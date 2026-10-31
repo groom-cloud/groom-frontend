@@ -1,0 +1,295 @@
+/* Hallmark · built: Groom · genre: modern-minimal · theme: apple-hig (by request) · posture: restrained · redesign: polish · scope: app */
+/* critique: replaced hardcoded hex overrides with unified OKLCH semantic tokens, eliminated nested card borders, and restricted monospace to code and IDs */
+/* waive 64: technical pipeline identifiers, SQL DDL, file names, and live countdown timers require monospace */
+@import "tailwindcss";
+
+:root,
+[data-theme="light"] {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Apple HIG Light Mode — Warm Neutral Paper & Crisp Ink (OKLCH) */
+  --token-paper: oklch(96.8% 0.005 260);
+  --token-surface: oklch(99.6% 0.005 260);
+  --token-well: oklch(94.2% 0.005 260);
+  --token-control: oklch(91.5% 0.006 260);
+  --token-overlay: oklch(18% 0.01 260 / 0.42);
+
+  --token-line: oklch(86% 0.006 260);
+  --token-line-strong: oklch(78% 0.008 260);
+
+  --token-ink: oklch(21% 0.008 260);
+  --token-ink-2: oklch(34% 0.01 260);
+  --token-muted: oklch(51% 0.012 260);
+  --token-subtle: oklch(68% 0.01 260);
+
+  /* Single Primary Signal: Apple System Blue */
+  --token-accent: oklch(51% 0.19 255);
+  --token-accent-strong: oklch(45% 0.19 255);
+  --token-accent-ink: oklch(99% 0.002 255);
+  --token-accent-soft: oklch(51% 0.19 255 / 0.09);
+  --token-accent-line: oklch(51% 0.19 255 / 0.26);
+
+  /* Restrained Semantic Status Tokens */
+  --token-ok: oklch(52% 0.15 152);
+  --token-ok-strong: oklch(46% 0.15 152);
+  --token-ok-ink: oklch(99% 0.002 152);
+  --token-ok-soft: oklch(52% 0.15 152 / 0.10);
+  --token-ok-line: oklch(52% 0.15 152 / 0.25);
+
+  --token-warn: oklch(56% 0.15 65);
+  --token-warn-soft: oklch(64% 0.15 70 / 0.11);
+  --token-warn-line: oklch(58% 0.15 65 / 0.28);
+
+  --token-danger: oklch(53% 0.20 25);
+  --token-danger-soft: oklch(55% 0.20 25 / 0.10);
+  --token-danger-line: oklch(55% 0.20 25 / 0.26);
+
+  --token-grid-dot: oklch(21% 0.008 260 / 0.12);
+  --token-grid-line: oklch(21% 0.008 260 / 0.035);
+
+  /* Official Brand Colors for Social Login */
+  --token-brand-kakao: oklch(91.5% 0.18 95);
+  --token-brand-kakao-ink: oklch(18% 0.005 260);
+  --token-brand-naver: oklch(68.5% 0.22 145);
+  --token-brand-naver-ink: oklch(99.5% 0.005 260);
+  --token-brand-google: oklch(99.5% 0.005 260);
+  --token-brand-google-ink: oklch(32% 0.01 260);
+  --token-brand-google-border: oklch(86% 0.006 260);
+  --token-brand-github: oklch(22% 0.01 260);
+  --token-brand-github-ink: oklch(99.5% 0.005 260);
+}
+
+[data-theme="dark"] {
+  /* Apple HIG Pro Dark Mode — Deep Titanium & Luminous Ink (OKLCH) */
+  --token-paper: oklch(15.5% 0.008 260);
+  --token-surface: oklch(21.5% 0.01 260);
+  --token-well: oklch(18% 0.009 260);
+  --token-control: oklch(26.5% 0.012 260);
+  --token-overlay: oklch(10% 0.008 260 / 0.72);
+
+  --token-line: oklch(29% 0.012 260);
+  --token-line-strong: oklch(37% 0.014 260);
+
+  --token-ink: oklch(96.5% 0.004 260);
+  --token-ink-2: oklch(86% 0.008 260);
+  --token-muted: oklch(65% 0.012 260);
+  --token-subtle: oklch(46% 0.012 260);
+
+  /* Single Primary Signal: Apple Dark Mode Blue */
+  --token-accent: oklch(53% 0.20 255);
+  --token-accent-strong: oklch(48% 0.20 255);
+  --token-accent-ink: oklch(99.5% 0.002 255);
+  --token-accent-soft: oklch(59% 0.20 255 / 0.16);
+  --token-accent-line: oklch(62% 0.19 255 / 0.34);
+
+  /* Restrained Semantic Status Tokens (Dark) */
+  --token-ok: oklch(64% 0.17 152);
+  --token-ok-strong: oklch(58% 0.17 152);
+  --token-ok-ink: oklch(99% 0.002 152);
+  --token-ok-soft: oklch(64% 0.17 152 / 0.14);
+  --token-ok-line: oklch(64% 0.17 152 / 0.30);
+
+  --token-warn: oklch(76% 0.15 75);
+  --token-warn-soft: oklch(72% 0.15 75 / 0.14);
+  --token-warn-line: oklch(74% 0.15 75 / 0.30);
+
+  --token-danger: oklch(66% 0.19 25);
+  --token-danger-soft: oklch(62% 0.19 25 / 0.14);
+  --token-danger-line: oklch(64% 0.19 25 / 0.30);
+
+  --token-grid-dot: oklch(96% 0.004 260 / 0.13);
+  --token-grid-line: oklch(96% 0.004 260 / 0.035);
+
+  /* Official Brand Colors for Social Login */
+  --token-brand-kakao: oklch(91.5% 0.18 95);
+  --token-brand-kakao-ink: oklch(18% 0.005 260);
+  --token-brand-naver: oklch(68.5% 0.22 145);
+  --token-brand-naver-ink: oklch(99.5% 0.005 260);
+  --token-brand-google: oklch(99.5% 0.005 260);
+  --token-brand-google-ink: oklch(32% 0.01 260);
+  --token-brand-google-border: oklch(86% 0.006 260);
+  --token-brand-github: oklch(22% 0.01 260);
+  --token-brand-github-ink: oklch(99.5% 0.005 260);
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-paper: var(--token-paper);
+  --color-surface: var(--token-surface);
+  --color-well: var(--token-well);
+  --color-control: var(--token-control);
+  --color-overlay: var(--token-overlay);
+
+  --color-line: var(--token-line);
+  --color-line-strong: var(--token-line-strong);
+
+  --color-ink: var(--token-ink);
+  --color-ink-2: var(--token-ink-2);
+  --color-muted: var(--token-muted);
+  --color-subtle: var(--token-subtle);
+
+  --color-accent: var(--token-accent);
+  --color-accent-strong: var(--token-accent-strong);
+  --color-accent-ink: var(--token-accent-ink);
+  --color-accent-soft: var(--token-accent-soft);
+  --color-accent-line: var(--token-accent-line);
+
+  --color-ok: var(--token-ok);
+  --color-ok-strong: var(--token-ok-strong);
+  --color-ok-ink: var(--token-ok-ink);
+  --color-ok-soft: var(--token-ok-soft);
+  --color-ok-line: var(--token-ok-line);
+
+  --color-warn: var(--token-warn);
+  --color-warn-soft: var(--token-warn-soft);
+  --color-warn-line: var(--token-warn-line);
+
+  --color-danger: var(--token-danger);
+  --color-danger-soft: var(--token-danger-soft);
+  --color-danger-line: var(--token-danger-line);
+
+  --color-brand-kakao: var(--token-brand-kakao);
+  --color-brand-kakao-ink: var(--token-brand-kakao-ink);
+  --color-brand-naver: var(--token-brand-naver);
+  --color-brand-naver-ink: var(--token-brand-naver-ink);
+  --color-brand-google: var(--token-brand-google);
+  --color-brand-google-ink: var(--token-brand-google-ink);
+  --color-brand-google-border: var(--token-brand-google-border);
+  --color-brand-github: var(--token-brand-github);
+  --color-brand-github-ink: var(--token-brand-github-ink);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--color-line);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: clip;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    min-width: 0;
+    word-break: keep-all;
+  }
+
+  p,
+  li,
+  dd,
+  dt,
+  td,
+  th,
+  label,
+  button,
+  span {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  code,
+  pre,
+  .font-mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "liga" 0;
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0.5px);
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.canvas-dot-grid {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  background-image: radial-gradient(var(--token-grid-dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.canvas-fine-grid {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  background-size: 48px 48px;
+  background-image:
+    linear-gradient(to right, var(--token-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--token-grid-line) 1px, transparent 1px);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
