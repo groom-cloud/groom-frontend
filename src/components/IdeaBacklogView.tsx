@@ -5,9 +5,11 @@ import {
   Trash2,
   Check,
   Filter,
-  PanelRightClose
+  PanelRightClose,
+  Edit3
 } from 'lucide-react';
 import type { BacklogIdeaItem, StepId } from '../mockData';
+import { ExportDropdown } from './ExportDropdown';
 
 interface IdeaBacklogViewProps {
   ideas: BacklogIdeaItem[];
@@ -27,6 +29,7 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
   onCollapsePane,
   isConfirmed = false
 }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isAddingIdea, setIsAddingIdea] = useState(false);
@@ -93,6 +96,22 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
     return true;
   });
 
+  const buildMarkdown = () => {
+    return `# 04. 아이디어 백로그 (Idea Backlog)
+
+총 보관 아이디어: ${ideas.length}건
+
+${ideas
+  .map(
+    (i) => `### [${i.priority}] ${i.title} (${i.category})
+- 상태: ${i.status === 'wbs_converted' || i.status === 'transferred_to_wbs' ? '13. WBS 칸반 연동됨' : '미배정 백로그'}
+- 우선순위: ${i.priority} | 공수: ${i.effort || 'Medium'} | 영향도: ${i.impact || 'High'}
+- 상세 내용: ${i.description}`
+  )
+  .join('\n\n')}
+`;
+  };
+
   const getPriorityBadge = (p: 'P0' | 'P1' | 'P2') => {
     switch (p) {
       case 'P0':
@@ -132,13 +151,23 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <ExportDropdown
+            title="04_아이디어_백로그"
+            getMarkdown={buildMarkdown}
+            onShowToast={showToast}
+          />
+
           <button
             type="button"
-            onClick={() => setIsAddingIdea(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+              isEditMode
+                ? 'bg-accent text-accent-ink font-semibold'
+                : 'bg-well hover:bg-control text-ink border border-line'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>아이디어 추가</span>
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>{isEditMode ? '편집 완료' : '편집하기'}</span>
           </button>
 
           {onConfirmStep && (
@@ -221,6 +250,20 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
 
       {/* Idea Cards List */}
       <div className="flex-1 overflow-y-auto p-5 space-y-3.5">
+        {isEditMode && (
+          <div className="p-3 bg-well/40 border border-dashed border-accent/40 rounded-xl flex items-center justify-between">
+            <span className="text-xs text-muted">편집 모드: 새 아이디어를 추가하거나 카드를 수정/삭제할 수 있습니다.</span>
+            <button
+              type="button"
+              onClick={() => setIsAddingIdea(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ 새 아이디어 제안</span>
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {filteredIdeas.map((idea) => {
             const isConverted = idea.status === 'wbs_converted';
@@ -247,23 +290,50 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
                         </span>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteIdea(idea.id, idea.title)}
-                      className="p-1 text-muted hover:text-danger rounded transition-colors cursor-pointer"
-                      title="아이디어 삭제"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {isEditMode && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteIdea(idea.id, idea.title)}
+                        className="p-1 text-muted hover:text-danger rounded transition-colors cursor-pointer"
+                        title="아이디어 삭제"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
 
                   <div>
-                    <h3 className={`text-sm font-bold ${isConverted ? 'text-ink-2 line-through' : 'text-ink'}`}>
-                      {idea.title}
-                    </h3>
-                    <p className="text-xs text-muted mt-1 leading-relaxed">
-                      {idea.description}
-                    </p>
+                    {isEditMode ? (
+                      <div className="space-y-1.5">
+                        <input
+                          type="text"
+                          value={idea.title}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, title: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-sm font-bold text-ink outline-none"
+                        />
+                        <textarea
+                          rows={2}
+                          value={idea.description}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, description: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-ink-2 outline-none resize-none"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className={`text-sm font-bold ${isConverted ? 'text-ink-2 line-through' : 'text-ink'}`}>
+                          {idea.title}
+                        </h3>
+                        <p className="text-xs text-muted mt-1 leading-relaxed">
+                          {idea.description}
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 text-[11px] text-muted pt-1">

@@ -2780,7 +2780,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
               onMouseDown={(e) => e.stopPropagation()}
               onTouchStart={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[420px] max-h-[82%] flex flex-col bg-surface border border-line-strong rounded-xl z-30 overflow-hidden shadow-2xl"
+              className="absolute bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[420px] max-h-[82%] flex flex-col bg-surface border border-line-strong rounded-xl z-30 overflow-hidden shadow-lg"
             >
               <div className="px-4 py-2.5 bg-well border-b border-line flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2 min-w-0">
