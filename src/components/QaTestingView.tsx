@@ -107,6 +107,26 @@ export const QaTestingView: React.FC<QaTestingViewProps> = ({
     showToast(`[${id}] "${title}" 케이스가 삭제되었습니다.`);
   };
 
+  const handleUpdateCaseField = <K extends keyof QaTestCase>(
+    id: string,
+    field: K,
+    value: QaTestCase[K]
+  ) => {
+    setTestCases((prev) =>
+      prev.map((tc) =>
+        tc.id === id
+          ? {
+              ...tc,
+              [field]: value,
+              ...(field === 'testTitle' || field === 'title'
+                ? { testTitle: value as string, title: value as string }
+                : {})
+            }
+          : tc
+      )
+    );
+  };
+
   const passedCount = testCases.filter((tc) => tc.isPassed || tc.status === 'PASSED').length;
   const passRate = Math.round((passedCount / (testCases.length || 1)) * 100);
 
@@ -337,30 +357,84 @@ ${loadMetrics
                           {isFailed && <XCircle className="w-3.5 h-3.5" />}
                         </button>
 
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono text-[10px] text-muted">{tc.id}</span>
-                            <span className="px-1.5 py-0.2 rounded text-[10px] bg-well text-ink-2 border border-line">
-                              {tc.category}
-                            </span>
-                            <span
-                              className={`px-1.5 py-0.2 rounded text-[10px] font-medium ${
-                                (tc.scenarioType || tc.category) === 'NORMAL' || (tc.scenarioType || tc.category) === '기능 테스트'
-                                  ? 'bg-blue-500/10 text-blue-400'
-                                  : (tc.scenarioType || tc.category) === 'EXCEPTION' || (tc.scenarioType || tc.category) === '예외 처리'
-                                  ? 'bg-amber-500/10 text-amber-400'
-                                  : 'bg-purple-500/10 text-purple-400'
-                              }`}
-                            >
-                              {tc.scenarioType || tc.category}
-                            </span>
-                            <span className="text-[10px] text-muted">
-                              중요도: {tc.severity}
-                            </span>
+                            {isEditMode ? (
+                              <select
+                                value={tc.category}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => handleUpdateCaseField(tc.id, 'category', e.target.value as any)}
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-well text-ink-2 border border-line outline-none"
+                              >
+                                <option value="기능 테스트">기능 테스트</option>
+                                <option value="예외 처리">예외 처리</option>
+                                <option value="동시성 검증">동시성 검증</option>
+                                <option value="보안/인증">보안/인증</option>
+                              </select>
+                            ) : (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] bg-well text-ink-2 border border-line">
+                                {tc.category}
+                              </span>
+                            )}
+
+                            {isEditMode ? (
+                              <select
+                                value={tc.scenarioType || 'NORMAL'}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => handleUpdateCaseField(tc.id, 'scenarioType', e.target.value as any)}
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-well text-ink border border-line outline-none"
+                              >
+                                <option value="NORMAL">NORMAL</option>
+                                <option value="EXCEPTION">EXCEPTION</option>
+                                <option value="EDGE_CASE">EDGE_CASE</option>
+                              </select>
+                            ) : (
+                              <span
+                                className={`px-1.5 py-0.2 rounded text-[10px] font-medium ${
+                                  (tc.scenarioType || tc.category) === 'NORMAL' || (tc.scenarioType || tc.category) === '기능 테스트'
+                                    ? 'bg-blue-500/10 text-blue-400'
+                                    : (tc.scenarioType || tc.category) === 'EXCEPTION' || (tc.scenarioType || tc.category) === '예외 처리'
+                                    ? 'bg-amber-500/10 text-amber-400'
+                                    : 'bg-purple-500/10 text-purple-400'
+                                }`}
+                              >
+                                {tc.scenarioType || tc.category}
+                              </span>
+                            )}
+
+                            {isEditMode ? (
+                              <select
+                                value={tc.severity}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => handleUpdateCaseField(tc.id, 'severity', e.target.value as any)}
+                                className="px-1.5 py-0.5 rounded text-[10px] bg-well text-muted border border-line outline-none"
+                              >
+                                <option value="Critical">Critical</option>
+                                <option value="Major">Major</option>
+                                <option value="Minor">Minor</option>
+                              </select>
+                            ) : (
+                              <span className="text-[10px] text-muted">
+                                중요도: {tc.severity}
+                              </span>
+                            )}
                           </div>
-                          <h4 className="text-xs font-bold text-ink mt-0.5 truncate">
-                            {tc.title || tc.testTitle}
-                          </h4>
+
+                          {isEditMode ? (
+                            <input
+                              type="text"
+                              value={tc.title || tc.testTitle}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => handleUpdateCaseField(tc.id, 'title', e.target.value)}
+                              className="w-full px-2 py-1 bg-well border border-line rounded text-xs font-bold text-ink outline-none focus:border-accent"
+                              placeholder="테스트 시나리오 제목 입력"
+                            />
+                          ) : (
+                            <h4 className="text-xs font-bold text-ink mt-0.5 truncate">
+                              {tc.title || tc.testTitle}
+                            </h4>
+                          )}
                         </div>
                       </div>
 
@@ -388,33 +462,63 @@ ${loadMetrics
                     {/* Expanded Detail */}
                     {isExpanded && (
                       <div className="px-4 pb-4 pt-1 border-t border-line/60 text-xs space-y-2.5 bg-canvas/30">
-                        {tc.precondition && (
-                          <div>
-                            <span className="text-[11px] font-semibold text-muted block mb-0.5">
-                              사전 조건 (Precondition)
-                            </span>
+                        <div>
+                          <span className="text-[11px] font-semibold text-muted block mb-0.5">
+                            사전 조건 (Precondition)
+                          </span>
+                          {isEditMode ? (
+                            <input
+                              type="text"
+                              value={tc.precondition}
+                              onChange={(e) => handleUpdateCaseField(tc.id, 'precondition', e.target.value)}
+                              className="w-full px-2.5 py-1 bg-well border border-line rounded text-ink-2 font-mono text-[11px] outline-none focus:border-accent"
+                              placeholder="사전 조건 기술"
+                            />
+                          ) : (
                             <p className="p-2 rounded bg-well border border-line text-ink-2 font-mono text-[11px]">
                               {tc.precondition}
                             </p>
-                          </div>
-                        )}
+                          )}
+                        </div>
                         <div>
                           <span className="text-[11px] font-semibold text-muted block mb-1">
-                            재현 절차 (Steps to Reproduce)
+                            재현 절차 (Steps to Reproduce - 줄바꿈으로 단계 구분)
                           </span>
-                          <ol className="list-decimal list-inside space-y-1 text-ink-2 pl-1">
-                            {(tc.steps || tc.testSteps || []).map((step, idx) => (
-                              <li key={idx}>{step}</li>
-                            ))}
-                          </ol>
+                          {isEditMode ? (
+                            <textarea
+                              value={(tc.steps || tc.testSteps || []).join('\n')}
+                              onChange={(e) => {
+                                const nextSteps = e.target.value.split('\n').filter(Boolean);
+                                handleUpdateCaseField(tc.id, 'steps', nextSteps);
+                                handleUpdateCaseField(tc.id, 'testSteps', nextSteps);
+                              }}
+                              rows={3}
+                              className="w-full p-2.5 rounded-lg bg-well border border-line text-ink-2 text-xs leading-relaxed outline-none focus:border-accent"
+                            />
+                          ) : (
+                            <ol className="list-decimal list-inside space-y-1 text-ink-2 pl-1">
+                              {(tc.steps || tc.testSteps || []).map((step, idx) => (
+                                <li key={idx}>{step}</li>
+                              ))}
+                            </ol>
+                          )}
                         </div>
                         <div>
                           <span className="text-[11px] font-semibold text-emerald-400 block mb-0.5">
                             기대 결과 (Expected Outcome)
                           </span>
-                          <p className="p-2.5 rounded-lg bg-well border border-line text-ink-2">
-                            {tc.expectedResult}
-                          </p>
+                          {isEditMode ? (
+                            <textarea
+                              value={tc.expectedResult}
+                              onChange={(e) => handleUpdateCaseField(tc.id, 'expectedResult', e.target.value)}
+                              rows={2}
+                              className="w-full p-2.5 rounded-lg bg-well border border-line text-ink-2 text-xs outline-none focus:border-accent"
+                            />
+                          ) : (
+                            <p className="p-2.5 rounded-lg bg-well border border-line text-ink-2">
+                              {tc.expectedResult}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}

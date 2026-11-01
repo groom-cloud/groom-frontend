@@ -130,6 +130,18 @@ export const TroubleshootingArchiveView: React.FC<TroubleshootingArchiveViewProp
     }
   };
 
+  const handleUpdateItemField = <K extends keyof TroubleshootingItem>(
+    id: string,
+    field: K,
+    value: TroubleshootingItem[K]
+  ) => {
+    if (setItems) {
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, [field]: value } : i))
+      );
+    }
+  };
+
   const buildMarkdown = () => {
     return `# 16. 트러블슈팅 아카이빙 (Troubleshooting & Post-Mortem)
 
@@ -292,10 +304,33 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
               {/* Card Top: Badges & Title */}
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">
-                  {getSeverityBadge(item.severity)}
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Resolved in {item.resolvedInVersion}
-                  </span>
+                  {isEditMode ? (
+                    <select
+                      value={item.severity}
+                      onChange={(e) => handleUpdateItemField(item.id, 'severity', e.target.value as any)}
+                      className="px-2 py-0.5 rounded text-[10px] font-bold bg-well border border-line text-ink outline-none"
+                    >
+                      <option value="Critical">Critical 장애</option>
+                      <option value="High">High 병목</option>
+                      <option value="Medium">Medium 개선</option>
+                    </select>
+                  ) : (
+                    getSeverityBadge(item.severity)
+                  )}
+
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={item.resolvedInVersion}
+                      onChange={(e) => handleUpdateItemField(item.id, 'resolvedInVersion', e.target.value)}
+                      className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-well text-emerald-400 border border-line outline-none w-20"
+                      placeholder="v1.5.0"
+                    />
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Resolved in {item.resolvedInVersion}
+                    </span>
+                  )}
                   <span className="text-[11px] text-muted">{item.resolvedAt}</span>
                 </div>
 
@@ -322,7 +357,17 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-bold text-ink">{item.title}</h3>
+                {isEditMode ? (
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={(e) => handleUpdateItemField(item.id, 'title', e.target.value)}
+                    className="w-full max-w-lg px-2.5 py-1 rounded-lg bg-well border border-line text-sm font-bold text-ink outline-none focus:border-accent"
+                    placeholder="트러블슈팅 제목"
+                  />
+                ) : (
+                  <h3 className="text-sm font-bold text-ink">{item.title}</h3>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -346,9 +391,23 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
                       <AlertTriangle className="w-3.5 h-3.5" />
                       1. 문제 현상 및 원인
                     </span>
-                    <p className="text-xs text-ink-2 leading-relaxed">
-                      {item.rootCause || item.symptomAndCause || item.problemSymptom}
-                    </p>
+                    {isEditMode ? (
+                      <textarea
+                        value={item.rootCause || item.symptomAndCause || item.problemSymptom}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateItemField(item.id, 'rootCause', val);
+                          handleUpdateItemField(item.id, 'problemSymptom', val);
+                          handleUpdateItemField(item.id, 'symptomAndCause', val);
+                        }}
+                        rows={3}
+                        className="w-full p-2 bg-well border border-line rounded text-xs text-ink leading-relaxed outline-none focus:border-accent"
+                      />
+                    ) : (
+                      <p className="text-xs text-ink-2 leading-relaxed">
+                        {item.rootCause || item.symptomAndCause || item.problemSymptom}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -359,9 +418,23 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
                       <Zap className="w-3.5 h-3.5" />
                       2. 해결 과정 및 적용 기술
                     </span>
-                    <p className="text-xs text-ink-2 leading-relaxed">
-                      {item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.[0]}
-                    </p>
+                    {isEditMode ? (
+                      <textarea
+                        value={item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.[0] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdateItemField(item.id, 'improvementSummary', val);
+                          handleUpdateItemField(item.id, 'resolutionProcess', val);
+                          handleUpdateItemField(item.id, 'solutionMechanisms', [val]);
+                        }}
+                        rows={3}
+                        className="w-full p-2 bg-well border border-line rounded text-xs text-ink leading-relaxed outline-none focus:border-accent"
+                      />
+                    ) : (
+                      <p className="text-xs text-ink-2 leading-relaxed">
+                        {item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.[0]}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -375,9 +448,27 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
                     <div className="pt-2 flex items-center justify-between text-xs">
                       <div>
                         <div className="text-[10px] text-muted">개선 전 (Before)</div>
-                        <div className="font-mono font-bold text-danger mt-0.5 line-through">
-                          {item.metricsBefore?.value || item.beforeMetric}
-                        </div>
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.metricsBefore?.value || item.beforeMetric || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const num = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                              handleUpdateItemField(item.id, 'beforeMetric', val);
+                              handleUpdateItemField(item.id, 'metricsBefore', {
+                                metricName: item.metricsBefore?.metricName || '응답 지연',
+                                value: val,
+                                numericValue: num
+                              });
+                            }}
+                            className="w-20 px-1.5 py-0.5 bg-well border border-line rounded font-mono font-bold text-danger text-xs outline-none"
+                          />
+                        ) : (
+                          <div className="font-mono font-bold text-danger mt-0.5 line-through">
+                            {item.metricsBefore?.value || item.beforeMetric}
+                          </div>
+                        )}
                       </div>
 
                       <div className="text-center px-2">
@@ -391,9 +482,26 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
 
                       <div className="text-right">
                         <div className="text-[10px] text-muted">개선 후 (After)</div>
-                        <div className="font-mono font-bold text-emerald-400 mt-0.5">
-                          {item.metricsAfter?.value || item.afterMetric}
-                        </div>
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.metricsAfter?.value || item.afterMetric || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const num = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                              handleUpdateItemField(item.id, 'afterMetric', val);
+                              handleUpdateItemField(item.id, 'metricsAfter', {
+                                value: val,
+                                numericValue: num
+                              });
+                            }}
+                            className="w-20 px-1.5 py-0.5 bg-well border border-line rounded font-mono font-bold text-emerald-400 text-xs outline-none text-right"
+                          />
+                        ) : (
+                          <div className="font-mono font-bold text-emerald-400 mt-0.5">
+                            {item.metricsAfter?.value || item.afterMetric}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

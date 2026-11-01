@@ -93,6 +93,18 @@ export const ApiSpecificationView: React.FC<ApiSpecificationViewProps> = ({
     }
   };
 
+  const handleUpdateEndpointField = <K extends keyof ApiEndpointSpec>(
+    id: string,
+    field: K,
+    value: ApiEndpointSpec[K]
+  ) => {
+    if (setEndpoints) {
+      setEndpoints((prev) =>
+        prev.map((ep) => (ep.id === id ? { ...ep, [field]: value } : ep))
+      );
+    }
+  };
+
   const buildMarkdown = () => {
     return `# 12. 백엔드 API 명세서 (REST API Spec)
 
@@ -294,23 +306,92 @@ ${ep.rfc7807ErrorJson}
                 onClick={() => setExpandedEndpointId(isExpanded ? '' : ep.id)}
                 className="p-3.5 cursor-pointer flex items-center justify-between gap-3 bg-well/30 hover:bg-well/60 transition-colors"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  {getMethodBadge(ep.method)}
-                  <span className="font-mono text-xs font-bold text-ink truncate">
-                    {ep.path}
-                  </span>
-                  <span className="text-xs text-muted hidden md:inline truncate">
-                    - {ep.summary}
-                  </span>
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  {isEditMode ? (
+                    <select
+                      value={ep.method}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateEndpointField(ep.id, 'method', e.target.value as any)}
+                      className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-well border border-line text-ink outline-none"
+                    >
+                      <option value="GET">GET</option>
+                      <option value="POST">POST</option>
+                      <option value="PATCH">PATCH</option>
+                      <option value="PUT">PUT</option>
+                      <option value="DELETE">DELETE</option>
+                    </select>
+                  ) : (
+                    getMethodBadge(ep.method)
+                  )}
+
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={ep.path}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateEndpointField(ep.id, 'path', e.target.value)}
+                      className="font-mono text-xs font-bold text-ink bg-well border border-line rounded px-2 py-1 outline-none focus:border-accent w-56"
+                      placeholder="/api/v1/resource"
+                    />
+                  ) : (
+                    <span className="font-mono text-xs font-bold text-ink truncate">
+                      {ep.path}
+                    </span>
+                  )}
+
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={ep.summary}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateEndpointField(ep.id, 'summary', e.target.value)}
+                      className="text-xs text-ink bg-well border border-line rounded px-2 py-1 outline-none focus:border-accent flex-1 min-w-[140px]"
+                      placeholder="기능 요약 설명"
+                    />
+                  ) : (
+                    <span className="text-xs text-muted hidden md:inline truncate">
+                      - {ep.summary}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line font-medium">
-                    {ep.authScope}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-accent-soft text-accent border border-accent/20">
-                    {ep.domainGroup}
-                  </span>
+                  {isEditMode ? (
+                    <select
+                      value={ep.authScope}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateEndpointField(ep.id, 'authScope', e.target.value as any)}
+                      className="px-1.5 py-0.5 rounded text-[10px] bg-well text-ink border border-line outline-none"
+                    >
+                      <option value="Public">Public</option>
+                      <option value="Guest">Guest</option>
+                      <option value="Member">Member</option>
+                      <option value="StoreOwner">StoreOwner</option>
+                    </select>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line font-medium">
+                      {ep.authScope}
+                    </span>
+                  )}
+
+                  {isEditMode ? (
+                    <select
+                      value={ep.domainGroup}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateEndpointField(ep.id, 'domainGroup', e.target.value as any)}
+                      className="px-1.5 py-0.5 rounded text-[10px] bg-well text-accent border border-accent/20 outline-none"
+                    >
+                      <option value="인증 및 세션">인증 및 세션</option>
+                      <option value="점주 마감 등록">점주 마감 등록</option>
+                      <option value="픽업 예약/결제">픽업 예약/결제</option>
+                      <option value="실시간 알림">실시간 알림</option>
+                    </select>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-accent-soft text-accent border border-accent/20">
+                      {ep.domainGroup}
+                    </span>
+                  )}
+
                   {isEditMode && (
                     <button
                       type="button"
@@ -336,11 +417,21 @@ ${ep.rfc7807ErrorJson}
               {isExpanded && (
                 <div className="p-5 border-t border-line space-y-5 text-xs bg-canvas/40">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs text-ink-2 font-medium">{ep.summary}</p>
+                    {isEditMode ? (
+                      <input
+                        type="text"
+                        value={ep.summary}
+                        onChange={(e) => handleUpdateEndpointField(ep.id, 'summary', e.target.value)}
+                        className="text-xs text-ink-2 font-medium bg-well border border-line rounded px-2.5 py-1.5 w-full max-w-md outline-none focus:border-accent"
+                        placeholder="상세 설명 입력"
+                      />
+                    ) : (
+                      <p className="text-xs text-ink-2 font-medium">{ep.summary}</p>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleCopyCurl(ep)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-well border border-line text-ink hover:border-line-strong transition-colors cursor-pointer"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded bg-well border border-line text-ink hover:border-line-strong transition-colors cursor-pointer shrink-0"
                     >
                       <Terminal className="w-3.5 h-3.5 text-accent" />
                       <span>cURL 복사</span>
@@ -361,9 +452,18 @@ ${ep.rfc7807ErrorJson}
                           복사
                         </button>
                       </div>
-                      <pre className="p-3 rounded-lg bg-well font-mono text-xs text-ink-2 overflow-x-auto border border-line leading-relaxed max-h-56">
-                        {ep.requestJson}
-                      </pre>
+                      {isEditMode ? (
+                        <textarea
+                          value={ep.requestJson}
+                          onChange={(e) => handleUpdateEndpointField(ep.id, 'requestJson', e.target.value)}
+                          rows={6}
+                          className="w-full p-3 rounded-lg bg-well font-mono text-xs text-ink-2 border border-line leading-relaxed outline-none focus:border-accent"
+                        />
+                      ) : (
+                        <pre className="p-3 rounded-lg bg-well font-mono text-xs text-ink-2 overflow-x-auto border border-line leading-relaxed max-h-56">
+                          {ep.requestJson}
+                        </pre>
+                      )}
                     </div>
 
                     {/* Response Body (200 OK) */}
@@ -378,9 +478,18 @@ ${ep.rfc7807ErrorJson}
                           복사
                         </button>
                       </div>
-                      <pre className="p-3 rounded-lg bg-well font-mono text-xs text-ink-2 overflow-x-auto border border-line leading-relaxed max-h-56">
-                        {ep.responseJson}
-                      </pre>
+                      {isEditMode ? (
+                        <textarea
+                          value={ep.responseJson}
+                          onChange={(e) => handleUpdateEndpointField(ep.id, 'responseJson', e.target.value)}
+                          rows={6}
+                          className="w-full p-3 rounded-lg bg-well font-mono text-xs text-ink-2 border border-line leading-relaxed outline-none focus:border-accent"
+                        />
+                      ) : (
+                        <pre className="p-3 rounded-lg bg-well font-mono text-xs text-ink-2 overflow-x-auto border border-line leading-relaxed max-h-56">
+                          {ep.responseJson}
+                        </pre>
+                      )}
                     </div>
                   </div>
 
@@ -399,9 +508,18 @@ ${ep.rfc7807ErrorJson}
                           복사
                         </button>
                       </div>
-                      <pre className="p-3 rounded-lg bg-well font-mono text-xs text-rose-300/90 overflow-x-auto border border-rose-500/20 leading-relaxed max-h-48">
-                        {ep.rfc7807ErrorJson}
-                      </pre>
+                      {isEditMode ? (
+                        <textarea
+                          value={ep.rfc7807ErrorJson}
+                          onChange={(e) => handleUpdateEndpointField(ep.id, 'rfc7807ErrorJson', e.target.value)}
+                          rows={5}
+                          className="w-full p-3 rounded-lg bg-well font-mono text-xs text-rose-300 border border-rose-500/20 leading-relaxed outline-none focus:border-accent"
+                        />
+                      ) : (
+                        <pre className="p-3 rounded-lg bg-well font-mono text-xs text-rose-300/90 overflow-x-auto border border-rose-500/20 leading-relaxed max-h-48">
+                          {ep.rfc7807ErrorJson}
+                        </pre>
+                      )}
                     </div>
                   )}
                 </div>

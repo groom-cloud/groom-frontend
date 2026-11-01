@@ -988,7 +988,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span className="hidden @2xl:inline">
-                {isEditMode ? '편집 완료' : '전체 편집'}
+                {isEditMode ? '편집 완료' : '편집하기'}
               </span>
               <span className="@2xl:hidden">{isEditMode ? '완료' : '편집'}</span>
             </button>

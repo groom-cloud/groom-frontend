@@ -83,6 +83,16 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
     showToast(`"${version}" 배포 기록이 삭제되었습니다.`);
   };
 
+  const handleUpdateReleaseField = <K extends keyof DeploymentRecord>(
+    id: string,
+    field: K,
+    value: DeploymentRecord[K]
+  ) => {
+    setDeployments((prev) =>
+      prev.map((dep) => (dep.id === id ? { ...dep, [field]: value } : dep))
+    );
+  };
+
   const latestRelease = deployments[0] || {
     id: 'default_rel',
     version: 'v1.5.0',
@@ -244,16 +254,39 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
                 <div className="p-4 rounded-xl bg-surface border border-line hover:border-line-strong transition-colors space-y-3 shadow-sm">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-bold text-ink">{dep.version}</span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          dep.environment === 'Production' || dep.status === 'Production'
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                        }`}
-                      >
-                        {dep.environment || dep.status}
-                      </span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={dep.version}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'version', e.target.value)}
+                          className="font-mono text-sm font-bold text-ink bg-well border border-line rounded px-2 py-0.5 w-24 outline-none focus:border-accent"
+                          placeholder="v1.6.0"
+                        />
+                      ) : (
+                        <span className="font-mono text-sm font-bold text-ink">{dep.version}</span>
+                      )}
+
+                      {isEditMode ? (
+                        <select
+                          value={dep.environment || dep.status}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'environment', e.target.value as any)}
+                          className="px-2 py-0.5 rounded text-[10px] font-bold bg-well border border-line text-ink outline-none"
+                        >
+                          <option value="Production">Production</option>
+                          <option value="Staging">Staging</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            dep.environment === 'Production' || dep.status === 'Production'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          }`}
+                        >
+                          {dep.environment || dep.status}
+                        </span>
+                      )}
+
                       {isLatest && (
                         <span className="px-2 py-0.5 rounded text-[10px] bg-accent-soft text-accent border border-accent/20 font-medium">
                           Latest Release
@@ -285,35 +318,56 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
                     <span className="text-[11px] font-semibold text-muted block mb-1">
                       주요 변경 사항 (Changelog)
                     </span>
-                    <ul className="space-y-1 text-xs text-ink-2">
-                      {dep.changelog.map((c, cIdx) => (
-                        <li key={cIdx} className="flex items-start gap-1.5">
-                          <span className="text-accent mt-0.5">•</span>
-                          <span>{c}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {isEditMode ? (
+                      <textarea
+                        value={dep.changelog.join('\n')}
+                        onChange={(e) => {
+                          const lines = e.target.value.split('\n').filter(Boolean);
+                          handleUpdateReleaseField(dep.id, 'changelog', lines);
+                        }}
+                        rows={3}
+                        className="w-full p-2.5 rounded-lg bg-well border border-line text-xs text-ink leading-relaxed outline-none focus:border-accent"
+                        placeholder="줄바꿈으로 변경 사항 입력"
+                      />
+                    ) : (
+                      <ul className="space-y-1 text-xs text-ink-2">
+                        {dep.changelog.map((c, cIdx) => (
+                          <li key={cIdx} className="flex items-start gap-1.5">
+                            <span className="text-accent mt-0.5">•</span>
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   {/* Rollback Guide */}
-                  {dep.rollbackGuide && (
-                    <div className="pt-2 border-t border-line flex items-center justify-between gap-3 text-xs">
-                      <div className="flex items-center gap-1.5 text-muted truncate">
-                        <RotateCcw className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <div className="pt-2 border-t border-line flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-1.5 text-muted flex-1 min-w-0">
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={dep.rollbackGuide}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'rollbackGuide', e.target.value)}
+                          className="w-full px-2 py-0.5 bg-well border border-line rounded font-mono text-[11px] text-ink outline-none focus:border-accent"
+                          placeholder="롤백 명령어"
+                        />
+                      ) : (
                         <span className="font-mono text-[11px] text-ink-2 truncate">
                           {dep.rollbackGuide}
                         </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyRollback(dep.rollbackGuide, dep.version)}
-                        className="flex items-center gap-1 text-[11px] text-accent hover:underline cursor-pointer shrink-0"
-                      >
-                        <Copy className="w-3 h-3" />
-                        <span>롤백 명령어 복사</span>
-                      </button>
+                      )}
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => handleCopyRollback(dep.rollbackGuide, dep.version)}
+                      className="flex items-center gap-1 text-[11px] text-accent hover:underline cursor-pointer shrink-0"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>복사</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

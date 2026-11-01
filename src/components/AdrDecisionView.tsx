@@ -101,6 +101,71 @@ export const AdrDecisionView: React.FC<AdrDecisionViewProps> = ({
     }
   };
 
+  const handleUpdateAdrField = <K extends keyof AdrDecision>(
+    id: string,
+    field: K,
+    value: AdrDecision[K]
+  ) => {
+    if (setDecisions) {
+      setDecisions((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+      );
+    }
+  };
+
+  const handleUpdateAlternative = (
+    adrId: string,
+    altIdx: number,
+    field: 'tech' | 'pros' | 'cons' | 'decisionReason',
+    value: string
+  ) => {
+    if (setDecisions) {
+      setDecisions((prev) =>
+        prev.map((item) => {
+          if (item.id !== adrId) return item;
+          const nextAlts = [...item.alternatives];
+          nextAlts[altIdx] = {
+            ...nextAlts[altIdx],
+            [field]: value,
+            ...(field === 'decisionReason' ? { whyNotChosen: value } : {})
+          };
+          return { ...item, alternatives: nextAlts };
+        })
+      );
+    }
+  };
+
+  const handleAddAlternative = (adrId: string) => {
+    if (setDecisions) {
+      setDecisions((prev) =>
+        prev.map((item) => {
+          if (item.id !== adrId) return item;
+          return {
+            ...item,
+            alternatives: [
+              ...item.alternatives,
+              { tech: '대안 기술명', pros: '주요 장점', cons: '단점 및 리스크', decisionReason: '미선정 사유' }
+            ]
+          };
+        })
+      );
+    }
+  };
+
+  const handleDeleteAlternative = (adrId: string, altIdx: number) => {
+    if (setDecisions) {
+      setDecisions((prev) =>
+        prev.map((item) => {
+          if (item.id !== adrId) return item;
+          return {
+            ...item,
+            alternatives: item.alternatives.filter((_, i) => i !== altIdx)
+          };
+        })
+      );
+    }
+  };
+
   const buildMarkdown = () => {
     return `# 08. 기술 스택 선정 정의서 (ADR)
 
@@ -292,30 +357,80 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
                 onClick={() => setExpandedId(isExpanded ? '' : adr.id)}
                 className="p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-well/30 transition-colors"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="px-2 py-1 rounded bg-well border border-line font-mono text-xs font-bold text-accent shrink-0">
                     ADR-{String(adr.adrNumber).padStart(2, '0')}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold text-ink truncate">{adr.title}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
-                        {getCategoryLabel(adr.category)}
-                      </span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={adr.title}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleUpdateAdrField(adr.id, 'title', e.target.value)}
+                          className="bg-well border border-line rounded px-2 py-1 text-sm font-bold text-ink w-full max-w-sm outline-none focus:border-accent"
+                          placeholder="ADR 제목 입력"
+                        />
+                      ) : (
+                        <span className="text-sm font-bold text-ink truncate">{adr.title}</span>
+                      )}
+                      {isEditMode ? (
+                        <select
+                          value={adr.category}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleUpdateAdrField(adr.id, 'category', e.target.value as any)}
+                          className="px-2 py-0.5 rounded text-[11px] bg-well text-ink border border-line outline-none"
+                        >
+                          <option value="frontend">프론트엔드</option>
+                          <option value="backend">백엔드</option>
+                          <option value="database">데이터베이스</option>
+                          <option value="infra">인프라/운영</option>
+                        </select>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
+                          {getCategoryLabel(adr.category)}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs mt-0.5">
-                      <span className="text-muted">선택 기술:</span>
-                      <strong className="text-accent font-semibold">
-                        {adr.selectedTech || adr.chosenTech}
-                      </strong>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted shrink-0">선택 기술:</span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={adr.selectedTech || adr.chosenTech}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleUpdateAdrField(adr.id, 'selectedTech', e.target.value)}
+                          className="bg-well border border-line rounded px-2 py-0.5 text-xs font-semibold text-accent outline-none focus:border-accent"
+                          placeholder="예: PostgreSQL"
+                        />
+                      ) : (
+                        <strong className="text-accent font-semibold">
+                          {adr.selectedTech || adr.chosenTech}
+                        </strong>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {adr.status}
-                  </span>
+                  {isEditMode ? (
+                    <select
+                      value={adr.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleUpdateAdrField(adr.id, 'status', e.target.value as any)}
+                      className="px-2 py-0.5 rounded text-[10px] font-medium bg-well text-emerald-400 border border-line outline-none"
+                    >
+                      <option value="Accepted">Accepted</option>
+                      <option value="Proposed">Proposed</option>
+                      <option value="Deprecated">Deprecated</option>
+                      <option value="Superseded">Superseded</option>
+                    </select>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {adr.status}
+                    </span>
+                  )}
                   {isEditMode && (
                     <button
                       type="button"
@@ -345,37 +460,113 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
                     <span className="text-[11px] font-semibold text-muted block">
                       1. 아키텍처 결정 근거 (Decision Drivers & Rationale)
                     </span>
-                    <div className="p-3.5 rounded-lg bg-well border border-line text-ink-2 leading-relaxed">
-                      {adr.context || adr.rationale}
-                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        value={adr.context || adr.rationale}
+                        onChange={(e) => handleUpdateAdrField(adr.id, 'context', e.target.value)}
+                        rows={3}
+                        className="w-full p-3 rounded-lg bg-well border border-line text-ink leading-relaxed outline-none focus:border-accent text-xs"
+                      />
+                    ) : (
+                      <div className="p-3.5 rounded-lg bg-well border border-line text-ink-2 leading-relaxed">
+                        {adr.context || adr.rationale}
+                      </div>
+                    )}
                   </div>
 
                   {/* Alternative Comparison Table */}
                   <div className="space-y-2">
-                    <span className="text-[11px] font-semibold text-muted block">
-                      2. 대안 기술과의 심층 비교 (Alternative Comparisons)
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-muted block">
+                        2. 대안 기술과의 심층 비교 (Alternative Comparisons)
+                      </span>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => handleAddAlternative(adr.id)}
+                          className="flex items-center gap-1 text-[11px] text-accent font-semibold hover:underline cursor-pointer"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>대안 추가</span>
+                        </button>
+                      )}
+                    </div>
                     <div className="rounded-lg border border-line overflow-hidden">
                       <table className="w-full text-left text-xs">
                         <thead className="bg-well border-b border-line text-muted">
                           <tr>
-                            <th className="px-3.5 py-2 font-medium">검토 대안</th>
+                            <th className="px-3.5 py-2 font-medium w-28">검토 대안</th>
                             <th className="px-3.5 py-2 font-medium">장점 (Pros)</th>
                             <th className="px-3.5 py-2 font-medium">단점 (Cons)</th>
                             <th className="px-3.5 py-2 font-medium">미선정 사유 (Rejection Reason)</th>
+                            {isEditMode && <th className="px-2 py-2 text-center w-12">삭제</th>}
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-line">
-                          {adr.alternatives.map((alt) => (
-                            <tr key={alt.tech} className="hover:bg-well/40 transition-colors">
-                              <td className="px-3.5 py-2.5 font-semibold text-ink whitespace-nowrap">
-                                {alt.tech}
+                          {adr.alternatives.map((alt, aIdx) => (
+                            <tr key={aIdx} className="hover:bg-well/40 transition-colors">
+                              <td className="px-3 py-2 align-top">
+                                {isEditMode ? (
+                                  <input
+                                    type="text"
+                                    value={alt.tech}
+                                    onChange={(e) => handleUpdateAlternative(adr.id, aIdx, 'tech', e.target.value)}
+                                    className="w-full px-2 py-1 bg-well border border-line rounded text-xs font-semibold text-ink outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-semibold text-ink whitespace-nowrap">{alt.tech}</span>
+                                )}
                               </td>
-                              <td className="px-3.5 py-2.5 text-ink-2">{alt.pros}</td>
-                              <td className="px-3.5 py-2.5 text-muted">{alt.cons}</td>
-                              <td className="px-3.5 py-2.5 text-danger/90 font-medium">
-                                {alt.decisionReason || alt.whyNotChosen}
+                              <td className="px-3 py-2 align-top">
+                                {isEditMode ? (
+                                  <input
+                                    type="text"
+                                    value={alt.pros}
+                                    onChange={(e) => handleUpdateAlternative(adr.id, aIdx, 'pros', e.target.value)}
+                                    className="w-full px-2 py-1 bg-well border border-line rounded text-xs text-ink-2 outline-none"
+                                  />
+                                ) : (
+                                  <span className="text-ink-2">{alt.pros}</span>
+                                )}
                               </td>
+                              <td className="px-3 py-2 align-top">
+                                {isEditMode ? (
+                                  <input
+                                    type="text"
+                                    value={alt.cons}
+                                    onChange={(e) => handleUpdateAlternative(adr.id, aIdx, 'cons', e.target.value)}
+                                    className="w-full px-2 py-1 bg-well border border-line rounded text-xs text-muted outline-none"
+                                  />
+                                ) : (
+                                  <span className="text-muted">{alt.cons}</span>
+                                )}
+                              </td>
+                              <td className="px-3 py-2 align-top">
+                                {isEditMode ? (
+                                  <input
+                                    type="text"
+                                    value={alt.decisionReason || alt.whyNotChosen}
+                                    onChange={(e) => handleUpdateAlternative(adr.id, aIdx, 'decisionReason', e.target.value)}
+                                    className="w-full px-2 py-1 bg-well border border-line rounded text-xs text-danger font-medium outline-none"
+                                  />
+                                ) : (
+                                  <span className="text-danger/90 font-medium">
+                                    {alt.decisionReason || alt.whyNotChosen}
+                                  </span>
+                                )}
+                              </td>
+                              {isEditMode && (
+                                <td className="px-2 py-2 text-center align-middle">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteAlternative(adr.id, aIdx)}
+                                    className="p-1 text-muted hover:text-danger rounded cursor-pointer"
+                                    title="대안 삭제"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
@@ -388,17 +579,30 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
                     <span className="text-[11px] font-semibold text-muted block">
                       3. 시스템 파급 효과 및 트레이드오프 (Consequences)
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {consequencesList.map((c, idx) => (
-                        <div
-                          key={idx}
-                          className="p-2.5 rounded-lg bg-well border border-line text-ink-2 flex items-center gap-2"
-                        >
-                          <Zap className="w-3.5 h-3.5 text-accent shrink-0" />
-                          <span>{c}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {isEditMode ? (
+                      <textarea
+                        value={consequencesList.join('\n')}
+                        onChange={(e) => {
+                          const lines = e.target.value.split('\n').filter(Boolean);
+                          handleUpdateAdrField(adr.id, 'consequences', lines);
+                        }}
+                        rows={3}
+                        placeholder="줄바꿈으로 각 파급 효과를 입력하세요"
+                        className="w-full p-2.5 rounded-lg bg-well border border-line text-ink text-xs outline-none focus:border-accent leading-relaxed"
+                      />
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {consequencesList.map((c, idx) => (
+                          <div
+                            key={idx}
+                            className="p-2.5 rounded-lg bg-well border border-line text-ink-2 flex items-center gap-2"
+                          >
+                            <Zap className="w-3.5 h-3.5 text-accent shrink-0" />
+                            <span>{c}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Footer Action */}

@@ -100,6 +100,50 @@ export const ConventionDocView: React.FC<ConventionDocViewProps> = ({
     }
   };
 
+  const handleUpdateBranch = (
+    bIdx: number,
+    field: 'name' | 'purpose' | 'namingConvention',
+    value: string
+  ) => {
+    if (setConventions) {
+      setConventions((prev) => {
+        const nextBranches = [...prev.gitStrategy.branches];
+        nextBranches[bIdx] = { ...nextBranches[bIdx], [field]: value };
+        return {
+          ...prev,
+          gitStrategy: { ...prev.gitStrategy, branches: nextBranches }
+        };
+      });
+    }
+  };
+
+  const handleUpdateCommitType = (
+    tIdx: number,
+    field: 'type' | 'description' | 'example',
+    value: string
+  ) => {
+    if (setConventions) {
+      setConventions((prev) => {
+        const nextTypes = [...prev.commitConvention.types];
+        nextTypes[tIdx] = { ...nextTypes[tIdx], [field]: value };
+        return {
+          ...prev,
+          commitConvention: { ...prev.commitConvention, types: nextTypes }
+        };
+      });
+    }
+  };
+
+  const handleUpdateRule = (rIdx: number, value: string) => {
+    if (setConventions) {
+      setConventions((prev) => {
+        const nextRules = [...prev.codeRules];
+        nextRules[rIdx] = value;
+        return { ...prev, codeRules: nextRules };
+      });
+    }
+  };
+
   // Commit type handlers
   const handleAddCommitType = (e: React.FormEvent) => {
     e.preventDefault();
@@ -308,10 +352,28 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
         {activeTab === 'git' && (
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-surface border border-line space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-ink flex items-center gap-1.5">
-                  <GitBranch className="w-4 h-4 text-accent" />
-                  브랜치 워크플로우 모델: {conventions.gitStrategy.model}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <span className="text-xs font-bold text-ink flex items-center gap-1.5 flex-1 min-w-[200px]">
+                  <GitBranch className="w-4 h-4 text-accent shrink-0" />
+                  <span>브랜치 워크플로우 모델:</span>
+                  {isEditMode ? (
+                    <input
+                      type="text"
+                      value={conventions.gitStrategy.model}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (setConventions) {
+                          setConventions((prev) => ({
+                            ...prev,
+                            gitStrategy: { ...prev.gitStrategy, model: val }
+                          }));
+                        }
+                      }}
+                      className="px-2 py-0.5 rounded bg-well border border-line text-xs font-bold text-ink outline-none focus:border-accent flex-1 max-w-sm"
+                    />
+                  ) : (
+                    <span>{conventions.gitStrategy.model}</span>
+                  )}
                 </span>
                 <span className="text-[11px] text-muted">Trunk-Based / Protected main</span>
               </div>
@@ -337,22 +399,53 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
               <table className="w-full text-left text-xs">
                 <thead className="bg-well border-b border-line text-muted">
                   <tr>
-                    <th className="px-4 py-2.5 font-medium">브랜치명</th>
+                    <th className="px-4 py-2.5 font-medium w-36">브랜치명</th>
                     <th className="px-4 py-2.5 font-medium">역할 및 목적</th>
                     <th className="px-4 py-2.5 font-medium">네이밍 규칙 & 예시</th>
                     {isEditMode && <th className="px-4 py-2.5 text-center w-14">삭제</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {conventions.gitStrategy.branches.map((b) => (
+                  {conventions.gitStrategy.branches.map((b, bIdx) => (
                     <tr key={b.name} className="hover:bg-well/40 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-accent whitespace-nowrap">
-                        {b.name}
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={b.name}
+                            onChange={(e) => handleUpdateBranch(bIdx, 'name', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded font-mono font-bold text-accent text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="font-mono font-bold text-accent whitespace-nowrap">{b.name}</span>
+                        )}
                       </td>
-                      <td className="px-4 py-3 text-ink-2">{b.purpose}</td>
-                      <td className="px-4 py-3 font-mono text-muted">{b.namingConvention}</td>
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={b.purpose}
+                            onChange={(e) => handleUpdateBranch(bIdx, 'purpose', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded text-ink-2 text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="text-ink-2">{b.purpose}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={b.namingConvention}
+                            onChange={(e) => handleUpdateBranch(bIdx, 'namingConvention', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded font-mono text-muted text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="font-mono text-muted">{b.namingConvention}</span>
+                        )}
+                      </td>
                       {isEditMode && (
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-2.5 text-center align-middle">
                           <button
                             type="button"
                             onClick={() => handleDeleteBranch(b.name)}
@@ -386,9 +479,26 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
                   <span>포맷 복사</span>
                 </button>
               </div>
-              <div className="p-3 rounded-lg bg-well font-mono text-xs text-accent border border-line">
-                {conventions.commitConvention.format}
-              </div>
+              {isEditMode ? (
+                <input
+                  type="text"
+                  value={conventions.commitConvention.format}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (setConventions) {
+                      setConventions((prev) => ({
+                        ...prev,
+                        commitConvention: { ...prev.commitConvention, format: val }
+                      }));
+                    }
+                  }}
+                  className="w-full p-2.5 rounded-lg bg-well font-mono text-xs text-accent border border-line outline-none focus:border-accent"
+                />
+              ) : (
+                <div className="p-3 rounded-lg bg-well font-mono text-xs text-accent border border-line">
+                  {conventions.commitConvention.format}
+                </div>
+              )}
             </div>
 
             <div className="rounded-xl border border-line overflow-hidden bg-surface">
@@ -408,7 +518,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
               <table className="w-full text-left text-xs">
                 <thead className="bg-well border-b border-line text-muted">
                   <tr>
-                    <th className="px-4 py-2.5 font-medium w-24">타입 (Type)</th>
+                    <th className="px-4 py-2.5 font-medium w-28">타입 (Type)</th>
                     <th className="px-4 py-2.5 font-medium">설명</th>
                     <th className="px-4 py-2.5 font-medium">실제 커밋 예시</th>
                     <th className="px-4 py-2.5 text-center w-16">복사</th>
@@ -416,12 +526,45 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {conventions.commitConvention.types.map((t) => (
+                  {conventions.commitConvention.types.map((t, tIdx) => (
                     <tr key={t.type} className="hover:bg-well/40 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-teal-400">{t.type}</td>
-                      <td className="px-4 py-3 text-ink-2">{t.description}</td>
-                      <td className="px-4 py-3 font-mono text-muted">{t.example}</td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={t.type}
+                            onChange={(e) => handleUpdateCommitType(tIdx, 'type', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded font-mono font-bold text-teal-400 text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="font-mono font-bold text-teal-400 whitespace-nowrap">{t.type}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={t.description}
+                            onChange={(e) => handleUpdateCommitType(tIdx, 'description', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded text-ink-2 text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="text-ink-2">{t.description}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 align-middle">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={t.example}
+                            onChange={(e) => handleUpdateCommitType(tIdx, 'example', e.target.value)}
+                            className="w-full px-2 py-1 bg-well border border-line rounded font-mono text-muted text-xs outline-none"
+                          />
+                        ) : (
+                          <span className="font-mono text-muted">{t.example}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-center align-middle">
                         <button
                           type="button"
                           onClick={() => handleCopy(t.example, `"${t.example}"가`)}
@@ -432,7 +575,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
                         </button>
                       </td>
                       {isEditMode && (
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-4 py-2.5 text-center align-middle">
                           <button
                             type="button"
                             onClick={() => handleDeleteCommitType(t.type)}
@@ -558,15 +701,24 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
                     key={idx}
                     className="p-3 rounded-lg bg-well border border-line text-xs text-ink-2 flex items-start justify-between gap-2"
                   >
-                    <div className="flex items-start gap-2 min-w-0">
-                      <CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-                      <span>{rule}</span>
+                    <div className="flex items-start gap-2 min-w-0 flex-1">
+                      <CheckCircle2 className="w-4 h-4 text-accent mt-1 shrink-0" />
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={rule}
+                          onChange={(e) => handleUpdateRule(idx, e.target.value)}
+                          className="w-full px-2 py-1 bg-surface border border-line rounded text-xs text-ink outline-none focus:border-accent"
+                        />
+                      ) : (
+                        <span>{rule}</span>
+                      )}
                     </div>
                     {isEditMode && (
                       <button
                         type="button"
                         onClick={() => handleDeleteRule(idx)}
-                        className="p-0.5 text-muted hover:text-danger transition-colors cursor-pointer shrink-0"
+                        className="p-1 text-muted hover:text-danger transition-colors cursor-pointer shrink-0 mt-0.5"
                         title="규칙 삭제"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

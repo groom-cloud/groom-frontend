@@ -378,12 +378,44 @@ ${items
                         )}
                       </td>
                       <td className="px-4 py-3.5 text-ink-2 whitespace-nowrap font-mono">
-                        {item.tierSpec || item.provider}
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.tierSpec || item.provider || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, tierSpec: val, provider: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-2 py-1 text-xs text-ink-2 font-mono outline-none w-32"
+                          />
+                        ) : (
+                          item.tierSpec || item.provider
+                        )}
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
-                          {item.billingCycle}
-                        </span>
+                        {isEditMode ? (
+                          <select
+                            value={item.billingCycle}
+                            onChange={(e) => {
+                              const val = e.target.value as any;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, billingCycle: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-1.5 py-1 text-[11px] text-ink outline-none"
+                          >
+                            <option value="월간">월간</option>
+                            <option value="연간">연간</option>
+                            <option value="종량제">종량제</option>
+                            <option value="일회성">일회성</option>
+                          </select>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
+                            {item.billingCycle}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3.5 text-right font-mono font-bold text-ink whitespace-nowrap">
                         {isEditMode ? (
@@ -404,8 +436,24 @@ ${items
                           formatMoney(cost)
                         )}
                       </td>
-                      <td className="px-4 py-3.5 text-muted max-w-xs truncate" title={item.notes || item.description}>
-                        {item.notes || item.description}
+                      <td className="px-4 py-3.5 text-muted max-w-xs">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.notes || item.description || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, notes: val, description: val } : i))
+                              );
+                            }}
+                            className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-muted outline-none"
+                          />
+                        ) : (
+                          <span className="truncate block" title={item.notes || item.description}>
+                            {item.notes || item.description}
+                          </span>
+                        )}
                       </td>
                       {isEditMode && (
                         <td className="px-4 py-3.5 text-center whitespace-nowrap">

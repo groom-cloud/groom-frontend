@@ -125,6 +125,32 @@ export const BrandingDesignView: React.FC<BrandingDesignViewProps> = ({
     }
   };
 
+  const handleUpdatePrinciple = (idx: number, field: 'title' | 'desc', val: string) => {
+    if (setBranding) {
+      setBranding((prev) => {
+        const next = [...(prev.designPrinciples || [])];
+        const current = next[idx];
+        if (typeof current === 'string') {
+          next[idx] = { title: current, desc: '', [field]: val };
+        } else {
+          next[idx] = { ...current, [field]: val };
+        }
+        return { ...prev, designPrinciples: next };
+      });
+    }
+  };
+
+  const handleUpdateSwatch = (origName: string, field: 'name' | 'role' | 'hex', val: string) => {
+    if (setBranding) {
+      setBranding((prev) => ({
+        ...prev,
+        colorSwatches: (prev.colorSwatches || []).map((c) =>
+          c.name === origName ? { ...c, [field]: val } : c
+        )
+      }));
+    }
+  };
+
   const handleUpdateSlogan = (slogan: string) => {
     if (setBranding) {
       setBranding((prev) => ({ ...prev, slogan }));
@@ -341,37 +367,56 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {branding.designPrinciples?.map((dp, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2.5 rounded-lg bg-well border border-line text-xs text-ink-2 flex items-start justify-between gap-2 group"
-                    >
-                      <div className="flex items-start gap-2 min-w-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
-                        <div className="min-w-0">
-                          {typeof dp === 'string' ? (
-                            <span>{dp}</span>
-                          ) : (
-                            <>
-                              <strong className="text-ink font-semibold">{dp.title}: </strong>
-                              <span>{dp.desc}</span>
-                            </>
-                          )}
+                  {branding.designPrinciples?.map((dp, idx) => {
+                    const title = typeof dp === 'string' ? dp : dp.title;
+                    const desc = typeof dp === 'string' ? '' : dp.desc;
+                    return (
+                      <div
+                        key={idx}
+                        className="p-2.5 rounded-lg bg-well border border-line text-xs text-ink-2 flex items-start justify-between gap-2 group"
+                      >
+                        <div className="flex items-start gap-2 min-w-0 flex-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5 shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            {isEditMode ? (
+                              <div className="space-y-1 w-full">
+                                <input
+                                  type="text"
+                                  value={title}
+                                  placeholder="원칙명"
+                                  onChange={(e) => handleUpdatePrinciple(idx, 'title', e.target.value)}
+                                  className="w-full text-xs font-semibold text-ink bg-canvas border border-line rounded px-2 py-0.5 focus:outline-none focus:border-accent"
+                                />
+                                <textarea
+                                  value={desc}
+                                  placeholder="설명"
+                                  rows={2}
+                                  onChange={(e) => handleUpdatePrinciple(idx, 'desc', e.target.value)}
+                                  className="w-full text-xs text-ink-2 bg-canvas border border-line rounded px-2 py-1 focus:outline-none focus:border-accent resize-none"
+                                />
+                              </div>
+                            ) : (
+                              <>
+                                <strong className="text-ink font-semibold">{title}: </strong>
+                                <span>{desc}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
 
-                      {isEditMode && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeletePrinciple(idx)}
-                          className="opacity-60 hover:opacity-100 p-0.5 text-muted hover:text-danger transition-opacity cursor-pointer shrink-0"
-                          title="삭제"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                        {isEditMode && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePrinciple(idx)}
+                            className="opacity-60 hover:opacity-100 p-0.5 text-muted hover:text-danger transition-opacity cursor-pointer shrink-0"
+                            title="삭제"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -406,8 +451,8 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
               return (
                 <div
                   key={color.name}
-                  onClick={() => handleCopyHex(color.hex, color.name)}
-                  className="group p-3 rounded-xl bg-well border border-line hover:border-line-strong transition-colors cursor-pointer flex flex-col justify-between space-y-2.5 relative"
+                  onClick={() => !isEditMode && handleCopyHex(color.hex, color.name)}
+                  className={`group p-3 rounded-xl bg-well border border-line hover:border-line-strong transition-colors flex flex-col justify-between space-y-2.5 relative ${isEditMode ? '' : 'cursor-pointer'}`}
                 >
                   {isEditMode && (
                     <button
@@ -427,18 +472,56 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
                     className="w-full h-14 rounded-lg shadow-inner flex items-center justify-center relative border border-white/10"
                     style={{ backgroundColor: color.hex }}
                   >
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded px-1.5 py-0.5 text-[10px] text-white flex items-center gap-1 font-mono">
-                      {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      <span>{isCopied ? '복사됨' : '복사'}</span>
-                    </div>
+                    {isEditMode ? (
+                      <input
+                        type="color"
+                        value={color.hex}
+                        onChange={(e) => handleUpdateSwatch(color.name, 'hex', e.target.value)}
+                        className="w-8 h-8 opacity-70 hover:opacity-100 cursor-pointer rounded border-0"
+                        title="색상 선택"
+                      />
+                    ) : (
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 rounded px-1.5 py-0.5 text-[10px] text-white flex items-center gap-1 font-mono">
+                        {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{isCopied ? '복사됨' : '복사'}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div>
-                    <div className="text-xs font-bold text-ink truncate">{color.name}</div>
-                    <div className="text-[10px] text-muted truncate">{color.role}</div>
-                    <div className="text-xs font-mono font-semibold text-accent mt-1 flex items-center justify-between">
-                      <span>{color.hex}</span>
-                    </div>
+                    {isEditMode ? (
+                      <div className="space-y-1">
+                        <input
+                          type="text"
+                          value={color.name}
+                          onChange={(e) => handleUpdateSwatch(color.name, 'name', e.target.value)}
+                          className="w-full text-xs font-bold text-ink bg-canvas border border-line rounded px-1.5 py-0.5 focus:outline-none focus:border-accent"
+                          placeholder="이름"
+                        />
+                        <input
+                          type="text"
+                          value={color.role}
+                          onChange={(e) => handleUpdateSwatch(color.name, 'role', e.target.value)}
+                          className="w-full text-[10px] text-muted bg-canvas border border-line rounded px-1.5 py-0.5 focus:outline-none focus:border-accent"
+                          placeholder="용도"
+                        />
+                        <input
+                          type="text"
+                          value={color.hex}
+                          onChange={(e) => handleUpdateSwatch(color.name, 'hex', e.target.value)}
+                          className="w-full text-xs font-mono font-semibold text-accent bg-canvas border border-line rounded px-1.5 py-0.5 focus:outline-none focus:border-accent"
+                          placeholder="#000000"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-xs font-bold text-ink truncate">{color.name}</div>
+                        <div className="text-[10px] text-muted truncate">{color.role}</div>
+                        <div className="text-xs font-mono font-semibold text-accent mt-1 flex items-center justify-between">
+                          <span>{color.hex}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               );
