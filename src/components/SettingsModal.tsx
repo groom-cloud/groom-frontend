@@ -17,7 +17,14 @@ import {
   Gamepad2,
   FileText
 } from 'lucide-react';
-import type { PipelineTrack, StepId, ProjectMember, PipelineStepInfo, ServiceDomain } from '../mockData';
+import {
+  PIPELINE_PHASES,
+  type PipelineTrack,
+  type StepId,
+  type ProjectMember,
+  type PipelineStepInfo,
+  type ServiceDomain
+} from '../mockData';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -485,19 +492,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="space-y-2 mb-3">
                     {[
                       {
-                        id: 'expert' as PipelineTrack,
-                        title: '전문가 트랙 (Full-Track / 8단계 전체 - 기본값)',
-                        desc: '01 기획부터 08 운영 & 배포 아카이빙까지 전 주기 활성화'
+                        id: 'fullstack' as PipelineTrack,
+                        title: '풀스택 전문가 트랙 (16개 전체 활성 - 기본값)',
+                        desc: '01 기획부터 16 트러블슈팅까지 5대 Phase 전체 산출물 활성화',
+                        count: '16개 모듈 전체'
                       },
                       {
-                        id: 'beginner' as PipelineTrack,
-                        title: '초보자 트랙 (Fast-Track / 4단계)',
-                        desc: '01 기획, 03 화면 흐름, 04 DB 설계, 06 칸반 4단계 집중'
+                        id: 'startup' as PipelineTrack,
+                        title: '비개발자 / 창업가 트랙 (8개 활성)',
+                        desc: '기획, BM, 예산, PRD, 브랜딩, 화면흐름, 칸반, QA 집중 (복잡한 DB/아키텍처/API 제외)',
+                        count: '8개 모듈 활성'
+                      },
+                      {
+                        id: 'backend' as PipelineTrack,
+                        title: '백엔드 포트폴리오 트랙 (11개 활성)',
+                        desc: 'PRD, 기술선정(ADR), ERD, 아키텍처, 컨벤션, API명세, WBS, QA, 배포, 트러블슈팅 엔지니어링 집중',
+                        count: '11개 모듈 활성'
                       },
                       {
                         id: 'custom' as PipelineTrack,
-                        title: '커스텀 트랙 (Custom Flow)',
-                        desc: '아래 8개 단계 스위치로 직접 ON/OFF 조합'
+                        title: '커스텀 트랙 (Custom Pipeline)',
+                        desc: '아래 5대 Phase의 16개 독립 모듈을 사용자 요구에 맞게 직접 ON/OFF',
+                        count: '자유 설정'
                       }
                     ].map((track) => {
                       const isSelected = pipelineTrack === track.id;
@@ -536,51 +552,75 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     })}
                   </div>
 
-                  {/* 8-Step ON/OFF Switches */}
+                  {/* 5-Phase / 16-Step Modular Switches */}
                   {pipelineSteps.length > 0 && (
-                    <div className="border border-line rounded-xl divide-y divide-line overflow-hidden bg-surface mb-3">
-                      {pipelineSteps.map((step) => {
-                        const isOn = enabledSteps[step.id];
-                        const stepNumStr = String(step.number).padStart(2, '0');
+                    <div className="space-y-3 mb-3">
+                      {PIPELINE_PHASES.map((phase) => {
+                        const phaseSteps = pipelineSteps.filter((s) => phase.stepIds.includes(s.id));
+                        const activeCountInPhase = phaseSteps.filter((s) => enabledSteps[s.id]).length;
                         return (
                           <div
-                            key={step.id}
-                            onClick={() => onToggleStep?.(step.id)}
-                            className={`px-3 py-2 flex items-center justify-between gap-3 transition-colors cursor-pointer ${
-                              isOn
-                                ? 'bg-surface hover:bg-well/50'
-                                : 'bg-well/50 opacity-65 hover:opacity-90'
-                            }`}
+                            key={phase.id}
+                            className="border border-line rounded-xl overflow-hidden bg-surface"
                           >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <code className="font-mono text-muted text-xs shrink-0">
-                                {stepNumStr}
-                              </code>
-                              <span
-                                className={`text-xs font-medium truncate ${
-                                  isOn ? 'text-ink' : 'line-through text-muted'
-                                }`}
-                              >
-                                {step.title.replace(/^Step \d+\.\s*/, '')}
+                            <div className="px-3.5 py-2 bg-well/60 border-b border-line flex items-center justify-between">
+                              <div>
+                                <span className="text-xs font-bold text-ink">{phase.title}</span>
+                                <span className="text-[10px] text-muted ml-2">{phase.titleEn}</span>
+                              </div>
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-surface border border-line text-muted">
+                                {activeCountInPhase}/{phaseSteps.length} ON
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                  isOn ? 'bg-ok-soft text-ok' : 'bg-well text-muted border border-line'
-                                }`}
-                              >
-                                {isOn ? 'ON' : 'SKIP'}
-                              </span>
-                              <div
-                                role="switch"
-                                aria-checked={isOn}
-                                className={`w-8 h-4 rounded-full p-0.5 flex items-center transition-colors ${
-                                  isOn ? 'bg-accent justify-end' : 'bg-control justify-start'
-                                }`}
-                              >
-                                <span className="w-3 h-3 rounded-full bg-surface block" />
-                              </div>
+                            <div className="divide-y divide-line">
+                              {phaseSteps.map((step) => {
+                                const isOn = enabledSteps[step.id];
+                                const stepNumStr = String(step.number).padStart(2, '0');
+                                return (
+                                  <div
+                                    key={step.id}
+                                    onClick={() => onToggleStep?.(step.id)}
+                                    className={`px-3 py-2 flex items-center justify-between gap-3 transition-colors cursor-pointer ${
+                                      isOn
+                                        ? 'bg-surface hover:bg-well/50'
+                                        : 'bg-well/50 opacity-60 hover:opacity-85'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <code className="font-mono text-muted text-xs shrink-0">
+                                        {stepNumStr}
+                                      </code>
+                                      <span
+                                        className={`text-xs font-medium truncate ${
+                                          isOn ? 'text-ink' : 'line-through text-muted'
+                                        }`}
+                                      >
+                                        {step.title.replace(/^Step \d+\.\s*/, '')}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span
+                                        className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                          isOn
+                                            ? 'bg-ok-soft text-ok'
+                                            : 'bg-well text-muted border border-line'
+                                        }`}
+                                      >
+                                        {isOn ? 'ON' : 'SKIPPED'}
+                                      </span>
+                                      <div
+                                        role="switch"
+                                        aria-checked={isOn}
+                                        className={`w-8 h-4 rounded-full p-0.5 flex items-center transition-colors ${
+                                          isOn ? 'bg-accent justify-end' : 'bg-control justify-start'
+                                        }`}
+                                      >
+                                        <span className="w-3 h-3 rounded-full bg-surface block" />
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         );

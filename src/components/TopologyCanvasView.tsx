@@ -77,8 +77,8 @@ function getUxNodeBounds(node: UxScreenNode): NodeBounds {
   return {
     x: node.x,
     y: node.y,
-    w: 236,
-    h: 168
+    w: 240,
+    h: 104
   };
 }
 
@@ -223,9 +223,9 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   onConfirmStep,
   isConfirmed = false
 }) => {
-  // Step 03 = UX Flow, Step 04 = ERD, Step 05 = System Architecture
+  // Step 07 = UX Flow, Step 09 = ERD, Step 10 = System Architecture
   const canvasMode: 'ux' | 'erd' | 'arch' =
-    currentStep === 'step3' ? 'ux' : currentStep === 'step4' ? 'erd' : 'arch';
+    currentStep === 'step7' ? 'ux' : currentStep === 'step9' ? 'erd' : 'arch';
   const isUx = canvasMode === 'ux';
   const isErd = canvasMode === 'erd';
   const isArch = canvasMode === 'arch';
@@ -245,7 +245,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
 
   // Canvas UI States
   const [showGroupBox, setShowGroupBox] = useState(true);
-  const [subViewMode, setSubViewMode] = useState<'canvas' | 'code'>('canvas');
+  const [subViewMode, setSubViewMode] = useState<'canvas' | 'code' | 'ia_table'>('canvas');
   const [toastNotice, setToastNotice] = useState<string | null>(null);
 
   // Inspector Selection (All null initially so no edit modal pops up on load!)
@@ -258,7 +258,6 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   // New column / element input inside inspectors
   const [newColName, setNewColName] = useState('');
   const [newColType, setNewColType] = useState('VARCHAR(50)');
-  const [newUxElement, setNewUxElement] = useState('');
 
   // Port Drag-and-Drop & Edge Configuration Modal State
   const [portDrag, setPortDrag] = useState<{
@@ -1104,8 +1103,14 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
         name: '마감 알림 구독 모달',
         route: '/bakeries/:id/subscribe',
         screenType: 'Modal',
+        authLevel: 'Member',
+        auth: 'Member',
         summary: '단골 빵집의 오후 8시 마감 할인 오픈 즉시 푸시 알림을 받도록 설정하는 화면',
+        subComponents: ['알림 희망 시간대 선택', '선호 빵 카테고리 체크', '구독 완료 토스트'],
         keyElements: ['알림 희망 시간대 선택', '선호 빵 카테고리 체크', '구독 완료 토스트'],
+        stateQueryParams: ['store_id', 'user_token'],
+        backendApiEndpoint: 'POST /v1/bakeries/:id/subscribe',
+        nextRouteActions: [{ label: '구독 완료', targetRoute: '/bakeries/:id' }],
         uxMetric: '구독 전환율 42%',
         x: Math.round((200 - panX) / zoom),
         y: Math.round((380 - panY) / zoom)
@@ -1365,8 +1370,14 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
         name,
         route,
         screenType: validType,
+        authLevel: existing?.authLevel || 'Public',
+        auth: existing?.auth || 'Public',
         summary: existing?.summary || '플로우차트 코드로부터 동기화된 화면 노드입니다.',
+        subComponents: existing?.subComponents || ['핵심 컴포넌트'],
         keyElements: existing?.keyElements || ['핵심 컴포넌트'],
+        stateQueryParams: existing?.stateQueryParams || [],
+        backendApiEndpoint: existing?.backendApiEndpoint || `GET ${route}`,
+        nextRouteActions: existing?.nextRouteActions || [],
         uxMetric: existing?.uxMetric || '전환 추적 중',
         x: existing ? existing.x : 56 + (idx % 4) * 284,
         y: existing ? existing.y : 112 + Math.floor(idx / 4) * 220
@@ -1606,19 +1617,33 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
               onClick={() => setSubViewMode('canvas')}
               className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
                 subViewMode === 'canvas'
-                  ? 'bg-surface text-ink font-medium'
+                  ? 'bg-surface text-ink font-medium shadow-xs'
                   : 'text-muted hover:text-ink'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>캔버스</span>
+              <span>{isUx ? '캔버스 뷰 (Flow)' : '캔버스'}</span>
             </button>
+            {isUx && (
+              <button
+                type="button"
+                onClick={() => setSubViewMode('ia_table')}
+                className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+                  subViewMode === 'ia_table'
+                    ? 'bg-surface text-ink font-medium shadow-xs'
+                    : 'text-muted hover:text-ink'
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>IA 라우팅 테이블 뷰</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSubViewMode('code')}
               className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
                 subViewMode === 'code'
-                  ? 'bg-surface text-ink font-medium'
+                  ? 'bg-surface text-ink font-medium shadow-xs'
                   : 'text-muted hover:text-ink'
               }`}
             >
@@ -1707,8 +1732,97 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
         </div>
       </div>
 
-      {/* Editable Code Sub-View */}
-      {subViewMode === 'code' ? (
+      {/* IA Routing Table Sub-View for Step 07 Screen Flow */}
+      {subViewMode === 'ia_table' ? (
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-ink">정보 구조도 & 프론트엔드 라우팅 테이블 (IA)</h3>
+              <p className="text-xs text-muted mt-0.5">전체 화면 목록, 진입 권한, 하위 UI 컴포넌트 및 API 매핑 명세</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSubViewMode('canvas')}
+              className="px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold cursor-pointer"
+            >
+              캔버스 뷰로 보기
+            </button>
+          </div>
+
+          <div className="rounded-xl border border-line overflow-hidden bg-surface shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-well border-b border-line text-muted">
+                  <tr>
+                    <th className="px-3.5 py-2.5 font-medium whitespace-nowrap">화면명</th>
+                    <th className="px-3.5 py-2.5 font-medium whitespace-nowrap">프론트 라우트</th>
+                    <th className="px-3.5 py-2.5 font-medium whitespace-nowrap">권한 (Auth)</th>
+                    <th className="px-3.5 py-2.5 font-medium">하위 UI 컴포넌트 목록</th>
+                    <th className="px-3.5 py-2.5 font-medium">주요 State 및 파라미터</th>
+                    <th className="px-3.5 py-2.5 font-medium whitespace-nowrap">호출 백엔드 API</th>
+                    <th className="px-3.5 py-2.5 font-medium">다음 이동 라우트</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {uxNodes.map((screen, sIdx) => (
+                    <tr
+                      key={screen.id}
+                      onClick={() => {
+                        setSelectedUxId(screen.id);
+                        setSubViewMode('canvas');
+                      }}
+                      className="hover:bg-well/40 transition-colors cursor-pointer"
+                    >
+                      <td className="px-3.5 py-3 font-semibold text-ink whitespace-nowrap">
+                        0{sIdx + 1}. {screen.name}
+                      </td>
+                      <td className="px-3.5 py-3 font-mono text-accent whitespace-nowrap font-medium">
+                        {screen.route}
+                      </td>
+                      <td className="px-3.5 py-3 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                            screen.auth === 'Guest'
+                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          }`}
+                        >
+                          {screen.auth || 'Member'}
+                        </span>
+                      </td>
+                      <td className="px-3.5 py-3 text-ink-2 max-w-[220px]">
+                        <div className="flex flex-wrap gap-1">
+                          {(screen.subComponents || screen.keyElements || []).map((c, i) => (
+                            <span
+                              key={i}
+                              className="px-1.5 py-0.5 rounded bg-well text-[10px] text-ink-2 border border-line"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-3.5 py-3 font-mono text-muted text-[11px] max-w-[180px]">
+                        {(screen.stateQueryParams || []).join(', ') || '-'}
+                      </td>
+                      <td className="px-3.5 py-3 font-mono text-accent text-[11px] whitespace-nowrap">
+                        {screen.backendApiEndpoint || '-'}
+                      </td>
+                      <td className="px-3.5 py-3 text-[11px] text-muted">
+                        {(screen.nextRouteActions || []).map((a, i) => (
+                          <div key={i} className="whitespace-nowrap">
+                            {a.action} ➔ <span className="font-mono text-accent">{a.targetRoute}</span>
+                          </div>
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : subViewMode === 'code' ? (
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-surface select-text">
           <div className="max-w-3xl mx-auto border border-line rounded-xl overflow-hidden bg-well">
             <div className="px-4 py-2.5 border-b border-line flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -2098,7 +2212,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                         setSelectedZoneId(null);
                         setSelectedUxId((prev) => (prev === screen.id ? null : screen.id));
                       }}
-                      style={{ left: screen.x, top: screen.y, width: 236, height: 168 }}
+                      style={{ left: screen.x, top: screen.y, width: 240, height: 104 }}
                       className="group absolute z-20 cursor-grab active:cursor-grabbing"
                     >
                       {renderNodePorts(screen.id, bounds, isHoveredTarget)}
@@ -2106,52 +2220,47 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                       <div
                         className={`h-full rounded-xl bg-surface flex flex-col justify-between overflow-hidden transition-colors ${
                           isHoveredTarget || isSelected
-                            ? 'border-2 border-accent'
+                            ? 'border-2 border-accent shadow-md'
                             : 'border border-line group-hover:border-line-strong'
                         }`}
                       >
-                        {/* Screen Browser/Modal Top Bar */}
-                        <div>
-                          <div
-                            className={`h-8 px-3 border-b flex items-center justify-between text-xs ${
-                              isSelected
-                                ? 'bg-accent-soft border-accent-line'
-                                : 'bg-well border-line'
-                            }`}
-                          >
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <Monitor className="w-3.5 h-3.5 text-accent shrink-0" />
-                              <span className="font-semibold text-ink truncate">
-                                0{idx + 1}. {screen.name}
-                              </span>
-                            </div>
-                            <span className="px-1.5 py-0.5 rounded bg-surface text-[10px] font-medium text-muted shrink-0">
-                              {screen.screenType}
+                        {/* 1. 화면명 & 권한 배지 (Guest/Member) */}
+                        <div
+                          className={`h-8 px-3 border-b flex items-center justify-between text-xs ${
+                            isSelected
+                              ? 'bg-accent-soft border-accent-line'
+                              : 'bg-well border-line'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Monitor className="w-3.5 h-3.5 text-accent shrink-0" />
+                            <span className="font-bold text-ink truncate">
+                              0{idx + 1}. {screen.name}
                             </span>
                           </div>
-
-                          <div className="px-3 pt-2.5 space-y-2 text-xs">
-                            <code className="block font-mono text-[11px] text-accent truncate">
-                              {screen.route}
-                            </code>
-
-                            <div className="space-y-1">
-                              {screen.keyElements.slice(0, 3).map((el, eIdx) => (
-                                <div
-                                  key={eIdx}
-                                  className="px-2 py-0.5 rounded bg-well text-[11px] text-ink-2 truncate"
-                                >
-                                  - {el}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[10px] font-semibold shrink-0 ${
+                              screen.auth === 'Guest'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            }`}
+                          >
+                            {screen.auth || 'Member'}
+                          </span>
                         </div>
 
-                        <div className="px-3 py-1.5 border-t border-line bg-well/50 flex items-center justify-between text-[11px] text-muted">
-                          <span>목표 지표</span>
-                          <span className="font-medium text-ink-2 truncate ml-2">
-                            {screen.uxMetric}
+                        {/* 2. 프론트 엔드포인트 */}
+                        <div className="px-3 py-1.5 min-w-0">
+                          <code className="block font-mono text-[11px] font-semibold text-accent truncate">
+                            {screen.route}
+                          </code>
+                        </div>
+
+                        {/* 3. 하단 상태 표시 바 */}
+                        <div className="px-3 py-1 border-t border-line bg-well/40 flex items-center justify-between text-[10px] text-muted">
+                          <span>{screen.screenType}</span>
+                          <span className="text-ink-2 font-medium">
+                            컴포넌트 {screen.subComponents?.length || screen.keyElements?.length || 0}개
                           </span>
                         </div>
                       </div>
@@ -2671,13 +2780,16 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
               onMouseDown={(e) => e.stopPropagation()}
               onTouchStart={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-4 right-4 w-[calc(100%-2rem)] sm:w-96 max-h-[78%] flex flex-col bg-surface border border-line-strong rounded-xl z-30 overflow-hidden"
+              className="absolute bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[420px] max-h-[82%] flex flex-col bg-surface border border-line-strong rounded-xl z-30 overflow-hidden shadow-2xl"
             >
               <div className="px-4 py-2.5 bg-well border-b border-line flex items-center justify-between shrink-0">
-                <span className="text-xs font-semibold text-ink">
-                  {selectedUxNode.name} 화면 편집
-                </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Monitor className="w-4 h-4 text-accent shrink-0" />
+                  <span className="text-xs font-bold text-ink truncate">
+                    {selectedUxNode.name} 화면 상세 명세
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
                     title="이 화면 노드 삭제"
@@ -2697,7 +2809,8 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                 </div>
               </div>
 
-              <div className="p-4 space-y-3 text-xs overflow-y-auto">
+              <div className="p-4 space-y-4 text-xs overflow-y-auto">
+                {/* Basic Fields: Name, Endpoint Route, Auth */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-muted block mb-1">화면 이름</label>
@@ -2711,124 +2824,117 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                           prev.map((n) => (n.id === selectedUxNode.id ? { ...n, name: val } : n))
                         );
                       }}
-                      className="w-full bg-well border border-line rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink"
+                      className="w-full bg-well border border-line rounded-lg px-2.5 py-1.5 text-xs font-semibold text-ink"
                     />
                   </div>
                   <div>
-                    <label className="text-muted block mb-1">화면 유형</label>
+                    <label className="text-muted block mb-1">접근 권한 (Auth)</label>
                     <select
-                      aria-label="화면 유형 선택"
-                      value={selectedUxNode.screenType}
+                      aria-label="접근 권한 선택"
+                      value={selectedUxNode.authLevel || selectedUxNode.auth || 'Member'}
                       onChange={(e) => {
-                        const val = e.target.value as UxScreenNode['screenType'];
+                        const raw = e.target.value;
+                        const val: 'Public' | 'Guest' | 'Member' =
+                          raw === 'Guest' ? 'Guest' : raw === 'Member' ? 'Member' : 'Public';
                         setUxNodes((prev) =>
                           prev.map((n) =>
-                            n.id === selectedUxNode.id ? { ...n, screenType: val } : n
+                            n.id === selectedUxNode.id ? { ...n, auth: val, authLevel: val } : n
                           )
                         );
                       }}
                       className="w-full bg-well border border-line rounded-lg px-2 py-1.5 text-xs text-ink"
                     >
-                      <option value="Page">Page</option>
-                      <option value="Modal">Modal</option>
-                      <option value="Workspace">Workspace</option>
-                      <option value="Drawer">Drawer</option>
+                      <option value="Public">Public (공개)</option>
+                      <option value="Guest">Guest (비로그인)</option>
+                      <option value="Member">Member (일반 회원)</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-muted block mb-1">라우트 경로 (URL)</label>
-                    <input
-                      type="text"
-                      aria-label="화면 라우트 경로 입력"
-                      value={selectedUxNode.route}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setUxNodes((prev) =>
-                          prev.map((n) => (n.id === selectedUxNode.id ? { ...n, route: val } : n))
-                        );
-                      }}
-                      className="w-full bg-well border border-line rounded-lg px-2.5 py-1.5 font-mono text-xs text-ink"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-muted block mb-1">UX 목표 지표</label>
-                    <input
-                      type="text"
-                      aria-label="UX 목표 지표 입력"
-                      value={selectedUxNode.uxMetric}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setUxNodes((prev) =>
-                          prev.map((n) =>
-                            n.id === selectedUxNode.id ? { ...n, uxMetric: val } : n
-                          )
-                        );
-                      }}
-                      className="w-full bg-well border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink"
-                    />
-                  </div>
+                <div>
+                  <label className="text-muted block mb-1">프론트 엔드포인트 라우트</label>
+                  <input
+                    type="text"
+                    aria-label="화면 라우트 경로 입력"
+                    value={selectedUxNode.route}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setUxNodes((prev) =>
+                        prev.map((n) => (n.id === selectedUxNode.id ? { ...n, route: val } : n))
+                      );
+                    }}
+                    className="w-full bg-well border border-line rounded-lg px-2.5 py-1.5 font-mono text-xs text-accent"
+                  />
                 </div>
 
-                <div className="space-y-1.5">
-                  <span className="text-muted block">핵심 UI 구성요소</span>
+                {/* 1. 하위 UI 컴포넌트 목록 */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] font-bold text-ink block">
+                    1. 하위 UI 컴포넌트 목록
+                  </span>
                   <div className="space-y-1">
-                    {selectedUxNode.keyElements.map((el, idx) => (
+                    {(selectedUxNode.subComponents || selectedUxNode.keyElements || []).map((comp, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between gap-2 px-2.5 py-1 rounded-lg bg-well text-ink-2"
+                        className="flex items-center justify-between gap-2 px-2.5 py-1 rounded-lg bg-well border border-line text-ink-2 font-mono text-[11px]"
                       >
-                        <span className="truncate">{el}</span>
-                        <button
-                          type="button"
-                          aria-label={`${el} 요소 삭제`}
-                          onClick={() => {
-                            setUxNodes((prev) =>
-                              prev.map((n) =>
-                                n.id === selectedUxNode.id
-                                  ? {
-                                      ...n,
-                                      keyElements: n.keyElements.filter((_, i) => i !== idx)
-                                    }
-                                  : n
-                              )
-                            );
-                          }}
-                          className="text-muted hover:text-danger cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                        <span className="truncate">❖ {comp}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="flex gap-1.5 pt-1">
-                    <input
-                      type="text"
-                      aria-label="새 UI 구성요소 입력"
-                      value={newUxElement}
-                      onChange={(e) => setNewUxElement(e.target.value)}
-                      placeholder="예: 실시간 재고 뱃지"
-                      className="flex-1 bg-well border border-line rounded-lg px-2.5 py-1.5 text-xs text-ink"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!newUxElement.trim()) return;
-                        setUxNodes((prev) =>
-                          prev.map((n) =>
-                            n.id === selectedUxNode.id
-                              ? { ...n, keyElements: [...n.keyElements, newUxElement.trim()] }
-                              : n
-                          )
-                        );
-                        setNewUxElement('');
-                      }}
-                      className="px-3 py-1.5 rounded-lg bg-ink text-paper font-medium cursor-pointer"
-                    >
-                      추가
-                    </button>
+                </div>
+
+                {/* 2. 주요 State 및 쿼리 파라미터 */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-ink block">
+                    2. 주요 State 및 쿼리 파라미터
+                  </span>
+                  <div className="p-2.5 rounded-lg bg-well border border-line space-y-1 font-mono text-[11px] text-ink-2">
+                    {(selectedUxNode.stateQueryParams || [
+                      'activeTab: "list" | "map"',
+                      'selectedStoreId: string | null',
+                      'page: number',
+                      'searchKeyword: string'
+                    ]).map((param, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <span className="text-accent">•</span>
+                        <span>{param}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. 이 화면에서 호출하는 백엔드 API 엔드포인트 매핑 */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-ink block">
+                    3. 호출 백엔드 API 매핑
+                  </span>
+                  <div className="p-2.5 rounded-lg bg-well border border-line font-mono text-[11px] text-accent flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                    <span className="truncate">
+                      {selectedUxNode.backendApiEndpoint || 'GET /v1/stores/:id/inventory'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. 액션별 이동할 다음 라우트 */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-bold text-ink block">
+                    4. 액션별 이동 다음 라우트
+                  </span>
+                  <div className="space-y-1">
+                    {(selectedUxNode.nextRouteActions || [
+                      { action: '매장 상세 진입', targetRoute: '/stores/:id' },
+                      { action: '장바구니 이동', targetRoute: '/cart' }
+                    ]).map((act, idx) => (
+                      <div
+                        key={idx}
+                        className="px-2.5 py-1.5 rounded-lg bg-well border border-line text-[11px] flex items-center justify-between"
+                      >
+                        <span className="text-muted">{act.action}</span>
+                        <span className="font-mono text-accent font-medium">➔ {act.targetRoute}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

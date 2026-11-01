@@ -7,6 +7,7 @@ import {
   Lock,
   Send,
   ChevronDown,
+  ChevronRight,
   CornerDownLeft,
   ArrowUpRight,
   PanelLeftClose,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import {
   ALL_STEP_IDS,
+  PIPELINE_PHASES,
   TRACK_PRESET_STEPS,
   INITIAL_PIPELINE_STEPS,
   INITIAL_PRD_REQUIREMENTS,
@@ -32,26 +34,40 @@ import {
   INITIAL_ARCH_ZONES,
   INITIAL_KANBAN_TASKS,
   INITIAL_API_ENDPOINTS,
-  INITIAL_IDE_PROMPTS,
-  INITIAL_DEPLOYMENTS,
-  INITIAL_TROUBLESHOOTINGS,
-  INITIAL_BACKLOG_IDEAS,
+  INITIAL_BUDGET_ITEMS,
+  INITIAL_IDEA_BACKLOG,
+  INITIAL_BRANDING_INFO,
+  INITIAL_ADR_DECISIONS,
+  INITIAL_DEV_CONVENTIONS,
+  INITIAL_QA_TEST_CASES,
+  INITIAL_LOAD_TEST_METRICS,
+  INITIAL_RELEASE_HISTORY,
+  INITIAL_TROUBLESHOOTING_ARCHIVE,
   INITIAL_CHAT_MESSAGES,
-  INITIAL_MEMBERS,
+  INITIAL_PROJECT_MEMBERS,
   type StepId,
+  type PhaseId,
   type PipelineTrack,
   type ViewMode,
   type ChatMessage,
-  type BacklogIdeaItem
+  type BacklogIdeaItem,
+  type ServiceDomain,
+  type KanbanTask
 } from './mockData';
 import { LandingView } from './components/LandingView';
 import { DocumentArtifactView } from './components/DocumentArtifactView';
 import { TopologyCanvasView } from './components/TopologyCanvasView';
 import { KanbanBoardView } from './components/KanbanBoardView';
-import { ApiConventionView } from './components/ApiConventionView';
-import { OperationsArchiveView } from './components/OperationsArchiveView';
+import { BudgetEstimatorView } from './components/BudgetEstimatorView';
+import { IdeaBacklogView } from './components/IdeaBacklogView';
+import { BrandingDesignView } from './components/BrandingDesignView';
+import { AdrDecisionView } from './components/AdrDecisionView';
+import { ConventionDocView } from './components/ConventionDocView';
+import { ApiSpecificationView } from './components/ApiSpecificationView';
+import { QaTestingView } from './components/QaTestingView';
+import { ReleaseHistoryView } from './components/ReleaseHistoryView';
+import { TroubleshootingArchiveView } from './components/TroubleshootingArchiveView';
 import { WorkspaceModals } from './components/WorkspaceModals';
-import type { ServiceDomain } from './mockData';
 import { SettingsModal } from './components/SettingsModal';
 
 const LEFT_DEFAULT_WIDTH = 260;
@@ -115,12 +131,12 @@ export default function App() {
   // Theme State (Light vs Dark)
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Core Navigation & Dynamic Track State (Default: Expert Full-Track 8/8)
+  // Core Navigation & Dynamic Track State (Default: Fullstack Expert 16/16)
   const [viewMode, setViewMode] = useState<ViewMode>('workspace');
   const [currentStep, setCurrentStep] = useState<StepId>('step1');
-  const [pipelineTrack, setPipelineTrack] = useState<PipelineTrack>('expert');
+  const [pipelineTrack, setPipelineTrack] = useState<PipelineTrack>('fullstack');
   const [enabledSteps, setEnabledSteps] = useState<Record<StepId, boolean>>({
-    ...TRACK_PRESET_STEPS.expert
+    ...TRACK_PRESET_STEPS.fullstack
   });
   const [projectIdea, setProjectIdea] = useState('동네 빵집 마감 할인 서비스');
   const [serviceDomain, setServiceDomain] = useState<ServiceDomain>('web');
@@ -161,9 +177,14 @@ export default function App() {
   const [unreadCount, setUnreadCount] = useState(2);
   const [guestTimer, setGuestTimer] = useState({ hours: 23, minutes: 45, seconds: 12 });
 
-  // Domain Data States across all 8 Steps
+  // Domain Data States across all 16 Independent Modules
   const [pipelineSteps, setPipelineSteps] = useState(INITIAL_PIPELINE_STEPS);
   const [requirements, setRequirements] = useState(INITIAL_PRD_REQUIREMENTS);
+  const [budgetItems, setBudgetItems] = useState(INITIAL_BUDGET_ITEMS);
+  const [ideaBacklog, setIdeaBacklog] = useState(INITIAL_IDEA_BACKLOG);
+  const [branding, setBranding] = useState(INITIAL_BRANDING_INFO);
+  const [adrDecisions, setAdrDecisions] = useState(INITIAL_ADR_DECISIONS);
+  const [devConventions, setDevConventions] = useState(INITIAL_DEV_CONVENTIONS);
   const [uxNodes, setUxNodes] = useState(INITIAL_UX_NODES);
   const [uxEdges, setUxEdges] = useState(INITIAL_UX_EDGES);
   const [uxZones, setUxZones] = useState(INITIAL_UX_ZONES);
@@ -175,12 +196,55 @@ export default function App() {
   const [archZones, setArchZones] = useState(INITIAL_ARCH_ZONES);
   const [kanbanTasks, setKanbanTasks] = useState(INITIAL_KANBAN_TASKS);
   const [apiEndpoints, setApiEndpoints] = useState(INITIAL_API_ENDPOINTS);
-  const [idePrompts, setIdePrompts] = useState(INITIAL_IDE_PROMPTS);
-  const [deployments, setDeployments] = useState(INITIAL_DEPLOYMENTS);
-  const [troubleshootings, setTroubleshootings] = useState(INITIAL_TROUBLESHOOTINGS);
-  const [backlogIdeas, setBacklogIdeas] = useState(INITIAL_BACKLOG_IDEAS);
+  const [qaTestCases, setQaTestCases] = useState(INITIAL_QA_TEST_CASES);
+  const [loadTestMetrics] = useState(INITIAL_LOAD_TEST_METRICS);
+  const [deployments, setDeployments] = useState(INITIAL_RELEASE_HISTORY);
+  const [troubleshootings, setTroubleshootings] = useState(INITIAL_TROUBLESHOOTING_ARCHIVE);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(INITIAL_CHAT_MESSAGES);
-  const [members, setMembers] = useState(INITIAL_MEMBERS);
+  const [members, setMembers] = useState(INITIAL_PROJECT_MEMBERS);
+
+  // 5 Phase Accordion Open/Collapsed States
+  const [collapsedPhases, setCollapsedPhases] = useState<Record<PhaseId, boolean>>({
+    planning: false,
+    design_spec: false,
+    architecture: false,
+    development: false,
+    ops_maint: false
+  });
+
+  const togglePhaseCollapse = (phaseId: PhaseId) => {
+    setCollapsedPhases((prev) => ({ ...prev, [phaseId]: !prev[phaseId] }));
+  };
+
+  const handleSendIdeaToKanban = (idea: BacklogIdeaItem) => {
+    const newTask: KanbanTask = {
+      id: `task_${Date.now()}`,
+      ticketKey: `GRM-${Math.floor(200 + Math.random() * 800)}`,
+      title: idea.title,
+      description: idea.description,
+      assignee: {
+        name: '한정호',
+        initials: 'JH',
+        color: 'bg-accent',
+        role: 'Fullstack'
+      },
+      category: 'Frontend',
+      status: 'todo',
+      priority: idea.priority,
+      reqRef: 'REQ-BACKLOG',
+      storyPoints: idea.effort && idea.effort.includes('High') ? 8 : 5,
+      deadline: 'D-5',
+      aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시서 (${idea.title})
+// [맥락: 04 아이디어 백로그에서 전환됨]
+Implement backlog feature '${idea.title}':
+- Category: ${idea.category}
+- Impact: ${idea.impact || 'High'}
+- Scope & Details: ${idea.description}`
+    };
+
+    setKanbanTasks((prev) => [newTask, ...prev]);
+    showAppToast(`"${idea.title}" 아이디어가 [13. WBS 칸반] To-Do 열에 등록되었습니다.`);
+  };
 
   // AI Copilot Input & Filter State
   const [promptInput, setPromptInput] = useState('');
@@ -460,28 +524,6 @@ export default function App() {
     }
   };
 
-  const handleSendBacklogToWbs = (idea: BacklogIdeaItem): string => {
-    const nextNum = 101 + kanbanTasks.length;
-    const ticketKey = `GRM-${nextNum}`;
-    setKanbanTasks((prev) => [
-      {
-        id: `k_bg_${Date.now()}`,
-        ticketKey,
-        title: idea.title,
-        description: `[${idea.targetRelease}] ${idea.description}`,
-        priority: idea.priority,
-        assignee: { name: '한정호', initials: 'JH', color: 'bg-accent', role: 'Fullstack' },
-        deadline: 'D-7',
-        storyPoints: 5,
-        reqRef: 'REQ-BACKLOG',
-        category: 'Frontend',
-        status: 'todo'
-      },
-      ...prev
-    ]);
-    return ticketKey;
-  };
-
   const appendUserAndAiMessage = (userText: string, customAiReply?: string) => {
     const nowTime = new Date().toLocaleTimeString('ko-KR', {
       hour: '2-digit',
@@ -509,7 +551,7 @@ export default function App() {
       let artifactTitle = `${activeStepInfo.shortTitle} 업데이트`;
       let artifactSummary = '하위 단계 컨텍스트에 변경사항 반영됨';
 
-      if (currentStep === 'step4') {
+      if (currentStep === 'step9') {
         setErdTables((prev) =>
           prev.map((t) =>
             t.id === 'reservations' && !t.columns.some((c) => c.name === 'penalty_fee')
@@ -534,7 +576,7 @@ export default function App() {
           `요청하신 대로 \`reservations\` 테이블에 \`penalty_fee (INTEGER NOT NULL)\` 컬럼을 추가하고 DDL 스크립트를 갱신했습니다.`;
         artifactTitle = 'ERD 스키마 갱신 (v1.3)';
         artifactSummary = 'reservations.penalty_fee 컬럼 추가됨';
-      } else if (currentStep === 'step6') {
+      } else if (currentStep === 'step13') {
         const nextNum = 101 + kanbanTasks.length;
         setKanbanTasks((prev) => [
           {
@@ -548,7 +590,8 @@ export default function App() {
             storyPoints: 5,
             reqRef: 'REQ-RESV-03',
             category: 'Backend',
-            status: 'todo'
+            status: 'todo',
+            aiPromptSnippet: `// 🤖 Cursor / Copilot AI 지시서\nImplement: ${userText}`
           },
           ...prev
         ]);
@@ -585,14 +628,22 @@ export default function App() {
   };
 
   const quickPromptsByStep: Record<StepId, string[]> = {
-    step1: ['노쇼 방지 보증금 환불 기준 추가', '점주 월 구독 손익분기점 정리'],
-    step2: ['반경 1.5km 조회 인덱스 조건 추가', '임시 세션 만료 알림 정책 명세'],
-    step3: ['결제 실패 시 재시도 모달 분기 추가', '비로그인 예약 클릭 시 온보딩 연결'],
-    step4: ['reservations에 노쇼 위약금 컬럼 추가', '할인 품목 복합 인덱스 추천'],
-    step5: ['V1.5 Redis 도입 시 지연 시간 비교', 'SSE 연결 시 Nginx 타임아웃 설정'],
-    step6: ['미결제 자동 취소 스케줄러 태스크 추가', 'P0 필수 작업 기준 주요 경로 산정'],
-    step7: ['예약 취소 DELETE API 명세 추가', 'Cursor용 테스트 코드 프롬프트 보강'],
-    step8: ['HikariCP 커넥션 고갈 트러블슈팅 초안 작성', 'v1.5.0 배포 롤백 절차 점검']
+    step1: ['초기 시장 진입 전략 보강', '핵심 성공 지표(KPI) 재검토'],
+    step2: ['중개 수수료 5% 유닛 이코노믹스 검증', '점주 구독 모델 수익성 시뮬레이션'],
+    step3: ['AWS 인프라 월간 예상 비용 산정', 'OpenAI API 토큰 비용 최적화 방안'],
+    step4: ['WBS 칸반으로 넘길 우선순위 선정', 'MVP 제외 아이디어 아카이빙'],
+    step5: ['반경 1.5km 조회 기능 요구사항 추가', '게스트 세션 클레임 요구사항 검토'],
+    step6: ['컬러 팔레트 명도 대비(WCAG) 검증', '브랜드 SVG 심볼 코드 복사'],
+    step7: ['화면 흐름도 IA 라우팅 테이블 동기화', '게스트/회원 권한 분기 검토'],
+    step8: ['PostgreSQL 단일 DB 선정 사유 검토', 'Redis 분리 시점 ADR 추가'],
+    step9: ['reservations 낙관적 락 컬럼 검토', 'discount_items 인덱스 전략'],
+    step10: ['SSE 연결 유지 Nginx 타임아웃 구성', 'VPC 서브넷 격리 구조 점검'],
+    step11: ['Git 브랜치 전략 GitHub-flow 규칙 점검', '커밋 컨벤션 템플릿 생성'],
+    step12: ['RFC 7807 표준 에러 포맷 검증', '할인 재고 차감 API 스키마 확인'],
+    step13: ['P0 핵심 태스크 AI 코딩 지시서 생성', 'Cursor/Copilot용 프롬프트 복사'],
+    step14: ['동시 예약 락 예외 테스트 케이스 추가', 'k6 부하 테스트 1000 TPS 검증'],
+    step15: ['v1.5.0 프로덕션 릴리즈 노트 확인', '긴급 롤백 절차 점검'],
+    step16: ['마감 트래픽 병목 트러블슈팅 분석', 'Redis 캐시 전환 정량 개선 검토']
   };
 
   const visibleChatMessages =
@@ -723,7 +774,7 @@ export default function App() {
                     <div className="divide-y divide-line text-xs">
                       <div
                         onClick={() => {
-                          handleForceNavigateStep('step8');
+                          handleForceNavigateStep('step15');
                           setIsBellDropdownOpen(false);
                         }}
                         className="p-3.5 hover:bg-well transition-colors cursor-pointer space-y-1"
@@ -736,13 +787,13 @@ export default function App() {
                           Redis TTL 및 SSE 스트리밍 운영 배포 완료
                         </div>
                         <p className="text-muted">
-                          Step 08 배포 이력 및 릴리즈 노트에서 상세 지표를 확인하세요.
+                          Step 15 배포 이력 &amp; 릴리즈 노트에서 상세 지표를 확인하세요.
                         </p>
                       </div>
 
                       <div
                         onClick={() => {
-                          handleForceNavigateStep('step6');
+                          handleForceNavigateStep('step13');
                           setIsBellDropdownOpen(false);
                         }}
                         className="p-3.5 hover:bg-well transition-colors cursor-pointer space-y-1"
@@ -755,7 +806,7 @@ export default function App() {
                           [GRM-103] ERD 및 화면 흐름 JSONB 양방향 동기화
                         </div>
                         <p className="text-muted">
-                          할당된 P0 작업 마감일이 48시간 남았습니다.
+                          Step 13 WBS 칸반에서 할당된 P0 작업 마감일이 48시간 남았습니다.
                         </p>
                       </div>
                     </div>
@@ -779,7 +830,7 @@ export default function App() {
           {/* MOBILE / TABLET PANE SWITCHER (< 1024px) */}
           <div className="lg:hidden bg-surface border-b border-line px-3 py-1.5 flex items-center gap-1 shrink-0">
             {[
-              { id: 'steps' as const, label: `단계 (${activeStepCount}/8)` },
+              { id: 'steps' as const, label: `단계 (${activeStepCount}/${ALL_STEP_IDS.length})` },
               { id: 'chat' as const, label: 'AI 코파일럿' },
               { id: 'artifact' as const, label: `산출물 (${activeStepInfo.shortTitle})` }
             ].map((tab) => (
@@ -821,8 +872,8 @@ export default function App() {
 
                   <div className="w-6 border-t border-line my-1" />
 
-                  {/* Compact 01-08 Step Quick Buttons */}
-                  <div className="flex flex-col items-center gap-1 w-full">
+                  {/* Compact 01-16 Step Quick Buttons */}
+                  <div className="flex flex-col items-center gap-1 w-full overflow-y-auto max-h-[calc(100vh-140px)] py-1">
                     {pipelineSteps.map((step) => {
                       const isEnabled = enabledSteps[step.id];
                       const isSelected = isEnabled && currentStep === step.id;
@@ -833,20 +884,20 @@ export default function App() {
                           type="button"
                           onClick={() => handleSelectStep(step.id)}
                           title={`${step.title}${!isEnabled ? ' (SKIPPED)' : ''}`}
-                          className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
+                          className={`relative w-8 h-7 rounded flex items-center justify-center transition-colors cursor-pointer text-xs shrink-0 ${
                             !isEnabled
-                              ? 'opacity-40 text-muted line-through hover:bg-well'
+                              ? 'opacity-30 text-muted line-through hover:bg-well'
                               : isSelected
                               ? 'bg-ink text-paper font-semibold'
                               : 'text-ink-2 hover:bg-well hover:text-ink'
                           }`}
                         >
-                          <code className="font-mono text-xs">{stepNumStr}</code>
+                          <code className="font-mono text-[10px]">{stepNumStr}</code>
                           {isEnabled && step.status === 'COMPLETED' && (
-                            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-ok" />
+                            <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-ok" />
                           )}
                           {isEnabled && step.status === 'IN_PROGRESS' && !isSelected && (
-                            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-accent" />
+                            <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-accent" />
                           )}
                         </button>
                       );
@@ -864,7 +915,7 @@ export default function App() {
             )}
 
             {/* ======================================================== */}
-            {/* B. LEFT SIDEBAR: 8-STEP DYNAMIC LIFECYCLE PIPELINE */}
+            {/* B. LEFT SIDEBAR: 5-PHASE / 16-INDEPENDENT MODULES PIPELINE */}
             {/* ======================================================== */}
             <aside
               style={isDesktop && !isLeftCollapsed ? { width: `${leftWidth}px` } : undefined}
@@ -877,7 +928,7 @@ export default function App() {
                 <div className="p-3.5 border-b border-line space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-ink truncate">
-                      라이프사이클 파이프라인
+                      파이프라인 ({activeStepCount}/{ALL_STEP_IDS.length})
                     </span>
                     <button
                       type="button"
@@ -906,57 +957,101 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* 8-Step Pipeline Navigation List */}
-                <nav aria-label="8단계 표준 라이프사이클" className="p-2 space-y-0.5">
-                  {pipelineSteps.map((step) => {
-                    const isEnabled = enabledSteps[step.id];
-                    const isSelected = isEnabled && currentStep === step.id;
-                    const stepNumStr = String(step.number).padStart(2, '0');
-                    const cleanLabel = step.title.replace(/^Step \d+\.\s*/, '');
+                {/* 5-Phase Grouped Accordion Pipeline Navigation */}
+                <nav aria-label="5대 Phase 16개 독립 모듈" className="p-2 space-y-2">
+                  {PIPELINE_PHASES.map((phase) => {
+                    const isPhaseCollapsed = collapsedPhases[phase.id];
+                    const phaseSteps = phase.stepIds
+                      .map((id) => pipelineSteps.find((s) => s.id === id))
+                      .filter(Boolean) as typeof pipelineSteps;
+                    const phaseActiveCount = phaseSteps.filter((s) => enabledSteps[s.id]).length;
+                    const phaseCompletedCount = phaseSteps.filter(
+                      (s) => enabledSteps[s.id] && s.status === 'COMPLETED'
+                    ).length;
 
                     return (
-                      <button
-                        key={step.id}
-                        type="button"
-                        onClick={() => handleSelectStep(step.id)}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between gap-2 cursor-pointer min-w-0 ${
-                          !isEnabled
-                            ? 'opacity-50 hover:bg-well/40 text-muted'
-                            : isSelected
-                            ? 'bg-well text-ink font-semibold'
-                            : 'text-ink-2 hover:bg-well/60 hover:text-ink'
-                        }`}
+                      <div
+                        key={phase.id}
+                        className="rounded-lg border border-line/60 bg-paper/20 overflow-hidden"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <code className="font-mono text-xs text-muted shrink-0">
-                            {stepNumStr}
-                          </code>
-                          <span
-                            className={`text-xs truncate ${
-                              !isEnabled ? 'line-through text-muted' : ''
-                            }`}
-                          >
-                            {cleanLabel}
-                          </span>
-                        </div>
-
-                        <div className="shrink-0 flex items-center">
-                          {!isEnabled ? (
-                            <span className="px-1.5 py-0.5 rounded bg-well border border-line text-[10px] font-medium text-muted">
-                              SKIPPED
+                        {/* Phase Group Accordion Header */}
+                        <button
+                          type="button"
+                          onClick={() => togglePhaseCollapse(phase.id)}
+                          className="w-full px-2.5 py-2 flex items-center justify-between gap-1.5 text-left hover:bg-well/50 transition-colors cursor-pointer select-none"
+                        >
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {isPhaseCollapsed ? (
+                              <ChevronRight className="w-3.5 h-3.5 text-muted shrink-0" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5 text-muted shrink-0" />
+                            )}
+                            <span className="text-xs font-semibold text-ink truncate">
+                              {phase.title}
                             </span>
-                          ) : step.status === 'COMPLETED' ? (
-                            <Check className="w-3.5 h-3.5 text-ok" />
-                          ) : step.status === 'IN_PROGRESS' ? (
-                            <span
-                              className="w-2 h-2 rounded-full bg-accent"
-                              title="진행 중 (IN_PROGRESS)"
-                            />
-                          ) : (
-                            <Lock className="w-3 h-3 text-subtle" />
-                          )}
-                        </div>
-                      </button>
+                          </div>
+                          <span className="text-[10px] font-mono text-muted px-1.5 py-0.5 rounded bg-well shrink-0">
+                            {phaseCompletedCount}/{phaseActiveCount}
+                          </span>
+                        </button>
+
+                        {/* Phase Independent Step Modules */}
+                        {!isPhaseCollapsed && (
+                          <div className="p-1 pt-0.5 space-y-0.5 border-t border-line/40">
+                            {phaseSteps.map((step) => {
+                              const isEnabled = enabledSteps[step.id];
+                              const isSelected = isEnabled && currentStep === step.id;
+                              const stepNumStr = String(step.number).padStart(2, '0');
+                              const cleanLabel = step.title.replace(/^Step \d+\.\s*/, '');
+
+                              return (
+                                <button
+                                  key={step.id}
+                                  type="button"
+                                  onClick={() => handleSelectStep(step.id)}
+                                  className={`w-full text-left px-2.5 py-1.5 rounded-md transition-colors flex items-center justify-between gap-1.5 cursor-pointer min-w-0 ${
+                                    !isEnabled
+                                      ? 'opacity-40 hover:bg-well/40 text-muted'
+                                      : isSelected
+                                      ? 'bg-well text-ink font-semibold'
+                                      : 'text-ink-2 hover:bg-well/60 hover:text-ink'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <code className="font-mono text-[10px] text-muted shrink-0">
+                                      {stepNumStr}
+                                    </code>
+                                    <span
+                                      className={`text-xs truncate ${
+                                        !isEnabled ? 'line-through text-muted' : ''
+                                      }`}
+                                    >
+                                      {cleanLabel}
+                                    </span>
+                                  </div>
+
+                                  <div className="shrink-0 flex items-center">
+                                    {!isEnabled ? (
+                                      <span className="px-1.5 py-0.5 rounded bg-well border border-line text-[9px] font-medium text-muted">
+                                        SKIPPED
+                                      </span>
+                                    ) : step.status === 'COMPLETED' ? (
+                                      <Check className="w-3.5 h-3.5 text-ok" />
+                                    ) : step.status === 'IN_PROGRESS' ? (
+                                      <span
+                                        className="w-2 h-2 rounded-full bg-accent"
+                                        title="진행 중 (IN_PROGRESS)"
+                                      />
+                                    ) : (
+                                      <Lock className="w-3 h-3 text-subtle" />
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </nav>
@@ -969,8 +1064,10 @@ export default function App() {
                   <code className="font-mono text-ok font-semibold shrink-0">v1.5.0</code>
                 </div>
                 <div className="px-2 py-1 flex items-center justify-between gap-2">
-                  <span className="truncate">VS Code 브릿지 연동</span>
-                  <code className="font-mono shrink-0">V3.0</code>
+                  <span className="truncate">선택 트랙</span>
+                  <code className="font-mono shrink-0 uppercase text-[10px] px-1.5 py-0.5 rounded bg-well border border-line font-medium text-ink">
+                    {pipelineTrack}
+                  </code>
                 </div>
               </div>
             </aside>
@@ -1364,14 +1461,15 @@ export default function App() {
             )}
 
             {/* ======================================================== */}
-            {/* D. RIGHT PANEL: 8-STEP DYNAMIC ARTIFACT VIEWER */}
+            {/* ======================================================== */}
+            {/* D. RIGHT PANEL: 16-INDEPENDENT MODULES ARTIFACT VIEWER */}
             {/* ======================================================== */}
             <main
               className={`${mobilePane === 'artifact' ? 'flex w-full' : 'hidden'} ${
                 isArtifactCollapsed ? 'lg:hidden' : 'lg:flex lg:min-w-[460px]'
               } flex-1 min-w-0 flex-col overflow-hidden bg-paper`}
             >
-              {/* Step 01 & Step 02: Structured Markdown Document Viewer */}
+              {/* Step 01 (개요) & Step 02 (BM): Structured Markdown Document Viewer */}
               {(currentStep === 'step1' || currentStep === 'step2') && (
                 <DocumentArtifactView
                   currentStep={currentStep}
@@ -1384,17 +1482,72 @@ export default function App() {
                   onRequestAiRefine={(sectionTitle) => {
                     if (isChatCollapsed) setIsChatCollapsed(false);
                     appendUserAndAiMessage(
-                      `"${sectionTitle}" 섹션의 수익성 지표와 기술적 제약 연계를 더 구체적으로 보강해 줘.`
+                      `"${sectionTitle}" 섹션의 비즈니스 가치와 시장 진입 가설을 더 구체적으로 보강해 줘.`
                     );
                     setMobilePane('chat');
                   }}
                 />
               )}
 
-              {/* Step 03 (UX Flow), Step 04 (ERD), Step 05 (System Architecture): Visual Canvas */}
-              {(currentStep === 'step3' ||
-                currentStep === 'step4' ||
-                currentStep === 'step5') && (
+              {/* Step 03: 비용 및 예산 산정서 */}
+              {currentStep === 'step3' && (
+                <BudgetEstimatorView
+                  items={budgetItems}
+                  setItems={setBudgetItems}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 04: 아이디어 백로그 */}
+              {currentStep === 'step4' && (
+                <IdeaBacklogView
+                  ideas={ideaBacklog}
+                  setIdeas={setIdeaBacklog}
+                  onSendToWbs={handleSendIdeaToKanban}
+                  onNavigateStep={handleForceNavigateStep}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 05: 요구사항 및 제약사항 (PRD) */}
+              {currentStep === 'step5' && (
+                <DocumentArtifactView
+                  currentStep={currentStep}
+                  projectTitle={projectIdea}
+                  requirements={requirements}
+                  setRequirements={setRequirements}
+                  onConfirmStep={handleConfirmStep}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                  onCollapsePane={toggleArtifactPane}
+                  onRequestAiRefine={(sectionTitle) => {
+                    if (isChatCollapsed) setIsChatCollapsed(false);
+                    appendUserAndAiMessage(
+                      `PRD "${sectionTitle}" 요구사항의 예외 케이스 및 검증 기준을 보강해 줘.`
+                    );
+                    setMobilePane('chat');
+                  }}
+                />
+              )}
+
+              {/* Step 06: 브랜딩 & 디자인 시스템 */}
+              {currentStep === 'step6' && (
+                <BrandingDesignView
+                  branding={branding}
+                  setBranding={setBranding}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 07 (화면 흐름도), Step 09 (ERD), Step 10 (아키텍처): 토폴로지 캔버스 뷰 */}
+              {(currentStep === 'step7' ||
+                currentStep === 'step9' ||
+                currentStep === 'step10') && (
                 <TopologyCanvasView
                   currentStep={currentStep}
                   uxNodes={uxNodes}
@@ -1423,8 +1576,41 @@ export default function App() {
                 />
               )}
 
-              {/* Step 06: 3-Column WBS Kanban Board */}
-              {currentStep === 'step6' && (
+              {/* Step 08: 기술 스택 선정 정의서 (ADR) */}
+              {currentStep === 'step8' && (
+                <AdrDecisionView
+                  decisions={adrDecisions}
+                  setDecisions={setAdrDecisions}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 11: 개발 컨벤션 정의서 */}
+              {currentStep === 'step11' && (
+                <ConventionDocView
+                  conventions={devConventions}
+                  setConventions={setDevConventions}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 12: 백엔드 API 명세서 */}
+              {currentStep === 'step12' && (
+                <ApiSpecificationView
+                  endpoints={apiEndpoints}
+                  setEndpoints={setApiEndpoints}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 13: WBS 및 일정 칸반 보드 (+ 태스크별 AI 코딩 지시서 모달) */}
+              {currentStep === 'step13' && (
                 <KanbanBoardView
                   tasks={kanbanTasks}
                   setTasks={setKanbanTasks}
@@ -1434,33 +1620,37 @@ export default function App() {
                 />
               )}
 
-              {/* Step 07: API Specification & IDE Coding Prompt Viewer */}
-              {currentStep === 'step7' && (
-                <ApiConventionView
-                  endpoints={apiEndpoints}
-                  setEndpoints={setApiEndpoints}
-                  idePrompts={idePrompts}
-                  setIdePrompts={setIdePrompts}
+              {/* Step 14: 테스트 케이스 & QA */}
+              {currentStep === 'step14' && (
+                <QaTestingView
+                  testCases={qaTestCases}
+                  setTestCases={setQaTestCases}
+                  loadMetrics={loadTestMetrics}
                   onConfirmStep={handleConfirmStep}
-                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
                   onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
                 />
               )}
 
-              {/* Step 08: Deployment History, Troubleshooting Archive & v2.0 Backlog */}
-              {currentStep === 'step8' && (
-                <OperationsArchiveView
+              {/* Step 15: 배포 이력 & 릴리즈 노트 */}
+              {currentStep === 'step15' && (
+                <ReleaseHistoryView
                   deployments={deployments}
                   setDeployments={setDeployments}
-                  troubleshootings={troubleshootings}
-                  setTroubleshootings={setTroubleshootings}
-                  backlogIdeas={backlogIdeas}
-                  setBacklogIdeas={setBacklogIdeas}
-                  onSendBacklogToWbs={handleSendBacklogToWbs}
-                  onNavigateStep={handleForceNavigateStep}
                   onConfirmStep={handleConfirmStep}
-                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
                   onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 16: 트러블슈팅 아카이빙 */}
+              {currentStep === 'step16' && (
+                <TroubleshootingArchiveView
+                  items={troubleshootings}
+                  setItems={setTroubleshootings}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
                 />
               )}
             </main>
@@ -1541,16 +1731,22 @@ export default function App() {
         pipelineTrack={pipelineTrack}
         setPipelineTrack={(t) => {
           setPipelineTrack(t);
-          if (t === 'beginner') {
-            setEnabledSteps({ ...TRACK_PRESET_STEPS.beginner });
-          } else if (t === 'expert') {
-            setEnabledSteps({ ...TRACK_PRESET_STEPS.expert });
+          if (t === 'startup') {
+            setEnabledSteps({ ...TRACK_PRESET_STEPS.startup });
+          } else if (t === 'backend') {
+            setEnabledSteps({ ...TRACK_PRESET_STEPS.backend });
+          } else if (t === 'fullstack') {
+            setEnabledSteps({ ...TRACK_PRESET_STEPS.fullstack });
           }
-          showAppToast(
-            `파이프라인이 ${
-              t === 'beginner' ? '초보자 트랙' : t === 'expert' ? '전문가 트랙' : '커스텀 트랙'
-            }으로 변경되었습니다`
-          );
+          const trackLabel =
+            t === 'startup'
+              ? '비개발자/창업가 트랙'
+              : t === 'backend'
+              ? '백엔드 포트폴리오 트랙'
+              : t === 'fullstack'
+              ? '풀스택 전문가 트랙'
+              : '커스텀 트랙';
+          showAppToast(`파이프라인이 ${trackLabel}으로 변경되었습니다`);
         }}
         enabledSteps={enabledSteps}
         pipelineSteps={pipelineSteps}

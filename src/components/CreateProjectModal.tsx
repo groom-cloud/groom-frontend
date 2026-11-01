@@ -10,6 +10,7 @@ import {
   Gamepad2
 } from 'lucide-react';
 import {
+  PIPELINE_PHASES,
   TRACK_PRESET_STEPS,
   type PipelineStepInfo,
   type PipelineTrack,
@@ -105,7 +106,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     if (isOpen) {
       setCurrentStep(1);
       setSelectedDomain(initialDomain || 'web');
-      setSelectedTrack(initialTrack || 'expert');
+      setSelectedTrack(initialTrack || 'fullstack');
       setDraftSteps({ ...initialEnabledSteps });
       setDraftIdea(initialIdea || '');
     }
@@ -127,10 +128,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   const handleTrackChange = (track: PipelineTrack) => {
     setSelectedTrack(track);
-    if (track === 'beginner') {
-      setDraftSteps({ ...TRACK_PRESET_STEPS.beginner });
-    } else if (track === 'expert') {
-      setDraftSteps({ ...TRACK_PRESET_STEPS.expert });
+    if (track === 'startup') {
+      setDraftSteps({ ...TRACK_PRESET_STEPS.startup });
+    } else if (track === 'backend') {
+      setDraftSteps({ ...TRACK_PRESET_STEPS.backend });
+    } else if (track === 'fullstack') {
+      setDraftSteps({ ...TRACK_PRESET_STEPS.fullstack });
     }
   };
 
@@ -386,25 +389,31 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               </div>
 
               {/* Track Presets */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                 {[
                   {
-                    id: 'expert' as PipelineTrack,
-                    title: '전문가 트랙',
-                    badge: '8단계 전체 · 추천',
-                    desc: '기획부터 배포·운영까지 완결형 표준 라이프사이클'
+                    id: 'fullstack' as PipelineTrack,
+                    title: '풀스택 전문가',
+                    badge: '16개 전체 · 추천',
+                    desc: '기획부터 배포·트러블슈팅까지 16개 완결형 모듈'
                   },
                   {
-                    id: 'beginner' as PipelineTrack,
-                    title: '초보자 트랙',
-                    badge: '4단계 패스트',
-                    desc: '기획, 화면 흐름, DB 설계, 칸반 핵심 4단계 집중'
+                    id: 'startup' as PipelineTrack,
+                    title: '창업가 / 비개발자',
+                    badge: '8개 집중',
+                    desc: '기획, BM, 예산, PRD, 브랜딩, 화면흐름, 칸반, QA'
+                  },
+                  {
+                    id: 'backend' as PipelineTrack,
+                    title: '백엔드 포트폴리오',
+                    badge: '11개 엔지니어링',
+                    desc: 'PRD, ADR, ERD, 아키텍처, 컨벤션, API, WBS, Ops'
                   },
                   {
                     id: 'custom' as PipelineTrack,
                     title: '커스텀 트랙',
                     badge: '자유 구성',
-                    desc: '프로젝트 요구에 맞춰 단계를 직접 선택'
+                    desc: '요구에 맞춰 16개 모듈을 직접 토글 조합'
                   }
                 ].map((track) => {
                   const isSelected = selectedTrack === track.id;
@@ -432,49 +441,59 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 })}
               </div>
 
-              {/* 8-Step Matrix Grid */}
-              <div className="pt-2">
-                <span className="text-xs font-bold text-ink block mb-2">
-                  단계별 활성화 여부 선택
+              {/* 5-Phase / 16-Step Matrix Grid */}
+              <div className="pt-2 space-y-3">
+                <span className="text-xs font-bold text-ink block">
+                  5대 Phase / 16개 모듈 활성화 여부 선택
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {pipelineSteps.map((step, idx) => {
-                    const isChecked = !!draftSteps[step.id];
+                <div className="space-y-2.5">
+                  {PIPELINE_PHASES.map((phase) => {
+                    const phaseSteps = pipelineSteps.filter((s) => phase.stepIds.includes(s.id));
                     return (
-                      <div
-                        key={step.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleToggleStep(step.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') handleToggleStep(step.id);
-                        }}
-                        className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex items-center justify-between ${
-                          isChecked
-                            ? 'border-line-strong bg-surface text-ink'
-                            : 'border-line bg-well/30 text-muted opacity-60'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="font-mono text-[11px] font-bold text-accent shrink-0">
-                            0{idx + 1}
-                          </span>
-                          <div className="min-w-0">
-                            <span className="text-xs font-semibold block truncate">
-                              {step.title}
-                            </span>
-                            <span className="text-[10px] text-muted block truncate">
-                              {step.subtitle}
-                            </span>
-                          </div>
+                      <div key={phase.id} className="border border-line rounded-xl overflow-hidden bg-surface">
+                        <div className="px-3 py-1.5 bg-well/50 border-b border-line flex items-center justify-between">
+                          <span className="text-xs font-bold text-ink">{phase.title}</span>
+                          <span className="text-[10px] font-mono text-muted">{phase.titleEn}</span>
                         </div>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => handleToggleStep(step.id)}
-                          aria-label={`${step.title} 활성화`}
-                          className="w-4 h-4 rounded text-accent cursor-pointer shrink-0"
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-line p-1">
+                          {phaseSteps.map((step) => {
+                            const isChecked = !!draftSteps[step.id];
+                            return (
+                              <div
+                                key={step.id}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => handleToggleStep(step.id)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') handleToggleStep(step.id);
+                                }}
+                                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex items-center justify-between m-1 ${
+                                  isChecked
+                                    ? 'border-line-strong bg-surface text-ink'
+                                    : 'border-line bg-well/30 text-muted opacity-60'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span className="font-mono text-[11px] font-bold text-accent shrink-0">
+                                    {String(step.number).padStart(2, '0')}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <span className="text-xs font-semibold block truncate">
+                                      {step.title.replace(/^Step \d+\.\s*/, '')}
+                                    </span>
+                                  </div>
+                                </div>
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleToggleStep(step.id)}
+                                  aria-label={`${step.title} 활성화`}
+                                  className="w-4 h-4 rounded text-accent cursor-pointer shrink-0"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     );
                   })}
@@ -548,13 +567,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   <div>
                     <span className="text-[11px] text-muted block">파이프라인 트랙</span>
                     <span className="font-semibold text-ink">
-                      {selectedTrack === 'expert'
-                        ? '전문가 (8단계)'
-                        : selectedTrack === 'beginner'
-                        ? '초보자 (4단계)'
+                      {selectedTrack === 'fullstack'
+                        ? '풀스택 전문가 (16개 전체)'
+                        : selectedTrack === 'startup'
+                        ? '창업가 / 비개발자 (8개)'
+                        : selectedTrack === 'backend'
+                        ? '백엔드 포트폴리오 (11개)'
                         : '커스텀 트랙'}
                       {' · '}
-                      <span className="text-accent">{enabledCount}단계 활성</span>
+                      <span className="text-accent">{enabledCount}개 모듈 활성</span>
                     </span>
                   </div>
                 </div>

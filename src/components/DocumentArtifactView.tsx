@@ -78,56 +78,103 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     setTimeout(() => setExportToast(null), 2600);
   };
 
-  // Editable Step 1 BM Blocks
-  const [bmBlocks, setBmBlocks] = useState<BmBlock[]>([
+  // Editable Step 1 Overview Blocks
+  const [overviewBlocks, setOverviewBlocks] = useState<BmBlock[]>([
     {
-      id: 'bm_block_meta',
-      title: '1. 프로젝트 기본 정보 및 핵심 지표',
+      id: 'ov_block_meta',
+      title: '1. 프로젝트 기본 정보 및 핵심 비전',
       format: 'cards',
       content:
-        '서비스 도메인: 하이퍼로컬 O2O 웹 | 수익 모델: 중개 수수료 5% · 월 구독 | 초기 진입 전략: 비로그인 인근 재고 탐색 | 핵심 성공 지표: 마감 재고 소진율 80%',
+        '서비스 도메인: 하이퍼로컬 O2O 웹 | 타깃: 반경 1.5km 거주민 & 베이커리 점주 | 핵심 가치: 당일 마감 빵 50% 할인 픽업 | 성공 지표: 마감 재고 소진율 80%',
       tableHeaders: ['구분 / 핵심 항목', '설정값 및 전략'],
       tableRows: [
         ['서비스 도메인', '하이퍼로컬 O2O 웹'],
-        ['수익 모델', '중개 수수료 5% · 월 구독'],
+        ['핵심 고객', '반경 1.5km 거주민 & 로컬 베이커리 점주'],
         ['초기 진입 전략', '비로그인 인근 재고 탐색'],
         ['핵심 성공 지표 (KPI)', '마감 재고 소진율 80%']
       ],
       cardItems: [
         { id: 'meta_1', label: '서비스 도메인', text: '하이퍼로컬 O2O 웹' },
-        { id: 'meta_2', label: '수익 모델', text: '중개 수수료 5% · 월 구독' },
+        { id: 'meta_2', label: '핵심 고객', text: '반경 1.5km 거주민 & 베이커리' },
         { id: 'meta_3', label: '초기 진입 전략', text: '비로그인 인근 재고 탐색' },
         { id: 'meta_4', label: '핵심 성공 지표 (KPI)', text: '마감 재고 소진율 80%' }
       ]
     },
     {
-      id: 'bm_block_1',
-      title: '2. 핵심 문제 정의 및 서비스 개요',
+      id: 'ov_block_1',
+      title: '2. 핵심 문제 정의 및 배경',
       format: 'text',
       content:
-        '당일 생산·당일 폐기 원칙을 지키는 동네 베이커리의 마감 시간대(19:00~21:30) 잉여 빵 재고를 반경 1.5km 내 지역 거주민에게 30~50% 할인가로 실시간 연결하는 하이퍼로컬 픽업 예약 웹 플랫폼입니다.'
+        '당일 생산·당일 폐기 원칙을 지키는 프리미엄 동네 베이커리의 마감 시간대(19:00~21:30) 잉여 빵 재고를 반경 1.5km 내 거주민 및 직장인에게 30~50% 할인가로 실시간 연결하는 하이퍼로컬 픽업 예약 웹 플랫폼입니다.'
     },
     {
-      id: 'bm_block_2',
-      title: '3. 양면 시장 가치 제안',
+      id: 'ov_block_2',
+      title: '3. 타깃 고객 페르소나 및 양면 시장 가치',
       format: 'cards',
       content: '',
       cardItems: [
         {
+          id: 'card_demand',
+          label: '수요자 · 퇴근길 1인가구/거주민',
+          text: '퇴근 동선 내 검증된 동네 빵집의 신선한 베이커리를 반값에 예약하고, 대기 없이 매장에서 즉시 픽업할 수 있는 합리적 소비 경험을 제공합니다.'
+        },
+        {
           id: 'card_supply',
           label: '공급자 · 동네 베이커리 점주',
           text: '마감 2시간 전 사진·수량만 입력하면 단골 구독자에게 자동 알림 발송. 선결제 보증금 제도로 노쇼(No-Show)를 원천 차단하고 일평균 폐기 손실을 75% 이상 절감합니다.'
-        },
-        {
-          id: 'card_demand',
-          label: '수요자 · 반경 1.5km 내 거주민',
-          text: '퇴근길 동선 내 검증된 동네 빵집의 신선한 베이커리를 반값에 예약하고, 대기 없이 매장에서 즉시 픽업할 수 있는 합리적 소비 경험을 제공합니다.'
         }
       ]
     },
     {
+      id: 'ov_block_3',
+      title: '4. 핵심 제공 솔루션 및 기능 범위',
+      format: 'table',
+      content: '',
+      tableHeaders: ['구분', '제공 솔루션', '기대 효과'],
+      tableRows: [
+        ['실시간 재고 푸시', '점주가 20:00 재고 등록 시 반경 1.5km 단골에게 알림', '오픈 30분 내 80% 소진'],
+        ['선결제 픽업 예약', 'PG사 간편결제 및 예약 보증금 결제 후 매장 방문 수령', '노쇼 발생률 0.5% 미만 차단'],
+        ['비로그인 둘러보기', '게스트 세션으로 인근 빵집 잔여 수량 실시간 탐색', '초기 가입 이탈율 60% 개선']
+      ]
+    }
+  ]);
+
+  // Editable Step 2 Business Model Blocks
+  const [bmBlocks, setBmBlocks] = useState<BmBlock[]>([
+    {
+      id: 'bm_block_1',
+      title: '1. 비즈니스 모델 캔버스 요약',
+      format: 'cards',
+      content: '',
+      cardItems: [
+        { id: 'bm_c1', label: '수익 모델 (Revenue)', text: '픽업 예약 건당 중개 수수료 5% + 점주 월간 프로 구독(월 19,900원)' },
+        { id: 'bm_c2', label: '핵심 파트너', text: '지역 로컬 베이커리, PG 결제사, 카카오 알림톡/문자 발송사' },
+        { id: 'bm_c3', label: '고객 관계', text: '퇴근 시간대 정기 알림, 단골 빵집 찜하기, 선결제 보증금 제도' },
+        { id: 'bm_c4', label: '비용 구조 (Cost)', text: '클라우드 인프라(AWS), 알림톡 발송비, PG 수수료(2.5%)' }
+      ]
+    },
+    {
+      id: 'bm_block_2',
+      title: '2. 수수료 및 가격 정책',
+      format: 'table',
+      content: '',
+      tableHeaders: ['수익원 구분', '과금 체계', '적용 기준'],
+      tableRows: [
+        ['중개 거래 수수료', '결제 금액의 5%', '할인 빵 픽업 완료 시 정산 차감'],
+        ['점주 프리미엄 구독', '월 19,900원', '단골 푸시 무제한 + 일간 재고 분석 대시보드'],
+        ['소비자 예약 보증금', '건당 1,000원 선결제', '픽업 시 본 결제 금액에서 자동 공제']
+      ]
+    },
+    {
       id: 'bm_block_3',
-      title: '4. 운영 리스크 및 하위 설계 연계 규칙',
+      title: '3. 유닛 이코노믹스 및 마진 분석',
+      format: 'text',
+      content:
+        '평균 객단가 12,000원 기준 건당 5% 수수료(600원) 발생. PG 결제 수수료(약 300원) 및 카카오 알림톡(15원) 차감 후 건당 공헌이익 약 285원(마진율 47.5%). 점주당 월평균 150건 거래 발생 시 점주당 월 42,750원 순수익 창출.'
+    },
+    {
+      id: 'bm_block_4',
+      title: '4. 초기 시장 진입 (GTM) 및 운영 리스크 대응',
       format: 'table',
       content: '',
       tableHeaders: ['리스크 항목', '해결 메커니즘', '하위 스키마·아키텍처 반영'],
@@ -148,15 +195,17 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
           'Guest Shadow Session, Claim API'
         ]
       ]
-    },
-    {
-      id: 'bm_block_4',
-      title: '5. 초기 시장 진입 및 그로스 마케팅 전략',
-      format: 'text',
-      content:
-        '인근 반경 1.5km 내 오피스 밀집 지역(퇴근 시간대 직장인)을 타깃으로 마감 할인 시작 알림 푸시를 집중 발송하고, 첫 예약 시 2,000원 즉시 할인 쿠폰을 제공하여 초기 전환율을 확보합니다.'
     }
   ]);
+
+  const activeBlocks = currentStep === 'step1' ? overviewBlocks : bmBlocks;
+  const setActiveBlocks = (updater: React.SetStateAction<BmBlock[]>) => {
+    if (currentStep === 'step1') {
+      setOverviewBlocks(updater);
+    } else {
+      setBmBlocks(updater);
+    }
+  };
 
   const getCardGridClass = (count: number) => {
     if (count <= 1) return 'grid grid-cols-1 gap-4';
@@ -167,15 +216,15 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
   // Block manipulation handlers
   const handleUpdateBlockTitle = (id: string, title: string) => {
-    setBmBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, title } : b)));
+    setActiveBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, title } : b)));
   };
 
   const handleUpdateBlockContent = (id: string, content: string) => {
-    setBmBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, content } : b)));
+    setActiveBlocks((prev) => prev.map((b) => (b.id === id ? { ...b, content } : b)));
   };
 
   const handleChangeBlockFormat = (id: string, newFormat: BmBlockFormat) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== id) return b;
         const updated: BmBlock = { ...b, format: newFormat };
@@ -209,14 +258,14 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleDeleteBlock = (id: string) => {
-    setBmBlocks((prev) => prev.filter((b) => b.id !== id));
+    setActiveBlocks((prev) => prev.filter((b) => b.id !== id));
     showToast('블록 섹션이 삭제되었습니다');
   };
 
   const handleMoveBlock = (index: number, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= bmBlocks.length) return;
-    setBmBlocks((prev) => {
+    if (targetIndex < 0 || targetIndex >= activeBlocks.length) return;
+    setActiveBlocks((prev) => {
       const copy = [...prev];
       const temp = copy[index];
       copy[index] = copy[targetIndex];
@@ -226,7 +275,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleUpdateTableHeader = (blockId: string, colIdx: number, val: string) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         const newHeaders = [...(b.tableHeaders || [])];
@@ -237,7 +286,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleUpdateTableCell = (blockId: string, rowIdx: number, colIdx: number, val: string) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         const newRows = (b.tableRows || []).map((row, rIdx) => {
@@ -252,7 +301,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleDeleteTableRow = (blockId: string, rowIdx: number) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         return { ...b, tableRows: (b.tableRows || []).filter((_, rIdx) => rIdx !== rowIdx) };
@@ -261,7 +310,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleAddTableColumn = (blockId: string) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         const currentHeaders = b.tableHeaders || ['항목', '내용', '비고'];
@@ -279,7 +328,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleDeleteTableColumn = (blockId: string, colIdx: number) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         const currentHeaders = b.tableHeaders || ['항목', '내용', '비고'];
@@ -300,7 +349,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleUpdateCardItem = (blockId: string, cardId: string, field: 'label' | 'text', val: string) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         return {
@@ -312,7 +361,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   };
 
   const handleDeleteCardItem = (blockId: string, cardId: string) => {
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== blockId) return b;
         return { ...b, cardItems: (b.cardItems || []).filter((c) => c.id !== cardId) };
@@ -352,7 +401,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
   // Handlers for Table Row modal
   const handleOpenTableRowModal = (blockId: string) => {
-    const target = bmBlocks.find((b) => b.id === blockId);
+    const target = activeBlocks.find((b) => b.id === blockId);
     const colCount = target?.tableHeaders?.length || 3;
     setTargetBlockId(blockId);
     setModalRowCells(Array(colCount).fill(''));
@@ -362,7 +411,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   const handleSubmitTableRow = (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetBlockId) return;
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== targetBlockId) return b;
         return { ...b, tableRows: [...(b.tableRows || []), [...modalRowCells]] };
@@ -388,7 +437,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
       label: modalCardLabel.trim(),
       text: modalCardText.trim() || '세부 내용을 기술하세요.'
     };
-    setBmBlocks((prev) =>
+    setActiveBlocks((prev) =>
       prev.map((b) => {
         if (b.id !== targetBlockId) return b;
         return { ...b, cardItems: [...(b.cardItems || []), newCard] };
@@ -400,7 +449,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
   // Handlers for Section Modal
   const handleOpenSectionModal = () => {
-    const nextNum = bmBlocks.length + 1;
+    const nextNum = activeBlocks.length + 1;
     setModalSectionTitle(`${nextNum}. 신규 비즈니스 항목 및 운영 전략`);
     setModalSectionFormat('text');
     setModalSectionContent('');
@@ -422,7 +471,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
         { id: `c_${Date.now()}_2`, label: '대상 구분 2', text: '두 번째 대상에 대한 가치 제안을 입력하세요.' }
       ] : undefined
     };
-    setBmBlocks((prev) => [...prev, newBlock]);
+    setActiveBlocks((prev) => [...prev, newBlock]);
     setAddModalType(null);
     showToast('새 블록 섹션이 추가되었습니다');
   };
@@ -500,6 +549,27 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   // Build default markdown from structured state
   const buildMarkdownFromState = (step: StepId) => {
     if (step === 'step1') {
+      const blocksMd = overviewBlocks
+        .map((b) => {
+          if (b.format === 'table') {
+            const headers = b.tableHeaders || ['항목', '내용', '비고'];
+            const rows = b.tableRows || [];
+            const headerRow = `| ${headers.join(' | ')} |`;
+            const sepRow = `| ${headers.map(() => '---').join(' | ')} |`;
+            const dataRows = rows.map((r) => `| ${r.join(' | ')} |`).join('\n');
+            return `## ${b.title}\n\n${headerRow}\n${sepRow}\n${dataRows}`;
+          }
+          if (b.format === 'cards') {
+            const cards = b.cardItems || [];
+            return `## ${b.title}\n\n` + cards.map((c) => `### ${c.label}\n${c.text}`).join('\n\n');
+          }
+          return `## ${b.title}\n\n${b.content}`;
+        })
+        .join('\n\n');
+
+      return `# 01. 서비스 개요 및 기획서\n\n## 프로젝트명: ${projectTitle}\n\n${blocksMd}`;
+    }
+    if (step === 'step2') {
       const blocksMd = bmBlocks
         .map((b) => {
           if (b.format === 'table') {
@@ -518,14 +588,14 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
         })
         .join('\n\n');
 
-      return `# 1. 서비스 개요 및 비즈니스 모델\n\n## 프로젝트명: ${projectTitle}\n\n${blocksMd}`;
+      return `# 02. 비즈니스 모델 (BM)\n\n## 프로젝트명: ${projectTitle}\n\n${blocksMd}`;
     }
-    return `# 2. 요구사항 및 기술 제약사항 명세서 (PRD v1.2)\n\n## 2.1 기능 요구사항 (${requirements.length}건)\n${requirements
+    return `# 05. 요구사항 및 기술 제약사항 명세서 (PRD)\n\n## 5.1 기능 요구사항 (${requirements.length}건)\n${requirements
       .map(
         (r) =>
           `- **[${r.reqCode}] (${r.priority} / ${r.status}) ${r.title}**\n  - 분류: ${r.category}\n  - 상세 명세: ${r.specification}\n  - 인수 조건: ${r.acceptanceCriteria}`
       )
-      .join('\n')}\n\n## 2.2 엔지니어링 제약사항 및 기술 원칙\n${prdConstraints
+      .join('\n')}\n\n## 5.2 엔지니어링 제약사항 및 기술 원칙\n${prdConstraints
       .map((c) => `- **${c.title}:** ${c.description}`)
       .join('\n')}`;
   };
@@ -533,49 +603,64 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   // Raw Markdown editable state per step
   const [rawMdStep1, setRawMdStep1] = useState(() => buildMarkdownFromState('step1'));
   const [rawMdStep2, setRawMdStep2] = useState(() => buildMarkdownFromState('step2'));
+  const [rawMdStep5, setRawMdStep5] = useState(() => buildMarkdownFromState('step5'));
   const [isRawDirtyStep1, setIsRawDirtyStep1] = useState(false);
   const [isRawDirtyStep2, setIsRawDirtyStep2] = useState(false);
+  const [isRawDirtyStep5, setIsRawDirtyStep5] = useState(false);
 
   // Keep raw markdown synced with structured edits unless user customized raw markdown directly
   useEffect(() => {
     if (!isRawDirtyStep1) {
       setRawMdStep1(buildMarkdownFromState('step1'));
     }
-  }, [projectTitle, bmBlocks, isRawDirtyStep1]);
+  }, [projectTitle, overviewBlocks, isRawDirtyStep1]);
 
   useEffect(() => {
     if (!isRawDirtyStep2) {
       setRawMdStep2(buildMarkdownFromState('step2'));
     }
-  }, [requirements, prdConstraints, isRawDirtyStep2]);
+  }, [projectTitle, bmBlocks, isRawDirtyStep2]);
 
-  const currentRawMarkdown = currentStep === 'step1' ? rawMdStep1 : rawMdStep2;
+  useEffect(() => {
+    if (!isRawDirtyStep5) {
+      setRawMdStep5(buildMarkdownFromState('step5'));
+    }
+  }, [requirements, prdConstraints, isRawDirtyStep5]);
+
+  const currentRawMarkdown =
+    currentStep === 'step1'
+      ? rawMdStep1
+      : currentStep === 'step2'
+      ? rawMdStep2
+      : rawMdStep5;
 
   const handleRawMarkdownChange = (val: string) => {
     if (currentStep === 'step1') {
       setRawMdStep1(val);
       setIsRawDirtyStep1(true);
-    } else {
+    } else if (currentStep === 'step2') {
       setRawMdStep2(val);
       setIsRawDirtyStep2(true);
+    } else {
+      setRawMdStep5(val);
+      setIsRawDirtyStep5(true);
     }
   };
 
   const handleSyncRawToStructured = () => {
-    if (currentStep === 'step1') {
-      showToast('마크다운 원문 변경사항이 문서에 반영되었습니다');
-    } else {
-      showToast('마크다운 원문 변경사항이 저장되었습니다');
-    }
+    showToast('마크다운 원문 변경사항이 반영되었습니다');
   };
 
   const handleResetRawMarkdown = () => {
     if (currentStep === 'step1') {
       setIsRawDirtyStep1(false);
       setRawMdStep1(buildMarkdownFromState('step1'));
-    } else {
+    } else if (currentStep === 'step2') {
       setIsRawDirtyStep2(false);
       setRawMdStep2(buildMarkdownFromState('step2'));
+    } else {
+      setIsRawDirtyStep5(false);
+      setRawMdStep5(buildMarkdownFromState('step5'));
     }
     showToast('구조화 문서 기준으로 원문을 다시 생성했습니다');
   };
@@ -699,8 +784,10 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     const link = document.createElement('a');
     const fileName =
       currentStep === 'step1'
-        ? `01_BUSINESS_MODEL_${projectTitle.replace(/\s+/g, '_')}.doc`
-        : `02_PRD_SPECIFICATION_${projectTitle.replace(/\s+/g, '_')}.doc`;
+        ? `01_SERVICE_OVERVIEW_${projectTitle.replace(/\s+/g, '_')}.doc`
+        : currentStep === 'step2'
+        ? `02_BUSINESS_MODEL_${projectTitle.replace(/\s+/g, '_')}.doc`
+        : `05_PRD_SPECIFICATION_${projectTitle.replace(/\s+/g, '_')}.doc`;
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);
@@ -715,7 +802,12 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     const blob = new Blob([currentRawMarkdown], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    const fileName = currentStep === 'step1' ? '01_BUSINESS_MODEL.md' : '02_PRD_SPECIFICATION.md';
+    const fileName =
+      currentStep === 'step1'
+        ? '01_SERVICE_OVERVIEW.md'
+        : currentStep === 'step2'
+        ? '02_BUSINESS_MODEL.md'
+        : '05_PRD_SPECIFICATION.md';
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);
@@ -832,7 +924,11 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
           <div className="hidden @xl:flex items-center gap-1.5 text-xs min-w-0">
             <FileText className="w-3.5 h-3.5 text-muted shrink-0" />
             <code className="text-ink font-mono font-medium truncate max-w-[160px] @2xl:max-w-none">
-              {currentStep === 'step1' ? '01_BUSINESS_MODEL.md' : '02_PRD_SPECIFICATION.md'}
+              {currentStep === 'step1'
+                ? '01_SERVICE_OVERVIEW.md'
+                : currentStep === 'step2'
+                ? '02_BUSINESS_MODEL.md'
+                : '05_PRD_SPECIFICATION.md'}
             </code>
           </div>
 
@@ -976,16 +1072,18 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                 className="w-full p-5 text-xs font-mono text-ink leading-relaxed bg-surface focus:outline-none resize-y"
               />
             </div>
-          ) : currentStep === 'step1' ? (
+          ) : currentStep === 'step1' || currentStep === 'step2' ? (
             /* ======================================================== */
-            /* STEP 1: EDITORIAL BUSINESS MODEL DOCUMENT (FULL EDIT) */
+            /* STEP 1 (OVERVIEW) & STEP 2 (BM): EDITORIAL DOCUMENT      */
             /* ======================================================== */
             <article className="divide-y divide-line">
               {/* Document Title Header */}
               <header className="pb-6">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <span className="text-xs text-muted">
-                    Step 01 · 서비스 개요 및 비즈니스 모델
+                    {currentStep === 'step1'
+                      ? 'Step 01 · 서비스 개요 및 기획서'
+                      : 'Step 02 · 비즈니스 모델 (BM)'}
                   </span>
                   {!isEditMode && (
                     <button
@@ -1004,7 +1102,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
               {/* Dynamic Unified BM Blocks (Delete / Format Switch / Reorder / Edit) */}
               <div className="divide-y divide-line">
-                {bmBlocks.map((block, index) => (
+                {activeBlocks.map((block, index) => (
                   <section key={block.id} className="py-6 space-y-4">
                     {isEditMode ? (
                       /* Edit Mode Block Container */
@@ -1083,7 +1181,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleMoveBlock(index, 'down')}
-                                disabled={index === bmBlocks.length - 1}
+                                disabled={index === activeBlocks.length - 1}
                                 aria-label="블록 아래로 이동"
                                 className="p-1 rounded-md text-muted hover:text-ink hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
                                 title="블록 아래로 이동"
@@ -1341,16 +1439,16 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
             </article>
           ) : (
             /* ======================================================== */
-            /* STEP 2: EDITORIAL PRD SPECIFICATION (FULL EDIT) */
+            /* STEP 5: EDITORIAL PRD SPECIFICATION (FULL EDIT)          */
             /* ======================================================== */
             <article className="divide-y divide-line">
               <header className="pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <div className="text-xs text-muted mb-2">
-                    Step 02 · 요구사항 및 기술 제약사항 명세서 (PRD v1.2)
+                    Step 05 · 요구사항 및 기술 제약사항 (PRD)
                   </div>
                   <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
-                    기능 요구사항 및 아키텍처 원칙
+                    기능 요구사항 및 아키텍처 제약 규칙
                   </h1>
                 </div>
 
