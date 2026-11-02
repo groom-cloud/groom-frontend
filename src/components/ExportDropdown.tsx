@@ -123,7 +123,7 @@ export const ExportDropdown: React.FC<ExportDropdownProps> = ({
             onClick={() => setIsOpen(false)}
             className="fixed inset-0 z-40"
           />
-          <div className="absolute right-0 top-full mt-1.5 w-52 bg-surface border border-line-strong rounded-xl p-1.5 z-50 text-xs space-y-0.5 shadow-lg">
+          <div className="absolute right-0 top-full mt-1.5 w-52 bg-surface border border-line-strong rounded-xl p-1.5 z-50 text-xs space-y-0.5 shadow-md origin-top-right">
             <button
               type="button"
               onClick={handleExportPdf}

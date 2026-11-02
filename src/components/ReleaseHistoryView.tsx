@@ -209,14 +209,14 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
           <span className="font-bold text-ink">
-            Current Prod: <span className="text-emerald-400 font-mono">{latestRelease.version}</span> - Healthy 🟢
+            Current Prod: <span className="text-emerald-400 font-mono tabular-nums">{latestRelease.version}</span> - Healthy 🟢
           </span>
           <span className="text-muted hidden sm:inline">| 가동률 99.98% (SLA 정상 충족)</span>
         </div>
 
         <div className="text-[11px] text-muted flex items-center gap-1.5">
           <Clock className="w-3.5 h-3.5" />
-          <span>최근 배포: {latestRelease.deployedAt}</span>
+          <span>최근 배포: <span className="tabular-nums">{latestRelease.deployedAt}</span></span>
         </div>
       </div>
 
@@ -263,7 +263,7 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
                           placeholder="v1.6.0"
                         />
                       ) : (
-                        <span className="font-mono text-sm font-bold text-ink">{dep.version}</span>
+                        <span className="font-mono tabular-nums text-sm font-bold text-ink">{dep.version}</span>
                       )}
 
                       {isEditMode ? (

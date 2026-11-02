@@ -1139,7 +1139,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                               value={block.title}
                               onChange={(e) => handleUpdateBlockTitle(block.id, e.target.value)}
                               className="w-full bg-surface border border-accent-line rounded-lg px-3 py-1.5 text-xs sm:text-sm font-semibold text-ink focus:outline-none focus:border-ink/40"
-                              placeholder="블록 소제목을 입력하세요..."
+                              placeholder="블록 소제목을 입력하세요…"
                             />
                           </div>
 
@@ -1233,7 +1233,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                             value={block.content}
                             onChange={(e) => handleUpdateBlockContent(block.id, e.target.value)}
                             className="w-full bg-surface border border-line rounded-xl p-3.5 text-xs sm:text-sm text-ink leading-relaxed focus:outline-none focus:border-ink/40"
-                            placeholder="상세 내용을 자유롭게 기술하세요..."
+                            placeholder="상세 내용을 자유롭게 기술하세요…"
                           />
                         )}
 
@@ -1352,7 +1352,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                                     value={card.text}
                                     onChange={(e) => handleUpdateCardItem(block.id, card.id, 'text', e.target.value)}
                                     className="w-full bg-well border border-line rounded-lg p-2.5 text-xs text-ink leading-relaxed focus:outline-none focus:border-ink/40"
-                                    placeholder="상세 내용을 입력하세요..."
+                                    placeholder="상세 내용을 입력하세요…"
                                   />
                                 </div>
                               ))}
@@ -2025,7 +2025,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                       aria-label="카드 상세 내용"
                       value={modalCardText}
                       onChange={(e) => setModalCardText(e.target.value)}
-                      placeholder="해당 대상에게 제공되는 가치 또는 상세 역할을 작성하세요..."
+                      placeholder="해당 대상에게 제공되는 가치 또는 상세 역할을 작성하세요…"
                       className="w-full bg-well border border-line rounded-lg p-3 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-ink/40 leading-relaxed"
                     />
                   </div>
@@ -2130,7 +2130,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                       aria-label="상세 기획 내용"
                       value={modalSectionContent}
                       onChange={(e) => setModalSectionContent(e.target.value)}
-                      placeholder="해당 섹션에 대한 세부 전략, 정책, 또는 운영 규칙을 작성하세요..."
+                      placeholder="해당 섹션에 대한 세부 전략, 정책, 또는 운영 규칙을 작성하세요…"
                       className="w-full bg-well border border-line rounded-lg p-3 text-xs text-ink placeholder:text-muted focus:outline-none focus:border-ink/40 leading-relaxed"
                     />
                   </div>
@@ -2229,7 +2229,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                       aria-label="상세 기능 명세"
                       value={modalReqSpec}
                       onChange={(e) => setModalReqSpec(e.target.value)}
-                      placeholder="기능의 동작 방식, 예외 처리, 비즈니스 규칙을 명세합니다..."
+                      placeholder="기능의 동작 방식, 예외 처리, 비즈니스 규칙을 명세합니다…"
                       className="w-full bg-well border border-line rounded-lg p-3 text-xs text-ink leading-relaxed"
                     />
                   </div>

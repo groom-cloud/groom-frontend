@@ -261,10 +261,10 @@ ${items
               <span>월간 총 예상 비용</span>
               <TrendingUp className="w-4 h-4 text-accent" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight tabular-nums">
               {formatMoney(summary.totalMonthlyKrw)}
             </div>
-            <p className="text-[11px] text-muted">
+            <p className="text-[11px] text-muted tabular-nums">
               연간 예상: ₩{(summary.yearlyProjectionKrw / 10000).toLocaleString()}만원
             </p>
           </div>
@@ -275,7 +275,7 @@ ${items
               <span>클라우드 인프라 (AWS)</span>
               <HardDrive className="w-4 h-4 text-blue-400" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight tabular-nums">
               {formatMoney(summary.categoryBreakdown['인프라/클라우드'] || 0)}
             </div>
             <p className="text-[11px] text-muted">전체 지출의 약 {Math.round(((summary.categoryBreakdown['인프라/클라우드'] || 0) / (summary.totalMonthlyKrw || 1)) * 100)}% 차지</p>
@@ -287,7 +287,7 @@ ${items
               <span>AI 및 외부 API (OpenAI)</span>
               <Sparkles className="w-4 h-4 text-purple-400" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight tabular-nums">
               {formatMoney(summary.categoryBreakdown['AI 및 모델 API'] || 0)}
             </div>
             <p className="text-[11px] text-muted">사용자 1,000명 기준 토큰 예측치</p>
@@ -299,7 +299,7 @@ ${items
               <span>SaaS & 도메인/보안</span>
               <Layers className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+            <div className="text-xl sm:text-2xl font-bold text-ink tracking-tight tabular-nums">
               {formatMoney((summary.categoryBreakdown['서드파티 및 SaaS'] || 0) + (summary.categoryBreakdown['도메인 및 SSL'] || 0))}
             </div>
             <p className="text-[11px] text-muted">배포 호스팅, CDN, SSL 인증서</p>
@@ -417,7 +417,7 @@ ${items
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3.5 text-right font-mono font-bold text-ink whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-right font-mono tabular-nums font-bold text-ink whitespace-nowrap">
                         {isEditMode ? (
                           <input
                             type="number"
