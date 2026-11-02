@@ -482,7 +482,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       2. 라이프사이클 트랙 & 단계별 활성화 구성
                     </h3>
                     <span className="text-accent font-medium text-xs">
-                      {enabledCount} / 8 단계 활성
+                      {enabledCount} / {pipelineSteps.length} 단계 활성
                     </span>
                   </div>
                   <p className="text-xs text-muted mb-3">
@@ -493,26 +493,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {[
                       {
                         id: 'fullstack' as PipelineTrack,
-                        title: '풀스택 전문가 트랙 (16개 전체 활성 - 기본값)',
-                        desc: '01 기획부터 16 트러블슈팅까지 5대 Phase 전체 산출물 활성화',
-                        count: '16개 모듈 전체'
+                        title: '풀스택 전문가 트랙 (17개 전체 활성 - 기본값)',
+                        desc: '01 기획부터 17 트러블슈팅까지 5대 Phase 전체 산출물 활성화',
+                        count: '17개 모듈 전체'
                       },
                       {
                         id: 'startup' as PipelineTrack,
-                        title: '비개발자 / 창업가 트랙 (8개 활성)',
-                        desc: '기획, BM, 예산, PRD, 브랜딩, 화면흐름, 칸반, QA 집중 (복잡한 DB/아키텍처/API 제외)',
-                        count: '8개 모듈 활성'
+                        title: '비개발자 / 창업가 트랙 (10개 활성)',
+                        desc: '기획, BM, 예산, 백로그, PRD, 정책/제약, 브랜딩, 화면흐름, 칸반, QA 집중 (복잡한 DB/아키텍처/API 제외)',
+                        count: '10개 모듈 활성'
                       },
                       {
                         id: 'backend' as PipelineTrack,
-                        title: '백엔드 포트폴리오 트랙 (11개 활성)',
-                        desc: 'PRD, 기술선정(ADR), ERD, 아키텍처, 컨벤션, API명세, WBS, QA, 배포, 트러블슈팅 엔지니어링 집중',
-                        count: '11개 모듈 활성'
+                        title: '백엔드 포트폴리오 트랙 (12개 활성)',
+                        desc: '개요, PRD, 정책/제약, 기술선정(ADR), ERD, 아키텍처, 컨벤션, API명세, WBS, QA, 배포, 트러블슈팅 엔지니어링 집중',
+                        count: '12개 모듈 활성'
                       },
                       {
                         id: 'custom' as PipelineTrack,
                         title: '커스텀 트랙 (Custom Pipeline)',
-                        desc: '아래 5대 Phase의 16개 독립 모듈을 사용자 요구에 맞게 직접 ON/OFF',
+                        desc: '아래 5대 Phase의 17개 독립 모듈을 사용자 요구에 맞게 직접 ON/OFF',
                         count: '자유 설정'
                       }
                     ].map((track) => {
@@ -552,7 +552,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     })}
                   </div>
 
-                  {/* 5-Phase / 16-Step Modular Switches */}
+                  {/* 5-Phase / 17-Step Modular Switches */}
                   {pipelineSteps.length > 0 && (
                     <div className="space-y-3 mb-3">
                       {PIPELINE_PHASES.map((phase) => {
@@ -595,7 +595,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                           isOn ? 'text-ink' : 'line-through text-muted'
                                         }`}
                                       >
-                                        {step.title.replace(/^Step \d+\.\s*/, '')}
+                                        {step.title.replace(/^(\d+[\.\s\-]+|Step \d+[\.\s\-]*)/, '')}
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">

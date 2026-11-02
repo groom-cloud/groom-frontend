@@ -35,7 +35,6 @@ import {
   INITIAL_KANBAN_TASKS,
   INITIAL_API_ENDPOINTS,
   INITIAL_BUDGET_ITEMS,
-  INITIAL_IDEA_BACKLOG,
   INITIAL_BRANDING_INFO,
   INITIAL_ADR_DECISIONS,
   INITIAL_DEV_CONVENTIONS,
@@ -45,13 +44,18 @@ import {
   INITIAL_TROUBLESHOOTING_ARCHIVE,
   INITIAL_CHAT_MESSAGES,
   INITIAL_PROJECT_MEMBERS,
+  INITIAL_IDEA_BACKLOG,
+  INITIAL_SERVICE_POLICIES,
+  INITIAL_PRD_NON_FUNCTIONAL,
   type StepId,
   type PhaseId,
   type PipelineTrack,
   type ViewMode,
   type ChatMessage,
-  type BacklogIdeaItem,
   type ServiceDomain,
+  type BacklogIdeaItem,
+  type ServicePolicyItem,
+  type PrdNonFunctionalReq,
   type KanbanTask
 } from './mockData';
 import { LandingView } from './components/LandingView';
@@ -60,6 +64,7 @@ import { TopologyCanvasView } from './components/TopologyCanvasView';
 import { KanbanBoardView } from './components/KanbanBoardView';
 import { BudgetEstimatorView } from './components/BudgetEstimatorView';
 import { IdeaBacklogView } from './components/IdeaBacklogView';
+import { ServicePolicyView } from './components/ServicePolicyView';
 import { BrandingDesignView } from './components/BrandingDesignView';
 import { AdrDecisionView } from './components/AdrDecisionView';
 import { ConventionDocView } from './components/ConventionDocView';
@@ -177,11 +182,13 @@ export default function App() {
   const [unreadCount, setUnreadCount] = useState(2);
   const [guestTimer, setGuestTimer] = useState({ hours: 23, minutes: 45, seconds: 12 });
 
-  // Domain Data States across all 16 Independent Modules
+  // Domain Data States across all 17 Independent Modules
   const [pipelineSteps, setPipelineSteps] = useState(INITIAL_PIPELINE_STEPS);
   const [requirements, setRequirements] = useState(INITIAL_PRD_REQUIREMENTS);
+  const [nonFunctionalReqs, setNonFunctionalReqs] = useState<PrdNonFunctionalReq[]>(INITIAL_PRD_NON_FUNCTIONAL);
   const [budgetItems, setBudgetItems] = useState(INITIAL_BUDGET_ITEMS);
-  const [ideaBacklog, setIdeaBacklog] = useState(INITIAL_IDEA_BACKLOG);
+  const [ideaBacklog, setIdeaBacklog] = useState<BacklogIdeaItem[]>(INITIAL_IDEA_BACKLOG);
+  const [servicePolicies, setServicePolicies] = useState<ServicePolicyItem[]>(INITIAL_SERVICE_POLICIES);
   const [branding, setBranding] = useState(INITIAL_BRANDING_INFO);
   const [adrDecisions, setAdrDecisions] = useState(INITIAL_ADR_DECISIONS);
   const [devConventions, setDevConventions] = useState(INITIAL_DEV_CONVENTIONS);
@@ -203,6 +210,30 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(INITIAL_CHAT_MESSAGES);
   const [members, setMembers] = useState(INITIAL_PROJECT_MEMBERS);
 
+  const handleSendIdeaToWbs = (idea: BacklogIdeaItem) => {
+    const newTask: KanbanTask = {
+      id: `task_from_idea_${Date.now()}`,
+      ticketKey: `BREAD-${kanbanTasks.length + 10}`,
+      title: idea.title,
+      description: idea.description,
+      priority: idea.priority,
+      assignee: {
+        name: '미배정',
+        initials: 'UN',
+        color: 'bg-muted text-paper',
+        role: 'Sprint Backlog'
+      },
+      deadline: '2026-11-15',
+      storyPoints: 5,
+      reqRef: 'REQ-BACKLOG',
+      category: 'Backend',
+      status: 'todo',
+      aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (신규 아이디어 연동)\n// [아이디어 백로그: ${idea.title}]\n${idea.description}`
+    };
+    setKanbanTasks((prev) => [newTask, ...prev]);
+    showAppToast(`"${idea.title}" 아이디어가 [14. WBS 칸반]으로 전송되었습니다.`);
+  };
+
   // 5 Phase Accordion Open/Collapsed States
   const [collapsedPhases, setCollapsedPhases] = useState<Record<PhaseId, boolean>>({
     planning: false,
@@ -214,36 +245,6 @@ export default function App() {
 
   const togglePhaseCollapse = (phaseId: PhaseId) => {
     setCollapsedPhases((prev) => ({ ...prev, [phaseId]: !prev[phaseId] }));
-  };
-
-  const handleSendIdeaToKanban = (idea: BacklogIdeaItem) => {
-    const newTask: KanbanTask = {
-      id: `task_${Date.now()}`,
-      ticketKey: `GRM-${Math.floor(200 + Math.random() * 800)}`,
-      title: idea.title,
-      description: idea.description,
-      assignee: {
-        name: '한정호',
-        initials: 'JH',
-        color: 'bg-accent',
-        role: 'Fullstack'
-      },
-      category: 'Frontend',
-      status: 'todo',
-      priority: idea.priority,
-      reqRef: 'REQ-BACKLOG',
-      storyPoints: idea.effort && idea.effort.includes('High') ? 8 : 5,
-      deadline: 'D-5',
-      aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시서 (${idea.title})
-// [맥락: 04 아이디어 백로그에서 전환됨]
-Implement backlog feature '${idea.title}':
-- Category: ${idea.category}
-- Impact: ${idea.impact || 'High'}
-- Scope & Details: ${idea.description}`
-    };
-
-    setKanbanTasks((prev) => [newTask, ...prev]);
-    showAppToast(`"${idea.title}" 아이디어가 [13. WBS 칸반] To-Do 열에 등록되었습니다.`);
   };
 
   // AI Copilot Input & Filter State
@@ -630,20 +631,21 @@ Implement backlog feature '${idea.title}':
   const quickPromptsByStep: Record<StepId, string[]> = {
     step1: ['초기 시장 진입 전략 보강', '핵심 성공 지표(KPI) 재검토'],
     step2: ['중개 수수료 5% 유닛 이코노믹스 검증', '점주 구독 모델 수익성 시뮬레이션'],
-    step3: ['AWS 인프라 월간 예상 비용 산정', 'OpenAI API 토큰 비용 최적화 방안'],
-    step4: ['WBS 칸반으로 넘길 우선순위 선정', 'MVP 제외 아이디어 아카이빙'],
-    step5: ['반경 1.5km 조회 기능 요구사항 추가', '게스트 세션 클레임 요구사항 검토'],
-    step6: ['컬러 팔레트 명도 대비(WCAG) 검증', '브랜드 SVG 심볼 코드 복사'],
-    step7: ['화면 흐름도 IA 라우팅 테이블 동기화', '게스트/회원 권한 분기 검토'],
-    step8: ['PostgreSQL 단일 DB 선정 사유 검토', 'Redis 분리 시점 ADR 추가'],
-    step9: ['reservations 낙관적 락 컬럼 검토', 'discount_items 인덱스 전략'],
-    step10: ['SSE 연결 유지 Nginx 타임아웃 구성', 'VPC 서브넷 격리 구조 점검'],
-    step11: ['Git 브랜치 전략 GitHub-flow 규칙 점검', '커밋 컨벤션 템플릿 생성'],
-    step12: ['RFC 7807 표준 에러 포맷 검증', '할인 재고 차감 API 스키마 확인'],
-    step13: ['P0 핵심 태스크 AI 코딩 지시서 생성', 'Cursor/Copilot용 프롬프트 복사'],
-    step14: ['동시 예약 락 예외 테스트 케이스 추가', 'k6 부하 테스트 1000 TPS 검증'],
-    step15: ['v1.5.0 프로덕션 릴리즈 노트 확인', '긴급 롤백 절차 점검'],
-    step16: ['마감 트래픽 병목 트러블슈팅 분석', 'Redis 캐시 전환 정량 개선 검토']
+    step3: ['AWS 인프라 월간 예상 비용 산정', '외부 알림톡 및 지도 API 예산 분석'],
+    step4: ['단골 빵집 찜/스탬프 아이디어 추가', '14. WBS 칸반 연동 태스크 검토'],
+    step5: ['반경 1.5km 조회 기능 요구사항 추가', '비기능 품질 목표(지연시간 3초) 검토'],
+    step6: ['10분 전 취소 100% 환불 규정 점검', '노쇼 보증금 몰수 및 계정 정지 정책'],
+    step7: ['베이커리 웜톤 오렌지 팔레트 검증', '크루아상 & 시계 SVG 심볼 확인'],
+    step8: ['화면 흐름도 IA 라우팅 테이블 동기화', '1회용 픽업 바코드 화면 동선 점검'],
+    step9: ['PostgreSQL 단일 DB 선정 사유 검토', '동시성 제어 낙관적 락 ADR 확인'],
+    step10: ['reservations 낙관적 락 컬럼 검토', 'discount_items 복합 인덱스 전략'],
+    step11: ['SSE 연결 유지 Nginx 타임아웃 구성', 'VPC 서브넷 격리 구조 점검'],
+    step12: ['GitHub-flow 브랜치 보호 규칙 점검', '커밋 컨벤션 템플릿 생성'],
+    step13: ['RFC 7807 표준 에러 포맷 검증', '할인 재고 차감 API 스키마 확인'],
+    step14: ['P0 핵심 태스크 AI 코딩 지시서 생성', '낙관적 락 스프린트 일정 확인'],
+    step15: ['동시 예약 락 예외 테스트 케이스 추가', 'k6 부하 테스트 1000 TPS 검증'],
+    step16: ['v1.5.0 프로덕션 릴리즈 노트 확인', '긴급 롤백 절차 점검'],
+    step17: ['마감 세일 오버셀링 트러블슈팅 분석', 'Redis 캐시 전환 정량 개선 검토']
   };
 
   const visibleChatMessages =
@@ -958,7 +960,7 @@ Implement backlog feature '${idea.title}':
                 </div>
 
                 {/* 5-Phase Grouped Accordion Pipeline Navigation */}
-                <nav aria-label="5대 Phase 16개 독립 모듈" className="p-2 space-y-2">
+                <nav aria-label="5대 Phase 17개 독립 모듈" className="p-2 space-y-2">
                   {PIPELINE_PHASES.map((phase) => {
                     const isPhaseCollapsed = collapsedPhases[phase.id];
                     const phaseSteps = phase.stepIds
@@ -1002,7 +1004,7 @@ Implement backlog feature '${idea.title}':
                               const isEnabled = enabledSteps[step.id];
                               const isSelected = isEnabled && currentStep === step.id;
                               const stepNumStr = String(step.number).padStart(2, '0');
-                              const cleanLabel = step.title.replace(/^Step \d+\.\s*/, '');
+                              const cleanLabel = step.title.replace(/^(\d+[\.\s\-]+|Step \d+[\.\s\-]*)/, '');
 
                               return (
                                 <button
@@ -1462,7 +1464,7 @@ Implement backlog feature '${idea.title}':
 
             {/* ======================================================== */}
             {/* ======================================================== */}
-            {/* D. RIGHT PANEL: 16-INDEPENDENT MODULES ARTIFACT VIEWER */}
+            {/* D. RIGHT PANEL: 17-INDEPENDENT MODULES ARTIFACT VIEWER */}
             {/* ======================================================== */}
             <main
               className={`${mobilePane === 'artifact' ? 'flex w-full' : 'hidden'} ${
@@ -1476,6 +1478,8 @@ Implement backlog feature '${idea.title}':
                   projectTitle={projectIdea}
                   requirements={requirements}
                   setRequirements={setRequirements}
+                  nonFunctionalReqs={nonFunctionalReqs}
+                  setNonFunctionalReqs={setNonFunctionalReqs}
                   onConfirmStep={handleConfirmStep}
                   isConfirmed={activeStepInfo.status === 'COMPLETED'}
                   onCollapsePane={toggleArtifactPane}
@@ -1505,21 +1509,22 @@ Implement backlog feature '${idea.title}':
                 <IdeaBacklogView
                   ideas={ideaBacklog}
                   setIdeas={setIdeaBacklog}
-                  onSendToWbs={handleSendIdeaToKanban}
-                  onNavigateStep={handleForceNavigateStep}
+                  onSendToWbs={handleSendIdeaToWbs}
                   onConfirmStep={handleConfirmStep}
                   onCollapsePane={toggleArtifactPane}
                   isConfirmed={activeStepInfo.status === 'COMPLETED'}
                 />
               )}
 
-              {/* Step 05: 요구사항 및 제약사항 (PRD) */}
+              {/* Step 05: 요구사항 명세서 (PRD) */}
               {currentStep === 'step5' && (
                 <DocumentArtifactView
                   currentStep={currentStep}
                   projectTitle={projectIdea}
                   requirements={requirements}
                   setRequirements={setRequirements}
+                  nonFunctionalReqs={nonFunctionalReqs}
+                  setNonFunctionalReqs={setNonFunctionalReqs}
                   onConfirmStep={handleConfirmStep}
                   isConfirmed={activeStepInfo.status === 'COMPLETED'}
                   onCollapsePane={toggleArtifactPane}
@@ -1533,8 +1538,19 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 06: 브랜딩 & 디자인 시스템 */}
+              {/* Step 06: 서비스 정책 및 제약사항 */}
               {currentStep === 'step6' && (
+                <ServicePolicyView
+                  policies={servicePolicies}
+                  setPolicies={setServicePolicies}
+                  onConfirmStep={handleConfirmStep}
+                  onCollapsePane={toggleArtifactPane}
+                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
+                />
+              )}
+
+              {/* Step 07: 브랜딩 & 디자인 시스템 */}
+              {currentStep === 'step7' && (
                 <BrandingDesignView
                   branding={branding}
                   setBranding={setBranding}
@@ -1544,10 +1560,10 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 07 (화면 흐름도), Step 09 (ERD), Step 10 (아키텍처): 토폴로지 캔버스 뷰 */}
-              {(currentStep === 'step7' ||
-                currentStep === 'step9' ||
-                currentStep === 'step10') && (
+              {/* Step 08 (화면 흐름도), Step 10 (ERD), Step 11 (아키텍처): 토폴로지 캔버스 뷰 */}
+              {(currentStep === 'step8' ||
+                currentStep === 'step10' ||
+                currentStep === 'step11') && (
                 <TopologyCanvasView
                   currentStep={currentStep}
                   uxNodes={uxNodes}
@@ -1576,8 +1592,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 08: 기술 스택 선정 정의서 (ADR) */}
-              {currentStep === 'step8' && (
+              {/* Step 09: 기술 스택 선정 정의서 (ADR) */}
+              {currentStep === 'step9' && (
                 <AdrDecisionView
                   decisions={adrDecisions}
                   setDecisions={setAdrDecisions}
@@ -1587,8 +1603,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 11: 개발 컨벤션 정의서 */}
-              {currentStep === 'step11' && (
+              {/* Step 12: 개발 컨벤션 정의서 */}
+              {currentStep === 'step12' && (
                 <ConventionDocView
                   conventions={devConventions}
                   setConventions={setDevConventions}
@@ -1598,8 +1614,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 12: 백엔드 API 명세서 */}
-              {currentStep === 'step12' && (
+              {/* Step 13: 백엔드 API 명세서 */}
+              {currentStep === 'step13' && (
                 <ApiSpecificationView
                   endpoints={apiEndpoints}
                   setEndpoints={setApiEndpoints}
@@ -1609,8 +1625,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 13: WBS 및 일정 칸반 보드 (+ 태스크별 AI 코딩 지시서 모달) */}
-              {currentStep === 'step13' && (
+              {/* Step 14: WBS 및 일정 칸반 보드 (+ 태스크별 AI 코딩 지시서 모달) */}
+              {currentStep === 'step14' && (
                 <KanbanBoardView
                   tasks={kanbanTasks}
                   setTasks={setKanbanTasks}
@@ -1620,8 +1636,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 14: 테스트 케이스 & QA */}
-              {currentStep === 'step14' && (
+              {/* Step 15: 테스트 케이스 & QA */}
+              {currentStep === 'step15' && (
                 <QaTestingView
                   testCases={qaTestCases}
                   setTestCases={setQaTestCases}
@@ -1632,8 +1648,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 15: 배포 이력 & 릴리즈 노트 */}
-              {currentStep === 'step15' && (
+              {/* Step 16: 배포 이력 & 릴리즈 노트 */}
+              {currentStep === 'step16' && (
                 <ReleaseHistoryView
                   deployments={deployments}
                   setDeployments={setDeployments}
@@ -1643,8 +1659,8 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 16: 트러블슈팅 아카이빙 */}
-              {currentStep === 'step16' && (
+              {/* Step 17: 트러블슈팅 아카이빙 */}
+              {currentStep === 'step17' && (
                 <TroubleshootingArchiveView
                   items={troubleshootings}
                   setItems={setTroubleshootings}

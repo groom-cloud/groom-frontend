@@ -85,7 +85,7 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
       prev.map((i) => (i.id === idea.id ? { ...i, status: 'wbs_converted' } : i))
     );
 
-    showToast(`"${idea.title}" 아이디어가 [13. WBS 칸반] 대기 열로 전송되었습니다!`);
+    showToast(`"${idea.title}" 아이디어가 [14. WBS 칸반] 대기 열로 전송되었습니다!`);
   };
 
   const filteredIdeas = ideas.filter((idea) => {
@@ -286,7 +286,7 @@ ${ideas
                       {isConverted && (
                         <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1">
                           <Check className="w-3 h-3" />
-                          13. WBS 칸반 연동됨
+                          14. WBS 칸반 연동됨
                         </span>
                       )}
                     </div>
@@ -358,7 +358,7 @@ ${ideas
                         : 'bg-accent text-accent-ink hover:bg-accent-hover shadow-sm'
                     }`}
                   >
-                    <span>➔ 13. WBS 칸반으로 보내기</span>
+                    <span>➔ 14. WBS 칸반으로 보내기</span>
                   </button>
                 </div>
               </div>

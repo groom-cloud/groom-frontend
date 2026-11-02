@@ -1,5 +1,5 @@
 // =====================================================================
-// GROOM WORKSPACE - 5 PHASES / 16 INDEPENDENT MODULES DATA SYSTEM
+// GROOM WORKSPACE - 5 PHASES / 17 INDEPENDENT MODULES DATA SYSTEM
 // =====================================================================
 
 export type StepId =
@@ -18,7 +18,8 @@ export type StepId =
   | 'step13'
   | 'step14'
   | 'step15'
-  | 'step16';
+  | 'step16'
+  | 'step17';
 
 export type PhaseId =
   | 'planning'
@@ -48,7 +49,8 @@ export const ALL_STEP_IDS: StepId[] = [
   'step13',
   'step14',
   'step15',
-  'step16'
+  'step16',
+  'step17'
 ];
 
 export interface PhaseInfo {
@@ -74,8 +76,8 @@ export const PIPELINE_PHASES: PhaseInfo[] = [
     number: 2,
     title: 'Phase 2. UI/UX 및 요구사항',
     titleEn: 'Design & Spec',
-    subtitle: 'PRD 명세, 브랜딩 디자인 시스템, 화면 흐름 & 라우팅',
-    stepIds: ['step5', 'step6', 'step7']
+    subtitle: 'PRD 명세서, 서비스 정책/제약, 브랜딩 디자인, 화면 흐름 & 라우팅',
+    stepIds: ['step5', 'step6', 'step7', 'step8']
   },
   {
     id: 'architecture',
@@ -83,7 +85,7 @@ export const PIPELINE_PHASES: PhaseInfo[] = [
     title: 'Phase 3. 시스템 아키텍처 설계',
     titleEn: 'Architecture & Modeling',
     subtitle: '기술 선정 정의서(ADR), 데이터베이스 ERD, 토폴로지 구성도',
-    stepIds: ['step8', 'step9', 'step10']
+    stepIds: ['step9', 'step10', 'step11']
   },
   {
     id: 'development',
@@ -91,7 +93,7 @@ export const PIPELINE_PHASES: PhaseInfo[] = [
     title: 'Phase 4. 개발 및 일정 관리',
     titleEn: 'Development & Sprint',
     subtitle: '개발 컨벤션, REST API 명세서, WBS 칸반 & AI 코딩 지시서',
-    stepIds: ['step11', 'step12', 'step13']
+    stepIds: ['step12', 'step13', 'step14']
   },
   {
     id: 'ops_maint',
@@ -99,7 +101,7 @@ export const PIPELINE_PHASES: PhaseInfo[] = [
     title: 'Phase 5. 테스트 및 운영',
     titleEn: 'Ops & Maintenance',
     subtitle: 'QA 테스트케이스, 배포 릴리즈 타임라인, 트러블슈팅 아카이빙',
-    stepIds: ['step14', 'step15', 'step16']
+    stepIds: ['step15', 'step16', 'step17']
   }
 ];
 
@@ -110,35 +112,36 @@ export const TRACK_PRESET_STEPS: Record<
   'startup' | 'backend' | 'fullstack',
   Record<StepId, boolean>
 > = {
-  // 1. 비개발자/창업가 트랙 (8개 활성)
+  // 1. 비개발자/창업가 트랙 (10개 활성)
   startup: {
     step1: true,
     step2: true,
     step3: true,
-    step4: false,
+    step4: true,
     step5: true,
     step6: true,
     step7: true,
-    step8: false,
+    step8: true,
     step9: false,
     step10: false,
     step11: false,
     step12: false,
-    step13: true,
+    step13: false,
     step14: true,
-    step15: false,
-    step16: false
+    step15: true,
+    step16: false,
+    step17: false
   },
-  // 2. 백엔드 포트폴리오 트랙 (11개 활성)
+  // 2. 백엔드 포트폴리오 트랙 (12개 활성)
   backend: {
     step1: true,
     step2: false,
     step3: false,
     step4: false,
     step5: true,
-    step6: false,
+    step6: true,
     step7: false,
-    step8: true,
+    step8: false,
     step9: true,
     step10: true,
     step11: true,
@@ -146,9 +149,10 @@ export const TRACK_PRESET_STEPS: Record<
     step13: true,
     step14: true,
     step15: true,
-    step16: true
+    step16: true,
+    step17: true
   },
-  // 3. 풀스택 전문가 트랙 (16개 전체 활성 - 기본값)
+  // 3. 풀스택 전문가 트랙 (17개 전체 활성 - 기본값)
   fullstack: {
     step1: true,
     step2: true,
@@ -165,7 +169,8 @@ export const TRACK_PRESET_STEPS: Record<
     step13: true,
     step14: true,
     step15: true,
-    step16: true
+    step16: true,
+    step17: true
   }
 };
 
@@ -185,14 +190,14 @@ export interface PipelineStepInfo {
 }
 
 export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
-  // Phase 1
+  // Phase 1. 기획 및 비즈니스 (Planning)
   {
     id: 'step1',
     number: 1,
     phaseId: 'planning',
-    title: '01. 서비스 개요 및 기획서',
+    title: '서비스 개요 및 기획서',
     shortTitle: '서비스 개요',
-    subtitle: '핵심 문제 정의, 타겟 고객, 문제 해결 방안',
+    subtitle: '동네 빵집 마감 할인 알림 및 예약 픽업 O2O 기획서',
     deliverable: '01_SERVICE_OVERVIEW.md',
     personaName: 'Product Strategist AI',
     personaRole: '비즈니스 전략 디렉터',
@@ -204,9 +209,9 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step2',
     number: 2,
     phaseId: 'planning',
-    title: '02. 비즈니스 모델 (BM)',
+    title: '비즈니스 모델 (BM)',
     shortTitle: '비즈니스 모델 (BM)',
-    subtitle: '수익 구조, 가격 정책, 양면 시장 수수료 설계',
+    subtitle: '당일 마감 빵 50% 할인, 5% 중개 수수료 및 점주 구독 BM',
     deliverable: '02_BUSINESS_MODEL.md',
     personaName: 'Monetization Architect',
     personaRole: 'BM & 가격 정책 전략가',
@@ -218,9 +223,9 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step3',
     number: 3,
     phaseId: 'planning',
-    title: '03. 비용 및 예산 산정서',
+    title: '비용 및 예산 산정서',
     shortTitle: '비용 및 예산',
-    subtitle: '클라우드 인프라, AI API, SaaS 구독료 월간 계산',
+    subtitle: '클라우드 인프라, 알림톡/SMS, 지도 API 월간 운영 예산',
     deliverable: '03_BUDGET_ESTIMATION.xlsx',
     personaName: 'FinOps Specialist',
     personaRole: '클라우드 재무 엔지니어',
@@ -232,9 +237,9 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step4',
     number: 4,
     phaseId: 'planning',
-    title: '04. 아이디어 백로그',
+    title: '아이디어 백로그',
     shortTitle: '아이디어 백로그',
-    subtitle: '기능 아이디어 큐, 우선순위 태그 및 칸반 이관',
+    subtitle: '단골 빵집 찜, 빵 나오는 시간표, 비건/알러지 뱃지 아이디어 큐',
     deliverable: '04_IDEA_BACKLOG.csv',
     personaName: 'Ideation Coach',
     personaRole: '제품 인큐베이터',
@@ -242,14 +247,14 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     status: 'IN_PROGRESS',
     lastUpdated: '방금 동기화됨'
   },
-  // Phase 2
+  // Phase 2. UI/UX 및 요구사항 (Design & Spec)
   {
     id: 'step5',
     number: 5,
     phaseId: 'design_spec',
-    title: '05. 요구사항 및 제약사항 (PRD)',
+    title: '요구사항 명세서 (PRD)',
     shortTitle: '요구사항 (PRD)',
-    subtitle: '기능/비기능 요구사항, 제약조건 및 인수 기준',
+    subtitle: '점주 마감재고 등록, 1.5km 알림, 예약/결제 기능 및 비기능 목표',
     deliverable: '05_PRD_SPECIFICATION.md',
     personaName: 'Lead PM Copilot',
     personaRole: '수석 테크니컬 PM',
@@ -261,10 +266,24 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step6',
     number: 6,
     phaseId: 'design_spec',
-    title: '06. 브랜딩 & 디자인 시스템',
+    title: '서비스 정책 및 제약사항',
+    shortTitle: '서비스 정책',
+    subtitle: '취소/환불 규정, 노쇼 방지 보증금, 당일 식품 품질 및 위치정보 제약',
+    deliverable: '06_SERVICE_POLICIES.md',
+    personaName: 'Service Policy Lead',
+    personaRole: '서비스 정책 & 규제 전문가',
+    modelTier: 'GPT-4o',
+    status: 'IN_PROGRESS',
+    lastUpdated: '방금 생성됨'
+  },
+  {
+    id: 'step7',
+    number: 7,
+    phaseId: 'design_spec',
+    title: '브랜딩 & 디자인 시스템',
     shortTitle: '브랜딩 & 디자인',
-    subtitle: '로고 심볼, 슬로건, 컬러 스와치, 타이포그래피',
-    deliverable: '06_DESIGN_SYSTEM.tokens',
+    subtitle: '베이커리 크루아상 심볼, 웜톤 오렌지 스와치, 타이포그래피',
+    deliverable: '07_DESIGN_SYSTEM.tokens',
     personaName: 'Design System Lead',
     personaRole: '비주얼 디자인 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -272,28 +291,28 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '방금 동기화됨'
   },
   {
-    id: 'step7',
-    number: 7,
+    id: 'step8',
+    number: 8,
     phaseId: 'design_spec',
-    title: '07. 화면 흐름도 & 프론트 라우팅',
+    title: '화면 흐름도 & 프론트 라우팅',
     shortTitle: '화면 흐름 & 라우팅',
-    subtitle: '캔버스 플로우, IA 라우팅 테이블, 노드 인스펙터',
-    deliverable: '07_UI_SCREEN_FLOW.canvas',
+    subtitle: '지도 빵집 탐색 -> 잔여 재고 조회 -> 예약/결제 -> 픽업 바코드 티켓',
+    deliverable: '08_UI_SCREEN_FLOW.canvas',
     personaName: 'Principal UX Architect',
     personaRole: '수석 인터랙션 디자이너',
     modelTier: 'Claude 3.5 Sonnet',
     status: 'COMPLETED',
     lastUpdated: '8분 전 확정'
   },
-  // Phase 3
+  // Phase 3. 시스템 아키텍처 설계 (Architecture)
   {
-    id: 'step8',
-    number: 8,
+    id: 'step9',
+    number: 9,
     phaseId: 'architecture',
-    title: '08. 기술 스택 선정 정의서 (ADR)',
+    title: '기술 스택 선정 정의서 (ADR)',
     shortTitle: '기술 선정 (ADR)',
-    subtitle: '아키텍처 의사결정 기록, 대안 기술 비교 및 채택 근거',
-    deliverable: '08_ADR_DECISIONS.md',
+    subtitle: 'PostgreSQL 15 단일 DB, JPA 낙관적 락(@Version), SSE 단방향 알림',
+    deliverable: '09_ADR_DECISIONS.md',
     personaName: 'Enterprise Architect',
     personaRole: '수석 기술 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -301,13 +320,13 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '20분 전 갱신'
   },
   {
-    id: 'step9',
-    number: 9,
+    id: 'step10',
+    number: 10,
     phaseId: 'architecture',
-    title: '09. 데이터베이스 설계 (ERD)',
+    title: '데이터베이스 설계 (ERD)',
     shortTitle: '데이터베이스 (ERD)',
-    subtitle: '테이블 관계선, PK/FK 제약조건, PostgreSQL DDL',
-    deliverable: '09_SCHEMA_POSTGRESQL.sql',
+    subtitle: 'stores, bread_items, discount_schedules, reservations 테이블',
+    deliverable: '10_SCHEMA_POSTGRESQL.sql',
     personaName: 'Principal DB Architect',
     personaRole: '데이터베이스 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -315,28 +334,28 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '방금 동기화됨'
   },
   {
-    id: 'step10',
-    number: 10,
+    id: 'step11',
+    number: 11,
     phaseId: 'architecture',
-    title: '10. 시스템 아키텍처 구성도',
+    title: '시스템 아키텍처 구성도',
     shortTitle: '시스템 아키텍처',
-    subtitle: 'VPC 서브넷, Spring, DB, Cache, SSE 토폴로지',
-    deliverable: '10_SYSTEM_TOPOLOGY.tf',
+    subtitle: '모바일 웹 -> ALB -> Spring Boot -> PostgreSQL + SSE 알림 허브',
+    deliverable: '11_SYSTEM_TOPOLOGY.tf',
     personaName: 'Cloud Infra Architect',
     personaRole: '클라우드 인프라 아키텍트',
     modelTier: 'GPT-4o',
     status: 'IN_PROGRESS',
     lastUpdated: '5분 전 편집됨'
   },
-  // Phase 4
+  // Phase 4. 개발 및 일정 관리 (Development)
   {
-    id: 'step11',
-    number: 11,
+    id: 'step12',
+    number: 12,
     phaseId: 'development',
-    title: '11. 개발 컨벤션 정의서',
+    title: '개발 컨벤션 정의서',
     shortTitle: '개발 컨벤션',
-    subtitle: 'Git 브랜치 전략, 커밋 메시지 규칙, 디렉토리 구조',
-    deliverable: '11_DEV_CONVENTIONS.md',
+    subtitle: 'GitHub-flow 브랜치 전략, 커밋 메시지 규칙, 빵집 서비스 패키지 구조',
+    deliverable: '12_DEV_CONVENTIONS.md',
     personaName: 'Engineering Standards Lead',
     personaRole: '개발 문화 & 컨벤션 리드',
     modelTier: 'GPT-4o-mini',
@@ -344,13 +363,13 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '방금 생성됨'
   },
   {
-    id: 'step12',
-    number: 12,
+    id: 'step13',
+    number: 13,
     phaseId: 'development',
-    title: '12. 백엔드 API 명세서',
+    title: '백엔드 API 명세서',
     shortTitle: '백엔드 API 명세',
-    subtitle: 'REST 엔드포인트, JSON 스키마, RFC 7807 에러 규격',
-    deliverable: '12_OPENAPI_SPEC.json',
+    subtitle: '주변 빵집 조회, 마감 할인 등록, 픽업 예약 및 결제 REST API',
+    deliverable: '13_OPENAPI_SPEC.json',
     personaName: 'Staff API & DX Lead',
     personaRole: '수석 백엔드 API 리드',
     modelTier: 'Claude 3.5 Sonnet',
@@ -358,28 +377,28 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '방금 동기화됨'
   },
   {
-    id: 'step13',
-    number: 13,
+    id: 'step14',
+    number: 14,
     phaseId: 'development',
-    title: '13. WBS 및 일정 칸반 보드',
+    title: 'WBS 및 일정 칸반 보드',
     shortTitle: 'WBS & 칸반 보드',
-    subtitle: '스프린트 백로그, 작업 티켓, AI 코딩 지시서 생성',
-    deliverable: '13_WBS_SPRINT_BOARD.kanban',
+    subtitle: '동시 예약 락 제어, SSE 알림 브로드캐스트, 픽업 QR 검증 스프린트',
+    deliverable: '14_WBS_SPRINT_BOARD.kanban',
     personaName: 'Agile Delivery Lead',
     personaRole: '스크럼 마스터 & 딜리버리 리드',
     modelTier: 'GPT-4o-mini',
     status: 'IN_PROGRESS',
     lastUpdated: '3분 전 갱신됨'
   },
-  // Phase 5
+  // Phase 5. 테스트 및 운영 (Ops & Maintenance)
   {
-    id: 'step14',
-    number: 14,
+    id: 'step15',
+    number: 15,
     phaseId: 'ops_maint',
-    title: '14. 테스트 케이스 & QA',
+    title: '테스트 케이스 & QA',
     shortTitle: '테스트 & QA',
-    subtitle: '기능 체크리스트, 예외 동작 검증, k6 부하 테스트 지표',
-    deliverable: '14_QA_TEST_CASES.spec',
+    subtitle: '마지막 1개 빵 동시 예약 경쟁 검증, k6 1000 TPS 부하 테스트',
+    deliverable: '15_QA_TEST_CASES.spec',
     personaName: 'QA Automation Lead',
     personaRole: '품질 보증 & 부하 테스트 엔지니어',
     modelTier: 'Claude 3.5 Sonnet',
@@ -387,13 +406,13 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: '방금 갱신됨'
   },
   {
-    id: 'step15',
-    number: 15,
+    id: 'step16',
+    number: 16,
     phaseId: 'ops_maint',
-    title: '15. 배포 이력 & 릴리즈 노트',
+    title: '배포 이력 & 릴리즈 노트',
     shortTitle: '배포 & 릴리즈',
-    subtitle: '운영 버전 상태, 변경 사항 타임라인, 롤백 런북',
-    deliverable: '15_RELEASE_HISTORY.log',
+    subtitle: 'v1.2.0 마감 할인 픽업 정식 런칭, 낙관적 락 탑재, 롤백 런북',
+    deliverable: '16_RELEASE_HISTORY.log',
     personaName: 'SRE & Release Copilot',
     personaRole: '릴리즈 매니저',
     modelTier: 'GPT-4o',
@@ -401,13 +420,13 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     lastUpdated: 'v1.5.0 운영 중'
   },
   {
-    id: 'step16',
-    number: 16,
+    id: 'step17',
+    number: 17,
     phaseId: 'ops_maint',
-    title: '16. 트러블슈팅 아카이빙',
+    title: '트러블슈팅 아카이빙',
     shortTitle: '트러블슈팅 일지',
-    subtitle: '병목 원인 분석, 해결 과정, Before/After 정량 지표',
-    deliverable: '16_TROUBLESHOOTING.archive',
+    subtitle: '마감세일 동시성 오버셀링 해결(낙관적 락), SSE 타임아웃 핑 프레임',
+    deliverable: '17_TROUBLESHOOTING.archive',
     personaName: 'Performance Tuning SRE',
     personaRole: '시스템 성능 최적화 리드',
     modelTier: 'GPT-4o',
@@ -499,7 +518,7 @@ export const INITIAL_BUDGET_ITEMS: BudgetItem[] = [
     id: 'b7',
     category: '도메인 및 SSL',
     name: 'Route 53 & 도메인 등록',
-    tierSpec: 'groom.shop 도메인 + 호스팅 영역 1개',
+    tierSpec: 'bread-alert.kr 도메인 + 호스팅 영역 1개',
     monthlyCostUsd: 1.5,
     monthlyCostKrw: 2000,
     billingCycle: '연간 선납',
@@ -562,7 +581,7 @@ export const INITIAL_IDEA_BACKLOG: BacklogIdeaItem[] = [
     votes: 22,
     status: 'transferred_to_wbs',
     targetRelease: 'v1.6',
-    sentTicketKey: 'GROOM-42'
+    sentTicketKey: 'BREAD-42'
   },
   {
     id: 'idea-4',
@@ -611,43 +630,43 @@ export interface BrandingInfo {
 }
 
 export const INITIAL_BRANDING_INFO: BrandingInfo = {
-  serviceName: 'Groom (그룸)',
-  brandName: 'Groom (그룸)',
-  slogan: '한 줄의 서비스 아이디어를 여덟 단계의 표준 라이프사이클로.',
+  serviceName: '마감빵빵 (Last-Bread)',
+  brandName: '마감빵빵 (Last-Bread)',
+  slogan: '동네 빵집의 갓 구운 빵, 마감 전 반값에 만나는 따뜻한 습관',
   brandStory:
-    'Groom은 구름(Cloud)처럼 가볍게 시작하여 단단한 엔지니어링 표준으로 완성해 나가는 디지털 제품 빌더입니다. 아이디어 기획부터 인프라 토폴로지, 코딩 프롬프트까지 유기적으로 이어지는 워크스페이스를 지향합니다.',
+    '마감빵빵은 소상공인 베이커리의 당일 생산 빵 폐기율을 0%로 줄이고, 동네 주민에게는 고품질 빵을 합리적인 가격에 제공하는 실시간 마감 할인 예약 픽업 플랫폼입니다. 마감 3시간 전 남은 빵을 30초 만에 퀵 등록하고, 반경 1.5km 주민에게 SSE 알림을 발송하여 오버셀링 없이 안전하게 예약할 수 있습니다.',
   symbolMeaning:
-    '구름(Cloud) 외곽선 내부에 배치된 서킷 노드는 소프트웨어 아키텍처와 엔지니어링 파이프라인의 연결성을 상징합니다.',
-  logoSymbolSvg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 36C8 36 4 32 4 27C4 22.5 7.5 19 12 18.5C13.5 11 20 6 28 6C36.5 6 43.5 12.5 44 21C46.5 22.5 48 25.5 48 29C48 33.5 44.5 36 40 36H12Z" stroke="#0071E3" stroke-width="3" stroke-linejoin="round"/><circle cx="28" cy="24" r="3" fill="#0071E3"/><circle cx="36" cy="30" r="3" fill="#0071E3"/><path d="M18 36L28 24M28 24H36" stroke="#0071E3" stroke-width="3"/></svg>`,
+    '따스하게 피어오르는 갓 구운 크루아상 실루엣과 실시간 시계 바늘이 결합되어, 마감 직전의 따뜻한 가치와 시간의 소중함을 상징합니다.',
+  logoSymbolSvg: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 28C8 20 15 14 24 14C33 14 40 20 40 28C40 33 36 36 31 36H17C12 36 8 33 8 28Z" stroke="#FF6B00" stroke-width="3" stroke-linejoin="round"/><path d="M16 26C18 20 22 17 28 17" stroke="#FF9500" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="27" r="2.5" fill="#FF6B00"/><path d="M24 22V27L27 29" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>`,
   designPrinciples: [
-    { title: 'Calm & Functional', desc: '불필요한 애니메이션과 그라디언트를 배제하고 정보의 전달력에 집중합니다.' },
-    { title: 'Subtle Contrast', desc: 'WCAG AAA 규격을 준수하는 고대비 모노톤과 선명한 Electric Blue 악센트를 사용합니다.' },
-    { title: 'Systematic Grid', desc: '8px 베이스라인 그리드와 정밀한 레이아웃 규칙을 엄격히 적용합니다.' }
+    { title: 'Warmth & Trust', desc: '따뜻한 빵의 온기와 당일 생산 식품의 정직한 위생 신뢰를 시각화합니다.' },
+    { title: 'Hyperlocal Signal', desc: '반경 1.5km 내 긴급 마감 할인율(30~70%)을 고대비 앰버 오렌지로 즉시 식별합니다.' },
+    { title: 'Zero Friction Action', desc: '30초 퀵 등록과 1초 픽업 바코드 스캔을 위한 절제된 여백과 고기능 그리드를 적용합니다.' }
   ],
   colorSwatches: [
-    { name: 'Electric Blue', role: 'Accent', hex: '#0071E3' },
+    { name: 'Warm Amber', role: 'Primary Accent / Crust', hex: '#FF6B00' },
+    { name: 'Golden Honey', role: 'Highlight / Butter', hex: '#FF9500' },
     { name: 'Canvas Dark', role: 'Background', hex: '#0f1117' },
-    { name: 'Surface Well', role: 'Surface', hex: '#181a20' },
-    { name: 'Ink White', role: 'Typography', hex: '#f0f2f5' }
+    { name: 'Surface Well', role: 'Surface', hex: '#181a20' }
   ],
   primaryColors: [
     {
-      name: 'Electric Blue',
+      name: 'Warm Amber',
       role: 'Primary Brand / Signal Accent',
-      hex: '#0071E3',
-      oklch: 'oklch(51% 0.19 255)'
+      hex: '#FF6B00',
+      oklch: 'oklch(64% 0.22 45)'
     },
     {
-      name: 'Deep Blue',
-      role: 'Primary Hover & Deep Signal',
-      hex: '#0058B6',
-      oklch: 'oklch(45% 0.19 255)'
+      name: 'Golden Honey',
+      role: 'Primary Hover & Highlight',
+      hex: '#FF9500',
+      oklch: 'oklch(71% 0.18 55)'
     },
     {
-      name: 'Soft Tint Blue',
+      name: 'Soft Tint Amber',
       role: 'Selection / Chip Background',
-      hex: '#EBF4FF',
-      oklch: 'oklch(51% 0.19 255 / 0.12)'
+      hex: '#FFF3E8',
+      oklch: 'oklch(64% 0.22 45 / 0.12)'
     }
   ],
   neutralColors: [
@@ -1087,21 +1106,21 @@ export const INITIAL_DEV_CONVENTIONS: DevConventionInfo = {
     ]
   },
   folderTree: {
-    frontend: `groom-frontend/
+    frontend: `breadalert-frontend/
 ├── public/                 # Favicon, Logo assets, OG image
 ├── src/
 │   ├── assets/             # SVG & Static media
-│   ├── components/         # 16 Specialized Module Viewers & Modals
+│   ├── components/         # 17 Specialized Module Viewers & Modals
 │   ├── index.css           # Tailwind v4 @theme OKLCH design tokens
 │   ├── main.tsx            # React 19 bootstrap
 │   ├── mockData.ts         # Pipeline data ledger & types
 │   └── App.tsx             # 3-Pane workspace shell & stage router
 ├── package.json
 └── vite.config.ts`,
-    backend: `groom-backend/
-├── src/main/java/com/groom/
+    backend: `breadalert-backend/
+├── src/main/java/com/breadalert/
 │   ├── domain/             # Entities, Repositories, Domain Services
-│   │   ├── auth/           # Guest claim, Member, JWT
+│   │   ├── auth/           # Member, JWT, Session
 │   │   ├── store/          # Bread item, Store catalog, Inventory
 │   │   └── reservation/    # Order, Deposit, No-show scheduler
 │   ├── api/                # REST Controllers, DTOs, OpenAPI Spec
@@ -1120,7 +1139,7 @@ export const INITIAL_DEV_CONVENTIONS: DevConventionInfo = {
       {
         name: 'feature/*',
         purpose: '신규 비즈니스 기능 개발 및 티켓 단위 작업',
-        namingConvention: 'feature/{ticket-key}-{short-desc} (ex: feature/GROOM-12-kakao-login)'
+        namingConvention: 'feature/{ticket-key}-{short-desc} (ex: feature/BREAD-12-kakao-login)'
       },
       {
         name: 'hotfix/*',
@@ -1165,21 +1184,21 @@ export const INITIAL_DEV_CONVENTIONS: DevConventionInfo = {
     ]
   },
   folderStructure: {
-    frontendTree: `groom-frontend/
+    frontendTree: `breadalert-frontend/
 ├── public/                 # Favicon, Logo assets, OG image
 ├── src/
 │   ├── assets/             # SVG & Static media
-│   ├── components/         # 16 Specialized Module Viewers & Modals
+│   ├── components/         # 17 Specialized Module Viewers & Modals
 │   ├── index.css           # Tailwind v4 @theme OKLCH design tokens
 │   ├── main.tsx            # React 19 bootstrap
 │   ├── mockData.ts         # Pipeline data ledger & types
 │   └── App.tsx             # 3-Pane workspace shell & stage router
 ├── package.json
 └── vite.config.ts`,
-    backendTree: `groom-backend/
-├── src/main/java/com/groom/
+    backendTree: `breadalert-backend/
+├── src/main/java/com/breadalert/
 │   ├── domain/             # Entities, Repositories, Domain Services
-│   │   ├── auth/           # Guest claim, Member, JWT
+│   │   ├── auth/           # Member, JWT, Session
 │   │   ├── store/          # Bread item, Store catalog, Inventory
 │   │   └── reservation/    # Order, Deposit, No-show scheduler
 │   ├── api/                # REST Controllers, DTOs, OpenAPI Spec
@@ -1201,7 +1220,13 @@ export const INITIAL_DEV_CONVENTIONS: DevConventionInfo = {
 // =====================================================================
 export interface ApiEndpointSpec {
   id: string;
-  domainGroup: '인증 및 세션' | '점주 마감 등록' | '픽업 예약/결제' | '실시간 알림';
+  domainGroup:
+    | '인증 및 세션'
+    | '점주 마감 등록'
+    | '픽업 예약/결제'
+    | '실시간 알림'
+    | '탐색 및 위치'
+    | '픽업 및 매장 인증';
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   path: string;
   summary: string;
@@ -1215,30 +1240,36 @@ export interface ApiEndpointSpec {
 export const INITIAL_API_ENDPOINTS: ApiEndpointSpec[] = [
   {
     id: 'api-1',
-    domainGroup: '인증 및 세션',
-    method: 'POST',
-    path: '/api/v1/auth/claim-guest',
-    summary: '게스트 세션 계정 귀속 (Account Claim)',
-    authScope: 'Guest',
-    reqRef: 'REQ-AUTH-01',
-    requestJson: `{
-  "guestSessionToken": "gst_9f81a7b2c4e6",
-  "email": "user@example.com",
-  "password": "SecurePassword123!"
-}`,
+    domainGroup: '탐색 및 위치',
+    method: 'GET',
+    path: '/api/v1/stores/nearby',
+    summary: '반경 1.5km 마감 할인 빵집 지도/목록 실시간 조회',
+    authScope: 'Public',
+    reqRef: 'REQ-MAP-02',
+    requestJson: `/* Query Parameters: lat=37.5665&lng=126.9780&radius=1500&sort=discount */`,
     responseJson: `{
-  "success": true,
-  "userId": "usr_01J9X8K2M4P6Q8",
-  "claimedEmail": "user@example.com",
-  "transferredItemsCount": 42,
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5c..."
+  "totalStores": 14,
+  "stores": [
+    {
+      "storeId": "str_1001",
+      "name": "성심 베이커리 서촌점",
+      "distanceMeters": 380,
+      "discountRateRange": "40% ~ 50%",
+      "remainingTotalQty": 9,
+      "pickupCutoff": "21:30",
+      "items": [
+        { "name": "소금빵 3입", "discountPrice": 5400, "remaining": 5 },
+        { "name": "통밀 바게트", "discountPrice": 3500, "remaining": 4 }
+      ]
+    }
+  ]
 }`,
     rfc7807ErrorJson: `{
-  "type": "https://api.groom.dev/errors/email-already-exists",
-  "title": "Email Conflict",
-  "status": 409,
-  "detail": "해당 이메일로 등록된 계정이 이미 존재합니다.",
-  "instance": "/api/v1/auth/claim-guest"
+  "type": "https://api.breadalert.kr/errors/invalid-coordinates",
+  "title": "Invalid Coordinates",
+  "status": 400,
+  "detail": "위도와 경도 좌표 파라미터가 유효한 범위를 벗어났습니다.",
+  "instance": "/api/v1/stores/nearby"
 }`
   },
   {
@@ -1248,7 +1279,7 @@ export const INITIAL_API_ENDPOINTS: ApiEndpointSpec[] = [
     path: '/api/v1/stores/{storeId}/discount-items',
     summary: '마감 할인 빵 품목 30초 퀵 등록',
     authScope: 'StoreOwner',
-    reqRef: 'REQ-STORE-02',
+    reqRef: 'REQ-STORE-01',
     requestJson: `{
   "itemName": "소금빵 3입 세트",
   "originalPrice": 9000,
@@ -1265,7 +1296,7 @@ export const INITIAL_API_ENDPOINTS: ApiEndpointSpec[] = [
   "registeredAt": "2026-10-31T20:00:00Z"
 }`,
     rfc7807ErrorJson: `{
-  "type": "https://api.groom.dev/errors/invalid-pickup-time",
+  "type": "https://api.breadalert.kr/errors/invalid-pickup-time",
   "title": "Invalid Pickup Time",
   "status": 400,
   "detail": "픽업 마감 시각은 현재 시각보다 최소 30분 이후여야 합니다.",
@@ -1291,11 +1322,11 @@ export const INITIAL_API_ENDPOINTS: ApiEndpointSpec[] = [
   "reservationId": "rsv_44c892a1",
   "status": "CONFIRMED",
   "remainingQty": 4,
-  "qrCodeUrl": "https://cdn.groom.dev/qr/rsv_44c892a1.png",
+  "qrCodeUrl": "https://cdn.breadalert.kr/qr/rsv_44c892a1.png",
   "cancelDeadline": "2026-10-31T21:00:00Z"
 }`,
     rfc7807ErrorJson: `{
-  "type": "https://api.groom.dev/errors/optimistic-lock-conflict",
+  "type": "https://api.breadalert.kr/errors/optimistic-lock-conflict",
   "title": "Inventory Conflict",
   "status": 409,
   "detail": "동시에 예약이 진행되어 재고가 소진되었습니다. 다시 확인해 주세요.",
@@ -1309,16 +1340,43 @@ export const INITIAL_API_ENDPOINTS: ApiEndpointSpec[] = [
     path: '/api/v1/notifications/stream',
     summary: 'SSE 기반 실시간 알림 스트림 구독',
     authScope: 'Member',
-    reqRef: 'REQ-NOTI-04',
+    reqRef: 'REQ-NOTI-05',
     requestJson: `/* No Request Body (Headers: Accept: text/event-stream) */`,
     responseJson: `event: notification
-data: { "type": "RESERVATION_CONFIRMED", "message": "성심당 튀김소보로 예약이 확정되었습니다!" }`,
+data: { "type": "DISCOUNT_STARTED", "storeName": "성심 베이커리", "message": "마감 할인 40%가 시작되었습니다!" }`,
     rfc7807ErrorJson: `{
-  "type": "https://api.groom.dev/errors/sse-timeout",
+  "type": "https://api.breadalert.kr/errors/sse-timeout",
   "title": "Stream Timeout",
   "status": 504,
   "detail": "알림 연결이 타임아웃되었습니다. 자동 재연결을 시도합니다.",
   "instance": "/api/v1/notifications/stream"
+}`
+  },
+  {
+    id: 'api-5',
+    domainGroup: '픽업 및 매장 인증',
+    method: 'POST',
+    path: '/api/v1/reservations/{id}/pickup-verify',
+    summary: '[점주] 현장 바코드/QR 스캔 및 수령 완료 확정',
+    authScope: 'StoreOwner',
+    reqRef: 'REQ-TICK-04',
+    requestJson: `{
+  "barcodeToken": "bc_99a81c20f",
+  "scannedAt": "2026-10-31T21:18:22Z"
+}`,
+    responseJson: `{
+  "reservationId": "rsv_44c892a1",
+  "status": "COMPLETED",
+  "verified": true,
+  "completedAt": "2026-10-31T21:18:22Z",
+  "settlementExpectedAmount": 5400
+}`,
+    rfc7807ErrorJson: `{
+  "type": "https://api.breadalert.kr/errors/already-picked-up",
+  "title": "Already Completed",
+  "status": 400,
+  "detail": "이미 수령 완료되었거나 유효하지 않은 바코드입니다.",
+  "instance": "/api/v1/reservations/rsv_44c892a1/pickup-verify"
 }`
   }
 ];
@@ -1349,10 +1407,10 @@ export interface KanbanTask {
 export const INITIAL_KANBAN_TASKS: KanbanTask[] = [
   {
     id: 'k1',
-    ticketKey: 'GROOM-01',
-    title: '게스트 섀도우 세션 발급 및 계정 귀속 트랜잭션',
+    ticketKey: 'BREAD-01',
+    title: '점주 마감 빵 30초 퀵 등록 및 반경 1.5km 브로드캐스트',
     description:
-      '비로그인 진입 시 UUID 발급 후, 로그인/회원가입 시 아티팩트 소유권을 원자적으로 이관하는 백엔드 API 및 프론트 모달 연동',
+      '마감 3시간 전 당일 남은 빵 품목, 수량, 할인율(30~70%) 30초 퀵 등록 및 SSE 발송',
     priority: 'P0',
     assignee: {
       name: '김준호',
@@ -1362,23 +1420,22 @@ export const INITIAL_KANBAN_TASKS: KanbanTask[] = [
     },
     deadline: '2026-11-04',
     storyPoints: 5,
-    reqRef: 'REQ-AUTH-01',
+    reqRef: 'REQ-STORE-01',
     category: 'Backend',
     status: 'done',
-    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (GROOM-01)
-// [맥락 연계: REQ-AUTH-01 + PostgreSQL 스키마 + RFC 7807]
-Create a Spring Boot 3 service method for 'claimGuestSession':
-1. Parameters: guestToken (String), userEmail (String), password (String)
-2. Verify guestToken exists in Redis session store.
+    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (BREAD-01)
+// [맥락 연계: REQ-STORE-01 + 10 ERD stores/discount_items + 11 SSE Hub]
+Implement bakery owner quick-discount registration API in Spring Boot 3:
+1. Endpoint: POST /api/v1/stores/{storeId}/discounts
+2. Validate: discountRate is between 30 and 70 (POL-DISC-03).
 3. In a single @Transactional boundary:
-   - Create new Member entity (hashed password with BCrypt).
-   - Update project_workspaces SET owner_id = :newUserId WHERE guest_token = :guestToken;
-   - Revoke guestToken and return JWT AccessToken (expires in 2h).
-4. If userEmail already exists, throw DuplicateEmailException which translates to RFC 7807 (409 Conflict).`
+   - Save DiscountItem entities with initial version = 0.
+   - Publish StoreDiscountOpenedEvent for SSE broadcasting to clients within 1.5km.
+4. Return 201 Created with generated discount item IDs.`
   },
   {
     id: 'k2',
-    ticketKey: 'GROOM-02',
+    ticketKey: 'BREAD-02',
     title: '마감 할인 예약 시 낙관적 락(@Version) 재고 차감 로직',
     description:
       '동시성 경합 시 재고가 음수로 떨어지지 않도록 JPA 낙관적 락 및 409 Conflict 핸들러 구현',
@@ -1394,8 +1451,8 @@ Create a Spring Boot 3 service method for 'claimGuestSession':
     reqRef: 'REQ-RESV-03',
     category: 'Backend',
     status: 'in_progress',
-    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (GROOM-02)
-// [맥락 연계: REQ-RESV-03 + ADR-02 낙관적 락 + 09 ERD discount_items]
+    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (BREAD-02)
+// [맥락 연계: REQ-RESV-03 + 09 ADR-02 낙관적 락 + 10 ERD discount_items]
 Implement reservation decrement service with Optimistic Locking:
 1. DiscountItem entity has '@Version private Long version;' column.
 2. Inside ReservationService.createReservation():
@@ -1408,7 +1465,7 @@ Implement reservation decrement service with Optimistic Locking:
   },
   {
     id: 'k3',
-    ticketKey: 'GROOM-03',
+    ticketKey: 'BREAD-03',
     title: 'SSE 기반 실시간 알림 스트리밍 엔드포인트 구현',
     description:
       '점주 등록 및 픽업 예약 상태 변경 시 Nginx 타임아웃 방지 하트비트 포함 SseEmitter 구현',
@@ -1424,8 +1481,8 @@ Implement reservation decrement service with Optimistic Locking:
     reqRef: 'REQ-NOTI-04',
     category: 'Backend',
     status: 'todo',
-    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (GROOM-03)
-// [맥락 연계: REQ-NOTI-04 + 10 인프라 Nginx + ADR-03 SSE]
+    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (BREAD-03)
+// [맥락 연계: REQ-NOTI-04 + 11 아키텍처 Nginx + 09 ADR-03 SSE]
 Implement Server-Sent Events controller in Spring Boot 3:
 1. Endpoint: GET /api/v1/notifications/stream (produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 2. SseEmitter timeout: 30 minutes.
@@ -1434,10 +1491,10 @@ Implement Server-Sent Events controller in Spring Boot 3:
   },
   {
     id: 'k4',
-    ticketKey: 'GROOM-04',
-    title: '인터랙티브 캔버스 핀치 줌 및 터치 드래그 지원',
+    ticketKey: 'BREAD-04',
+    title: '현장 방문 수령 1회용 픽업 바코드 생성 및 점주 검증 API',
     description:
-      '모바일 환경에서 캔버스 배경 패닝, 2핑거 핀치 줌 및 노드 터치 이동 제스처 지원',
+      '예약 보증금 결제 후 고객 화면에 1회용 바코드를 렌더링하고, 점주 스캔 시 1초 만에 픽업 완료 처리하는 API 구현',
     priority: 'P0',
     assignee: {
       name: '최영희',
@@ -1447,17 +1504,16 @@ Implement Server-Sent Events controller in Spring Boot 3:
     },
     deadline: '2026-11-05',
     storyPoints: 5,
-    reqRef: 'REQ-UI-05',
+    reqRef: 'REQ-TICK-04',
     category: 'Frontend',
     status: 'done',
-    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (GROOM-04)
-// [맥락 연계: 07 화면 흐름 + 09 ERD + 10 아키텍처 공통 캔버스]
-Enhance React canvas with mobile gesture support:
-1. Add 'touch-none select-none' to canvas viewport.
-2. Implement onTouchStart, onTouchMove, onTouchEnd:
-   - 1 finger: pan canvas (panX, panY) or drag node if started on node.
-   - 2 fingers: calculate Euclidean distance and update zoom scale (0.4x ~ 2.0x) around midpoint.
-3. Prevent pull-to-refresh on mobile browsers.`
+    aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시 프롬프트 (BREAD-04)
+// [맥락 연계: REQ-TICK-04 + 08 화면 흐름 04번 티켓 화면 + 13 API 명세]
+Implement pickup barcode verification endpoint:
+1. Endpoint: POST /api/v1/reservations/{id}/pickup-verify
+2. Validate storeOwnerPin and barcodeToken expiration (valid for 3 hours).
+3. Update Reservation status to COMPLETED and record completedAt timestamp.
+4. If already picked up, throw RFC 7807 (400 Bad Request with "Already Completed").`
   }
 ];
 
@@ -1509,13 +1565,13 @@ export const INITIAL_QA_TEST_CASES: QaTestCase[] = [
   {
     id: 'qa-2',
     category: '보안/인증',
-    testTitle: '24시간 만료된 게스트 세션의 프로젝트 데이터 격리 및 접근 차단',
-    precondition: '발급 후 24시간이 경과한 게스트 토큰 준비',
+    testTitle: '타인의 픽업 예약 바코드 티켓 위조 및 비인가 접근 차단',
+    precondition: '다른 회원의 유효한 reservation_id 준비',
     testSteps: [
-      '만료된 토큰으로 GET /api/v1/projects/:id 요청',
-      '토큰 갱신 없이 수정 API 호출'
+      '타인 계정 토큰 또는 만료된 세션으로 GET /api/v1/reservations/{id}/ticket 요청',
+      '위조된 QR 바코드 토큰으로 검증 API 호출'
     ],
-    expectedResult: 'HTTP 401 Unauthorized 반환 및 재로그인 유도 모달 노출.',
+    expectedResult: 'HTTP 403 Forbidden 반환 및 픽업 바코드 노출 즉시 차단.',
     isPassed: true,
     severity: 'Major'
   },
@@ -1614,48 +1670,48 @@ export const INITIAL_RELEASE_HISTORY: DeploymentRecord[] = [
       'TypeScript ^5.7.2 다운그레이드 및 Vercel 빌드 무결성 확보'
     ],
     rollbackTarget: 'v1.0.1 (commit 2e179c8)',
-    rollbackCommand: 'kubectl rollout undo deployment/groom-api --to-revision=3',
+    rollbackCommand: 'kubectl rollout undo deployment/breadalert-api --to-revision=3',
     rollbackNote: 'Redis 장애 발생 시 application.yml의 cache.enabled=false 플래그 즉시 롤백 가능',
-    rollbackGuide: 'kubectl rollout undo deployment/groom-api --to-revision=3',
+    rollbackGuide: 'kubectl rollout undo deployment/breadalert-api --to-revision=3',
     environment: 'Production'
   },
   {
     id: 'rel-2',
     version: 'v1.0.1',
-    releaseTitle: '게스트 세션 만료 알림 및 UI 반응성 핫픽스',
+    releaseTitle: '노쇼 보증금 자동 취소 및 모바일 지도 반응성 핫픽스',
     deployedAt: '2026-10-27 14:15:00 (KST)',
     status: 'Production',
     commitRef: '2e179c8',
     commitHash: '2e179c8',
     highlights: [
-      '게스트 세션 만료 1시간 전 상단 띠 배너 알림 추가',
-      '모바일 캔버스 터치 제스처 패닝 및 핀치 줌 핫픽스'
+      '픽업 10분 전 미도착 알림톡 자동 발송 및 취소 수수료 처리 로직 추가',
+      '네이버 지도 마커 클러스터링 및 반경 1.5km 핀치 줌 핫픽스'
     ],
     changelog: [
-      '게스트 세션 만료 1시간 전 상단 띠 배너 알림 추가',
-      '모바일 캔버스 터치 제스처 패닝 및 핀치 줌 핫픽스'
+      '픽업 10분 전 미도착 알림톡 자동 발송 및 취소 수수료 처리 로직 추가',
+      '네이버 지도 마커 클러스터링 및 반경 1.5km 핀치 줌 핫픽스'
     ],
     rollbackTarget: 'v1.0.0 (commit 10a82f1)',
-    rollbackCommand: 'kubectl rollout undo deployment/groom-api --to-revision=2',
+    rollbackCommand: 'kubectl rollout undo deployment/breadalert-api --to-revision=2',
     rollbackNote: '무중단 롤링 업데이트로 다운타임 0초 유지',
-    rollbackGuide: 'kubectl rollout undo deployment/groom-api --to-revision=2',
+    rollbackGuide: 'kubectl rollout undo deployment/breadalert-api --to-revision=2',
     environment: 'Production'
   },
   {
     id: 'rel-3',
     version: 'v1.0.0',
-    releaseTitle: 'Groom 공식 알파 프로토타입 첫 릴리즈',
+    releaseTitle: '동네 빵집 마감할인 서비스 MVP 첫 배포',
     deployedAt: '2026-10-20 11:00:00 (KST)',
     status: 'Production',
     commitRef: '10a82f1',
     commitHash: '10a82f1',
     highlights: [
-      '01 서비스 기획부터 08 배포까지 기본 워크스페이스 코파일럿 개시',
-      'PostgreSQL DDL 및 낙관적 락 재고 차감 엔진 구축'
+      '01 서비스 기획부터 17 트러블슈팅까지 베이커리 O2O 시스템 개시',
+      'PostgreSQL PostGIS 공간 인덱스 및 낙관적 락 재고 차감 엔진 구축'
     ],
     changelog: [
-      '01 서비스 기획부터 08 배포까지 기본 워크스페이스 코파일럿 개시',
-      'PostgreSQL DDL 및 낙관적 락 재고 차감 엔진 구축'
+      '01 서비스 기획부터 17 트러블슈팅까지 베이커리 O2O 시스템 개시',
+      'PostgreSQL PostGIS 공간 인덱스 및 낙관적 락 재고 차감 엔진 구축'
     ],
     rollbackTarget: 'None (Initial Release)',
     rollbackCommand: 'N/A',
@@ -1672,7 +1728,7 @@ export interface TroubleshootingItem {
   id: string;
   issueNumber: number;
   title: string;
-  versionTrack?: 'v1.0 MVP' | 'v1.5 성능 개선';
+  versionTrack?: 'v1.0 MVP' | 'v1.1 동시성 락' | 'v1.5 성능 개선' | string;
   resolvedInVersion: string;
   resolvedAt: string;
   severity: 'Critical' | 'High' | 'Medium';
@@ -1786,39 +1842,39 @@ export const INITIAL_TROUBLESHOOTING_ARCHIVE: TroubleshootingItem[] = [
   {
     id: 'tr-3',
     issueNumber: 103,
-    title: '게스트 세션 계정 연동(Claim) 시 동시 중복 클릭으로 인한 무결성 위반',
-    versionTrack: 'v1.0 MVP',
-    resolvedInVersion: 'v1.0.1',
+    title: '마감 세일 오픈(20:00) 시 동일 빵 동시 결제 폭주로 인한 재고 오버셀링 및 마이너스 재고 발생',
+    versionTrack: 'v1.1 동시성 락',
+    resolvedInVersion: 'v1.1.0',
     resolvedAt: '2026-10-25',
-    severity: 'Medium',
-    tags: ['Redisson', 'Idempotency', 'Lock'],
+    severity: 'Critical',
+    tags: ['OptimisticLock', 'JPA', 'Concurrency', 'OverSelling'],
     problemSymptom:
-      '네트워크 지연 시 사용자가 [계정 연동하기] 버튼을 빠르게 연타하여 2개의 연동 트랜잭션이 동시 진입해 DB Unique Constraint 에러 발생.',
+      '오후 8시 마감 할인 시작 시 잔여 수량 2개 남은 빵 품목에 50여 명이 동시 결제를 시도하여 재고가 -8개로 음수화되는 오버셀링 장애 발생.',
     rootCause:
-      '클라이언트 단 디바운스 누락 및 백엔드 락 부재로 분산 환경에서 경쟁 상태 발생.',
+      '단순 SELECT 후 UPDATE 방식에서 트랜잭션 격리 레벨 락 부재로 다중 스레드 경쟁 상태(Race Condition) 발생.',
     solutionMechanisms: [
-      '프론트엔드 버튼에 useTransition / Debounce 적용하여 첫 클릭 후 즉시 비활성화',
-      '백엔드 Redis 분산 락(Redisson)을 3초간 적용하여 동일 guestToken 중복 처리 차단'
+      'discount_schedules 엔티티에 @Version 컬럼 추가하여 JPA 낙관적 락(Optimistic Lock) 적용',
+      '충돌 시 OptimisticLockingFailureException 캐치 후 프론트엔드에 409 Conflict 품절 처리 안내'
     ],
     metricsBefore: {
-      metricName: '중복 연동 에러율',
-      value: '100% (500 Error)',
-      numericValue: 100
+      metricName: '오버셀링 발생률',
+      value: '4.8% (재고 음수 발생)',
+      numericValue: 4.8
     },
     metricsAfter: {
-      value: '0% (멱등 처리)',
+      value: '0% (정합성 100%)',
       numericValue: 0
     },
     symptomAndCause:
-      '네트워크 지연 시 사용자가 [계정 연동하기] 버튼을 빠르게 연타하여 2개의 연동 트랜잭션이 동시 진입해 DB Unique Constraint 에러 발생.',
+      '오후 8시 마감 할인 시작 시 잔여 수량 2개 남은 빵 품목에 50여 명이 동시 결제를 시도하여 재고가 -8개로 음수화되는 오버셀링 장애 발생.',
     resolutionProcess:
-      '1) 프론트엔드 버튼에 useTransition / Debounce 적용하여 첫 클릭 후 즉시 버튼 비활성화. 2) 백엔드 Redis 분산 락(Redisson)을 3초간 적용하여 동일 guestToken 중복 처리 원천 차단.',
-    beforeMetric: '연타 시 500 Server Error 발생',
-    afterMetric: '안전한 멱등성 보장 (200 OK 1건 처리)',
-    improvementSummary: '계정 귀속 트랜잭션 멱등성 100% 확보',
+      '1) discount_schedules 엔티티에 @Version 컬럼을 추가하여 JPA 낙관적 락(Optimistic Lock) 적용. 2) 충돌 발생 시 409 Conflict 응답과 함께 "다른 고객이 먼저 결제 완료했습니다" 팝업 모달 제공.',
+    beforeMetric: '오버셀링 발생률 4.8%',
+    afterMetric: '오버셀링 0건 (정합성 100%)',
+    improvementSummary: '동시성 락을 통한 재고 음수 결제 원천 차단',
     metricComparison: {
-      label: '중복 연동 에러율',
-      beforeVal: 100,
+      label: '오버셀링 발생률',
+      beforeVal: 4.8,
       afterVal: 0,
       unit: '%'
     }
@@ -1826,7 +1882,7 @@ export const INITIAL_TROUBLESHOOTING_ARCHIVE: TroubleshootingItem[] = [
 ];
 
 // =====================================================================
-// STEP 05: PRD REQUIREMENTS DATA
+// STEP 05: PRD REQUIREMENTS (FUNCTIONAL & NON-FUNCTIONAL)
 // =====================================================================
 export interface PrdRequirement {
   id: string;
@@ -1839,50 +1895,227 @@ export interface PrdRequirement {
   status: 'Confirmed' | 'Review';
 }
 
+export interface PrdNonFunctionalReq {
+  id: string;
+  nfrCode: string;
+  category: '성능 및 지연시간' | '동시성 및 신뢰성' | '가용성' | '보안 및 개인정보' | '확장성';
+  title: string;
+  targetMetric: string;
+  verificationMethod: string;
+  priority: 'P0' | 'P1' | 'P2';
+  status: 'Confirmed' | 'Review';
+}
+
 export const INITIAL_PRD_REQUIREMENTS: PrdRequirement[] = [
   {
-    id: 'r1',
-    reqCode: 'REQ-AUTH-01',
-    category: '온보딩 / 인증',
-    title: '게스트 섀도우 세션 및 계정 귀속 (Account Claim)',
-    specification:
-      '비로그인 진입 시 UUID 기반 임시 워크스페이스 발급(24h 유효). 회원가입 시 작업 산출물 일체를 정식 유저 소유로 트랜잭션 이관.',
-    acceptanceCriteria: 'Claim 수행 시 하위 문서, ERD 노드(JSONB), WBS 티켓 누락률 0% 보장',
-    priority: 'P0',
-    status: 'Confirmed'
-  },
-  {
-    id: 'r2',
-    reqCode: 'REQ-STORE-02',
+    id: 'req_1',
+    reqCode: 'REQ-STORE-01',
     category: '점주 마감 등록',
-    title: '마감 할인 품목 30초 퀵 등록 및 재고 차감',
+    title: '마감 할인 품목 30초 퀵 등록 및 잔여 재고 설정',
     specification:
-      '빵집 점주가 마감 시간대 할인율(30~50%), 잔여 수량, 픽업 마감 시각을 등록하면 반경 1.5km 구독 유저에게 즉시 노출.',
-    acceptanceCriteria: '동시 예약 요청 시 낙관적 락(version 컬럼)으로 재고 음수 발생 차단',
+      '빵집 점주가 당일 마감 시간대 할인율(30~70%), 잔여 빵 수량, 픽업 마감 시각을 30초 내 모바일로 퀵 등록.',
+    acceptanceCriteria: '등록 완료 즉시 반경 1.5km 고객 실시간 피드에 노출되고 잔여 수량 반영',
     priority: 'P0',
     status: 'Confirmed'
   },
   {
-    id: 'r3',
+    id: 'req_2',
+    reqCode: 'REQ-MAP-02',
+    category: '탐색 및 위치',
+    title: '반경 1.5km 동네 빵집 마감 할인 지도/목록 실시간 조회',
+    specification:
+      '소비자 현재 GPS 위치 기준 1.5km 이내의 당일 마감 세일 진행 빵집 위치, 남은 빵 종류, 할인율 지도 핀 표시.',
+    acceptanceCriteria: 'GPS 위치 변경 시 3초 이내 주변 베이커리 목록 갱신 및 마감 여부 뱃지 표시',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'req_3',
     reqCode: 'REQ-RESV-03',
-    category: '픽업 예약 / 보증금',
-    title: '노쇼(No-Show) 방지 픽업 시간 지정 및 보증금 상태 관리',
+    category: '예약 및 결제',
+    title: '동시성 제어 기반 마감 빵 픽업 예약 및 수량 실시간 차감',
     specification:
-      '구매자가 픽업 예정 시각(pickup_time)을 지정하여 예약 생성. 보증금 결제 상태(PENDING, PAID, REFUNDED)에 따라 점주 화면에 확정 알림 송신.',
-    acceptanceCriteria: '예약 후 15분 내 미결제 시 스케줄러가 자동으로 재고 원복 처리',
+      '소비자가 희망 빵 품목과 수량을 선택해 픽업 예약. 다수 동시 요청 시 재고 오버셀링 방지 락 처리.',
+    acceptanceCriteria: '마지막 1개 잔여 빵 동시 예약 시 단 1건만 승인되고 후속 요청은 실시간 품절 안내',
     priority: 'P0',
     status: 'Confirmed'
   },
   {
-    id: 'r4',
-    reqCode: 'REQ-NOTI-04',
-    category: '알림 / 웹훅',
-    title: '마감 임박 및 예약 상태 변경 인앱/웹훅 알림',
+    id: 'req_4',
+    reqCode: 'REQ-TICK-04',
+    category: '픽업 및 매장 인증',
+    title: '현장 수령용 1회용 픽업 바코드/QR 발급 및 점주 인증',
     specification:
-      '단골 매장 신규 할인 등록 및 픽업 30분 전 리마인더 알림 발송. V1.0은 인앱 폴링, V1.5는 SSE 스트리밍 적용.',
-    acceptanceCriteria: '알림 이벤트가 주문 메인 트랜잭션을 블로킹하지 않도록 분리',
+      '예약 완료 시 고객 모바일 화면에 1회용 바코드 티켓 생성. 점주 화면에서 바코드 확인/스캔 시 수령 완료 처리.',
+    acceptanceCriteria: '바코드 인증 완료 시 예약 상태가 COMPLETED로 변경되고 점주 정산 대기금으로 반영',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'req_5',
+    reqCode: 'REQ-NOTI-05',
+    category: '실시간 알림',
+    title: '단골 빵집 마감 세일 시작 시 실시간 SSE 및 앱 푸시 발송',
+    specification:
+      '소비자가 찜한 단골 베이커리가 마감 세일을 시작하면 즉시 인앱 SSE 알림 및 카카오 알림톡/푸시 전송.',
+    acceptanceCriteria: '마감 등록 이벤트 발생 후 대상 고객에게 3초 이내 푸시 도착 보장',
     priority: 'P1',
     status: 'Confirmed'
+  }
+];
+
+export const INITIAL_PRD_NON_FUNCTIONAL: PrdNonFunctionalReq[] = [
+  {
+    id: 'nfr_1',
+    nfrCode: 'NFR-PERF-01',
+    category: '성능 및 지연시간',
+    title: '마감 세일 실시간 알림 전달 지연시간',
+    targetMetric: '점주 마감 등록 후 3.0초 이내 반경 1.5km 고객 디바이스 수신',
+    verificationMethod: 'k6 부하 테스트 스크립트 및 SSE 수신 핑 타임스탬프 로깅 검증',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'nfr_2',
+    nfrCode: 'NFR-CONCUR-02',
+    category: '동시성 및 신뢰성',
+    title: '마감 빵 동시 예약 초과 판매(오버셀링) 0건 보장',
+    targetMetric: '동일 상품 잔여 1개에 대해 100건 동시 요청 시 성공 1건, 초과 차감 0건',
+    verificationMethod: 'JPA 낙관적 락(@Version) 격리성 및 동시성 통합 테스트(ConcurrencyTest.java)',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'nfr_3',
+    nfrCode: 'NFR-AVAIL-03',
+    category: '가용성',
+    title: '마감 집중 시간대(19:00~22:00) 고가용성 보장',
+    targetMetric: '마감 피크 3시간 가용률 99.9% (월간 무중단 다운타임 4.3분 이하)',
+    verificationMethod: 'AWS ALB 헬스체크 및 다중 가용영역(Multi-AZ) 무중단 롤링 배포 검증',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'nfr_4',
+    nfrCode: 'NFR-SEC-04',
+    category: '보안 및 개인정보',
+    title: '위치 정보 보호법 준수 및 고객 GPS 비식별화',
+    targetMetric: '소비자 정확한 위경도 좌표는 영구 저장 금지, 반경 1.5km H3 헥사곤 매핑 후 폐기',
+    verificationMethod: 'DB DDL 감사 및 위치정보 처리 로그 개인정보 암호화 점검',
+    priority: 'P0',
+    status: 'Confirmed'
+  },
+  {
+    id: 'nfr_5',
+    nfrCode: 'NFR-RESP-05',
+    category: '성능 및 지연시간',
+    title: '주변 베이커리 마감 목록 조회 API 응답속도',
+    targetMetric: '동시 접속 1,000 유저 기준 p95 응답시간 120ms 이하',
+    verificationMethod: 'PostgreSQL PostGIS 공간 인덱스(GiST) 쿼리 플랜 및 JMeter 부하 검증',
+    priority: 'P1',
+    status: 'Confirmed'
+  }
+];
+
+// =====================================================================
+// STEP 06: SERVICE POLICY & CONSTRAINTS TYPES & DATA
+// =====================================================================
+export interface ServicePolicyItem {
+  id: string;
+  policyCode: string;
+  category: '비즈니스 운영 정책' | '법적 및 보안 제약' | '외부 연동 제약';
+  title: string;
+  ruleSummary: string;
+  details: string;
+  enforcementMethod: string;
+  impactLevel: 'High' | 'Medium' | 'Low';
+  status: 'Active' | 'Review';
+}
+
+export const INITIAL_SERVICE_POLICIES: ServicePolicyItem[] = [
+  {
+    id: 'pol_1',
+    policyCode: 'POL-RESV-01',
+    category: '비즈니스 운영 정책',
+    title: '마감 할인 픽업 예약 취소 및 전액 환불 기준',
+    ruleSummary: '픽업 예정 시각 10분 전까지 취소 시 100% 환불, 이후 취소 불가',
+    details:
+      '당일 마감 폐기 임박 베이커리 특성상, 픽업 10분 전 이후 취소 시 다른 고객에게 재판매가 불가능하므로 단순 변심 환불을 엄격히 제한합니다.',
+    enforcementMethod: '결제 시스템 환불 승인 인터셉터 및 픽업 10분 전 자동 취소 버튼 비활성화',
+    impactLevel: 'High',
+    status: 'Active'
+  },
+  {
+    id: 'pol_2',
+    policyCode: 'POL-NOSHOW-02',
+    category: '비즈니스 운영 정책',
+    title: '노쇼(No-Show) 페널티 및 예약 제한 규정',
+    ruleSummary: '예약 시간 내 미픽업 시 결제금 환불 불가 및 누적 2회 시 7일간 서비스 예약 차단',
+    details:
+      '소상공인 빵집 점주의 재고 폐기 피해를 방지하기 위해 정해진 마감 시각까지 픽업하지 않은 경우 보증금/결제금은 매장 점주에게 귀속되며 노쇼 계정은 일시 정지 조치됩니다.',
+    enforcementMethod: '매장 마감 시각 스케줄러 배치 처리로 미수령 주문 NOSHOW 확정 및 페널티 카운트',
+    impactLevel: 'High',
+    status: 'Active'
+  },
+  {
+    id: 'pol_3',
+    policyCode: 'POL-DISC-03',
+    category: '비즈니스 운영 정책',
+    title: '마감 할인 등록 가이드라인 및 할인율 제한',
+    ruleSummary: '당일 생산 당일 소진 베이커리 한정, 정가 대비 최소 30% ~ 최대 70% 할인율 강제',
+    details:
+      '고객 신뢰 확보를 위해 전일 생산 재고는 일절 등록할 수 없으며, 마감 할인 본래 취지에 부합하도록 최소 30% 이상의 할인율을 적용해야만 알림이 발송됩니다.',
+    enforcementMethod: '점주 마감 상품 등록 폼 유효성 검사 (할인율 30~70% 범위 외 등록 차단)',
+    impactLevel: 'Medium',
+    status: 'Active'
+  },
+  {
+    id: 'pol_4',
+    policyCode: 'CST-LEGAL-01',
+    category: '법적 및 보안 제약',
+    title: '위치정보의 보호 및 이용 등에 관한 법률 준수',
+    ruleSummary: '실시간 GPS 좌표는 영구 DB에 저장하지 않고, 반경 1.5km 헥사곤 단위 비식별 처리',
+    details:
+      '위치기반서비스 사업자 인허가 규정에 따라 고객의 동의를 획득한 후 1회성 매칭 연산에만 메모리 상에서 활용하고 디스크에는 행정동 단위 코드만 보관합니다.',
+    enforcementMethod: '위치 요청 시 단발성 인메모리 거리 계산(ST_DWithin) 후 파라미터 폐기',
+    impactLevel: 'High',
+    status: 'Active'
+  },
+  {
+    id: 'pol_5',
+    policyCode: 'CST-FOOD-02',
+    category: '법적 및 보안 제약',
+    title: '식품위생법상 당일 제조 베이커리 위생 고지 및 알레르기 안내',
+    ruleSummary: '당일 제조 식품 소비기한 명시, 유제품/육류 함유 빵 섭취 주의사항 라벨 표기',
+    details:
+      '상온 보관 시 변질 위험이 있는 크림빵, 샌드위치류는 당일 자정까지 섭취 권장 문구 및 난류, 우유, 대두 등 알레르기 유발 물질 정보를 상세 화면에 강제 노출합니다.',
+    enforcementMethod: '빵 품목 마스터 등록 시 알레르기 성분 체크리스트 필수 입력 검증',
+    impactLevel: 'High',
+    status: 'Active'
+  },
+  {
+    id: 'pol_6',
+    policyCode: 'EXT-NOTI-01',
+    category: '외부 연동 제약',
+    title: '정보통신망법 야간 광고성 정보 수신 제한 (21:00 ~ 08:00)',
+    ruleSummary: '야간 시간대(21시~08시)에는 마감 세일 푸시 발송 금지, 고객 사전 명시 동의 시에만 발송',
+    details:
+      '야간 수신 동의를 별도로 체크하지 않은 회원에게는 21시 이후 마감 세일 알림톡/푸시 발송을 자동 차단하고 인앱 피드 목록으로만 조용히 노출합니다.',
+    enforcementMethod: '푸시 발송 서비스 내 야간 시간대 수신동의 플래그 필터링 인터셉터',
+    impactLevel: 'Medium',
+    status: 'Active'
+  },
+  {
+    id: 'pol_7',
+    policyCode: 'EXT-MAP-02',
+    category: '외부 연동 제약',
+    title: '네이버 지도/지오코딩 API 일일 무료 쿼터 초과 시 폴백',
+    ruleSummary: '일일 10만 건 무료 쿼터 소진 시 매장 위경도 정적 캐시(Redis/Local) 자동 전환',
+    details:
+      '매장 좌표는 거의 변경되지 않는 정적 데이터이므로 매장 등록 시에만 지오코딩을 수행하고, 고객 조회 시에는 DB의 PostGIS 지점 좌표를 직접 활용하여 API 쿼터를 방어합니다.',
+    enforcementMethod: '매장 주소 변경 시에만 네이버 Geocoding API 호출하는 캐싱 정책',
+    impactLevel: 'Low',
+    status: 'Active'
   }
 ];
 
@@ -1891,148 +2124,150 @@ export const INITIAL_PRD_REQUIREMENTS: PrdRequirement[] = [
 // =====================================================================
 export const INITIAL_UX_NODES: UxScreenNode[] = [
   {
-    id: 'ux_landing',
-    name: '01. 서비스 랜딩',
-    route: '/',
+    id: 'ux_home',
+    name: '01. 주변 마감빵 지도 & 목록',
+    route: '/stores/nearby',
     screenType: 'Page',
     authLevel: 'Public',
-    summary: '서비스 소개 및 한 줄 아이디어로 즉시 워크스페이스 시작',
-    subComponents: ['LandingHero', 'SocialAuthModal', 'TrackPresetPill', 'Footer'],
-    stateQueryParams: ['theme=dark', 'ref=google'],
-    backendApiEndpoint: 'GET /api/v1/public/overview',
+    summary: '반경 1.5km 내 당일 마감 할인 진행 중인 빵집 지도 핀 및 실시간 할인율 목록',
+    subComponents: ['NearbyMapViewer', 'StoreSummaryCard', 'DiscountFilterBar', 'BottomNav'],
+    stateQueryParams: ['lat=37.5665', 'lng=126.9780', 'radius=1500', 'sort=discount'],
+    backendApiEndpoint: 'GET /api/v1/stores/nearby',
     nextRouteActions: [
-      { label: '설계 시작하기', targetRoute: '/workspace' },
-      { label: '로그인 / 회원가입', targetRoute: '/auth/modal' }
+      { label: '빵집 상세 보기', targetRoute: '/stores/:storeId' },
+      { label: '단골 빵집 알림 설정', targetRoute: '/notifications/settings' }
     ],
     x: 60,
     y: 80
   },
   {
-    id: 'ux_workspace',
-    name: '02. 메인 워크스페이스',
-    route: '/workspace',
-    screenType: 'Workspace',
+    id: 'ux_store_detail',
+    name: '02. 빵집 상세 & 잔여 재고',
+    route: '/stores/:storeId',
+    screenType: 'Page',
+    authLevel: 'Public',
+    summary: '선택 빵집의 당일 마감 할인 품목, 할인율, 픽업 마감 시각 및 남은 수량 조회',
+    subComponents: ['StoreHeaderInfo', 'BreadItemRow', 'RemainingQtyBadge', 'CartFloatingBar'],
+    stateQueryParams: ['storeId=102', 'tab=discount'],
+    backendApiEndpoint: 'GET /api/v1/stores/:storeId/discounts',
+    nextRouteActions: [
+      { label: '마감 빵 픽업 예약', targetRoute: '/reservations/new' },
+      { label: '지도 복귀', targetRoute: '/stores/nearby' }
+    ],
+    x: 360,
+    y: 80
+  },
+  {
+    id: 'ux_reservation',
+    name: '03. 마감 빵 픽업 예약/결제',
+    route: '/reservations/new',
+    screenType: 'Modal',
     authLevel: 'Guest',
-    summary: '5대 Phase / 16개 독립 모듈 3단 통합 엔지니어링 화면',
-    subComponents: [
-      'PhaseSidebarAccordion',
-      'CentralChatPane',
-      'SpecializedArtifactViewer',
-      'GlobalHeader'
-    ],
-    stateQueryParams: ['step=step1', 'track=fullstack', 'domain=web'],
-    backendApiEndpoint: 'GET /api/v1/projects/:id',
+    summary: '희망 수량 선택, 픽업 예정 시각 지정, 노쇼 방지 보증금 토스 간편결제',
+    subComponents: ['ReservationSummary', 'PickupTimePicker', 'TossPaymentWidget', 'NoShowAgreeModal'],
+    stateQueryParams: ['scheduleId=501', 'qty=2'],
+    backendApiEndpoint: 'POST /api/v1/reservations',
     nextRouteActions: [
-      { label: '설정 모달 열기', targetRoute: '/settings' },
-      { label: '계정 연동 모달', targetRoute: '/claim' }
+      { label: '결제 및 예약 완료', targetRoute: '/reservations/:id/ticket' },
+      { label: '취소', targetRoute: '/stores/:storeId' }
     ],
-    x: 360,
-    y: 80
-  },
-  {
-    id: 'ux_routing_canvas',
-    name: '03. 화면 흐름 & 라우팅',
-    route: '/workspace?step=step7',
-    screenType: 'Page',
-    authLevel: 'Member',
-    summary: '인터랙티브 화면 동선 캔버스 및 IA 라우팅 테이블 뷰어',
-    subComponents: ['CanvasDotGrid', 'ScreenNodeCard', 'InspectorDrawer', 'IaTableView'],
-    stateQueryParams: ['view=canvas', 'selected=ux_workspace'],
-    backendApiEndpoint: 'GET /api/v1/projects/:id/screens',
-    nextRouteActions: [{ label: '노드 클릭 시 인스펙터 오픈', targetRoute: 'drawer:inspect' }],
     x: 680,
     y: 80
   },
   {
-    id: 'ux_erd_canvas',
-    name: '04. 데이터베이스 ERD',
-    route: '/workspace?step=step9',
+    id: 'ux_ticket',
+    name: '04. 현장 픽업 바코드 티켓',
+    route: '/reservations/:id/ticket',
     screenType: 'Page',
     authLevel: 'Member',
-    summary: 'PostgreSQL 테이블 스키마 및 DDL 동기화 도트 캔버스',
-    subComponents: ['TableNodeCard', 'PortConnectionSvg', 'DdlCodeDrawer'],
-    stateQueryParams: ['schema=postgresql', 'zoom=100'],
-    backendApiEndpoint: 'GET /api/v1/projects/:id/erd',
-    nextRouteActions: [{ label: '테이블 속성 편집', targetRoute: 'modal:edit-table' }],
-    x: 360,
-    y: 340
-  },
-  {
-    id: 'ux_kanban_board',
-    name: '05. WBS 칸반 & AI 프롬프트',
-    route: '/workspace?step=step13',
-    screenType: 'Page',
-    authLevel: 'Member',
-    summary: '스프린트 태스크 관리 및 태스크별 IDE 코딩 프롬프트 생성',
-    subComponents: ['KanbanColumn', 'TaskCard', 'AiPromptCodeModal'],
-    stateQueryParams: ['filter=all', 'sprint=1'],
-    backendApiEndpoint: 'GET /api/v1/projects/:id/tasks',
+    summary: '매장 방문 후 사장님께 제시할 1회용 픽업 바코드/QR코드 및 영수증 화면',
+    subComponents: ['PickupBarcodeQr', 'StoreDirectionsCard', 'CountdownTimer', 'CancelButton'],
+    stateQueryParams: ['resvId=resv_7721'],
+    backendApiEndpoint: 'GET /api/v1/reservations/:id',
     nextRouteActions: [
-      { label: '카드 클릭 시 AI 프롬프트 모달', targetRoute: 'modal:ide-prompt' }
+      { label: '픽업 완료 영수증', targetRoute: '/receipt/:id' },
+      { label: '홈으로 이동', targetRoute: '/stores/nearby' }
     ],
     x: 680,
-    y: 340
+    y: 300
+  },
+  {
+    id: 'ux_owner_dashboard',
+    name: '05. 사장님 마감 재고 퀵 등록',
+    route: '/owner/stores/:storeId/discounts',
+    screenType: 'Page',
+    authLevel: 'Member',
+    summary: '마감 3시간 전 당일 남은 빵 품목, 수량, 할인율(30~70%) 30초 퀵 등록 및 SSE 발송',
+    subComponents: ['QuickStockInputRow', 'DiscountRateSlider', 'BroadcastAlertButton', 'TodaySalesCard'],
+    stateQueryParams: ['storeId=102', 'mode=quick'],
+    backendApiEndpoint: 'POST /api/v1/stores/:storeId/discounts',
+    nextRouteActions: [
+      { label: '실시간 예약 접수 확인', targetRoute: '/owner/reservations' },
+      { label: '마감 세일 종료', targetRoute: '/owner/dashboard' }
+    ],
+    x: 360,
+    y: 300
   }
 ];
 
 export const INITIAL_UX_EDGES: UxFlowEdge[] = [
   {
     id: 'ux_edge_1',
-    source: 'ux_landing',
-    target: 'ux_workspace',
+    source: 'ux_home',
+    target: 'ux_store_detail',
     sourcePort: 'right',
     targetPort: 'left',
-    triggerLabel: '시작하기 클릭',
-    guardCondition: '게스트 세션 토큰 자동 발급'
+    triggerLabel: '매장 카드 클릭',
+    guardCondition: '당일 마감 진행 중'
   },
   {
     id: 'ux_edge_2',
-    source: 'ux_workspace',
-    target: 'ux_routing_canvas',
+    source: 'ux_store_detail',
+    target: 'ux_reservation',
     sourcePort: 'right',
     targetPort: 'left',
-    triggerLabel: 'Step 07 선택',
-    guardCondition: '권한 검증 완료'
+    triggerLabel: '마감빵 예약 클릭',
+    guardCondition: '잔여 재고 1개 이상'
   },
   {
     id: 'ux_edge_3',
-    source: 'ux_workspace',
-    target: 'ux_erd_canvas',
+    source: 'ux_reservation',
+    target: 'ux_ticket',
     sourcePort: 'bottom',
     targetPort: 'top',
-    triggerLabel: 'Step 09 선택',
-    guardCondition: '스키마 동기화 완료'
+    triggerLabel: '보증금 결제 승인',
+    guardCondition: '토스 간편결제 200 OK'
   },
   {
     id: 'ux_edge_4',
-    source: 'ux_routing_canvas',
-    target: 'ux_kanban_board',
-    sourcePort: 'bottom',
-    targetPort: 'top',
-    triggerLabel: 'WBS 일정 연동',
-    guardCondition: '화면 명세 확정'
+    source: 'ux_owner_dashboard',
+    target: 'ux_store_detail',
+    sourcePort: 'top',
+    targetPort: 'bottom',
+    triggerLabel: '30초 퀵 등록 완료',
+    guardCondition: 'SSE 실시간 브로드캐스트'
   }
 ];
 
 export const INITIAL_CANVAS_ZONES: CanvasZone[] = [
   {
-    id: 'zone_front',
-    title: 'Client Web & Mobile Flow',
-    subtitle: '반응형 웹 및 모바일 앱 화면 동선 영역',
+    id: 'zone_consumer_flow',
+    title: '소비자 마감빵 탐색 & 예약 픽업 동선',
+    subtitle: '반경 1.5km 지도 조회 -> 잔여 재고 확인 -> 픽업 바코드 발급',
     x: 40,
     y: 40,
-    width: 920,
-    height: 240,
+    width: 960,
+    height: 220,
     tone: 'accent'
   },
   {
-    id: 'zone_backend',
-    title: 'Core Engineering & Sprint',
-    subtitle: '데이터베이스 모델링 및 개발 스프린트 관리 영역',
+    id: 'zone_owner_flow',
+    title: '베이커리 점주 마감 등록 & 인증 동선',
+    subtitle: '30초 퀵 재고 등록 -> 픽업 바코드 스캔 완료 처리',
     x: 320,
-    y: 300,
-    width: 640,
-    height: 240,
+    y: 260,
+    width: 680,
+    height: 180,
     tone: 'neutral'
   }
 ];
@@ -2272,7 +2507,7 @@ export const INITIAL_PROJECT_MEMBERS: ProjectMember[] = [
   {
     id: 'mem_2',
     name: '김도현',
-    email: 'dohyun@groom.dev',
+    email: 'dohyun@breadalert.kr',
     initials: 'DH',
     role: 'ADMIN',
     joinedAt: '2026-10-25'
@@ -2280,7 +2515,7 @@ export const INITIAL_PROJECT_MEMBERS: ProjectMember[] = [
   {
     id: 'mem_3',
     name: '송지은',
-    email: 'jieun.designer@groom.dev',
+    email: 'jieun.designer@breadalert.kr',
     initials: 'JE',
     role: 'EDITOR',
     joinedAt: '2026-10-27'

@@ -104,7 +104,7 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 15. 배포 이력 & 릴리즈 노트 (Release History & Changelog)
+    return `# 16. 배포 이력 & 릴리즈 노트 (Release History & Changelog)
 
 - **현재 프로덕션 버전**: ${latestRelease.version} (Healthy 🟢)
 - **최근 배포 시각**: ${latestRelease.deployedAt}
@@ -144,7 +144,7 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">15. Releases</span>
+              <span className="text-xs text-muted">16. Releases</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 총 {deployments.length}회 배포
               </span>
@@ -155,7 +155,7 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="15_배포_이력_및_릴리즈_노트"
+            title="16_배포_이력_및_릴리즈_노트"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />
@@ -176,7 +176,7 @@ ${dep.changelog.map((c) => `  - ${c}`).join('\n')}
           {onConfirmStep && (
             <button
               type="button"
-              onClick={() => onConfirmStep('step15')}
+              onClick={() => onConfirmStep('step16')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 isConfirmed
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'

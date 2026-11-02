@@ -20,7 +20,8 @@ import {
   AlignLeft,
   LayoutGrid
 } from 'lucide-react';
-import type { PrdRequirement, StepId } from '../mockData';
+import type { PrdRequirement, PrdNonFunctionalReq, StepId } from '../mockData';
+import { INITIAL_PRD_NON_FUNCTIONAL } from '../mockData';
 
 export type BmBlockFormat = 'text' | 'table' | 'cards';
 
@@ -40,17 +41,13 @@ export interface BmBlock {
   cardItems?: BmBlockCardItem[];
 }
 
-interface ConstraintItem {
-  id: string;
-  title: string;
-  description: string;
-}
-
 interface DocumentArtifactViewProps {
   currentStep: StepId;
   projectTitle: string;
   requirements: PrdRequirement[];
   setRequirements: React.Dispatch<React.SetStateAction<PrdRequirement[]>>;
+  nonFunctionalReqs?: PrdNonFunctionalReq[];
+  setNonFunctionalReqs?: React.Dispatch<React.SetStateAction<PrdNonFunctionalReq[]>>;
   onConfirmStep: (step: StepId) => void;
   onRequestAiRefine: (sectionTitle: string) => void;
   onCollapsePane?: () => void;
@@ -62,11 +59,18 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   projectTitle,
   requirements,
   setRequirements,
+  nonFunctionalReqs,
+  setNonFunctionalReqs,
   onConfirmStep,
   onRequestAiRefine,
   onCollapsePane,
   isConfirmed = false
 }) => {
+  const [localNonFunctionalReqs, setLocalNonFunctionalReqs] = useState<PrdNonFunctionalReq[]>(INITIAL_PRD_NON_FUNCTIONAL);
+  const nfrs = nonFunctionalReqs || localNonFunctionalReqs;
+  const setNfrs = setNonFunctionalReqs || setLocalNonFunctionalReqs;
+  const [prdTab, setPrdTab] = useState<'functional' | 'non_functional'>('functional');
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [docSubTab, setDocSubTab] = useState<'formatted' | 'raw_md'>('formatted');
   const [copiedBadge, setCopiedBadge] = useState(false);
@@ -372,7 +376,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   // =====================================================================
   // UNIFIED ADD MODAL STATES & SUBMIT HANDLERS (Step 1 & 2)
   // =====================================================================
-  const [addModalType, setAddModalType] = useState<'section' | 'table_row' | 'card_item' | 'requirement' | 'constraint' | null>(null);
+  const [addModalType, setAddModalType] = useState<'section' | 'table_row' | 'card_item' | 'requirement' | 'non_functional' | null>(null);
   const [targetBlockId, setTargetBlockId] = useState<string | null>(null);
 
   // Table Row inputs
@@ -395,9 +399,15 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   const [modalReqSpec, setModalReqSpec] = useState('');
   const [modalReqAc, setModalReqAc] = useState('');
 
-  // Constraint inputs
-  const [modalConstraintTitle, setModalConstraintTitle] = useState('');
-  const [modalConstraintDesc, setModalConstraintDesc] = useState('');
+  // Non-Functional Requirement inputs
+  const [modalNfrCode, setModalNfrCode] = useState('');
+  const [modalNfrCategory, setModalNfrCategory] = useState<
+    '성능 및 지연시간' | '동시성 및 신뢰성' | '가용성' | '보안 및 개인정보' | '확장성'
+  >('성능 및 지연시간');
+  const [modalNfrTitle, setModalNfrTitle] = useState('');
+  const [modalNfrTarget, setModalNfrTarget] = useState('');
+  const [modalNfrVerify, setModalNfrVerify] = useState('');
+  const [modalNfrPriority, setModalNfrPriority] = useState<'P0' | 'P1' | 'P2'>('P0');
 
   // Handlers for Table Row modal
   const handleOpenTableRowModal = (blockId: string) => {
@@ -505,46 +515,49 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     showToast(`[${newReq.reqCode}] 새 요구사항이 추가되었습니다`);
   };
 
-  const handleOpenConstraintModal = () => {
-    setModalConstraintTitle('');
-    setModalConstraintDesc('');
-    setAddModalType('constraint');
+  const handleOpenNfrModal = () => {
+    const nextNum = nfrs.length + 1;
+    setModalNfrCode(`NFR-QUAL-0${nextNum}`);
+    setModalNfrCategory('성능 및 지연시간');
+    setModalNfrTitle('');
+    setModalNfrTarget('');
+    setModalNfrVerify('');
+    setModalNfrPriority('P0');
+    setAddModalType('non_functional');
   };
 
-  const handleSubmitConstraint = (e: React.FormEvent) => {
+  const handleSubmitNfr = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!modalConstraintTitle.trim()) return;
-    const newConstraint: ConstraintItem = {
-      id: `c_${Date.now()}`,
-      title: modalConstraintTitle.trim(),
-      description: modalConstraintDesc.trim() || '기술적 제약사항 및 엔지니어링 원칙을 서술하세요.'
+    if (!modalNfrTitle.trim()) return;
+    const newNfr: PrdNonFunctionalReq = {
+      id: `nfr_${Date.now()}`,
+      nfrCode: modalNfrCode.trim() || `NFR-${Date.now()}`,
+      category: modalNfrCategory,
+      title: modalNfrTitle.trim(),
+      targetMetric: modalNfrTarget.trim() || '목표 수치 및 품질 지표를 정의하세요.',
+      verificationMethod: modalNfrVerify.trim() || '부하 테스트 및 메트릭 로깅 검증',
+      priority: modalNfrPriority,
+      status: 'Confirmed'
     };
-    setPrdConstraints((prev) => [...prev, newConstraint]);
+    setNfrs((prev) => [...prev, newNfr]);
     setAddModalType(null);
-    showToast('새 기술 제약사항이 추가되었습니다');
+    showToast(`[${newNfr.nfrCode}] 비기능 요구사항이 추가되었습니다`);
   };
 
-  // Editable Step 2 Constraints State
-  const [prdConstraints, setPrdConstraints] = useState<ConstraintItem[]>([
-    {
-      id: 'c1',
-      title: 'PostgreSQL 15 단일 RDBMS',
-      description:
-        '초기 운영 복잡도를 낮추기 위해 V1.0에서는 게스트 세션과 토큰 화이트리스트까지 모두 단일 RDBMS 테이블로 관리한 뒤 V1.5에서 Redis로 분리합니다.'
-    },
-    {
-      id: 'c2',
-      title: 'JPA 낙관적 락 (@Version)',
-      description:
-        '마감 할인 품목 재고 차감 시 데드락 위험이 있는 비관적 락 대신 애플리케이션 레벨 버전 검증으로 처리량을 확보합니다.'
-    },
-    {
-      id: 'c3',
-      title: '프로젝트 단위 역할 권한 (RBAC)',
-      description:
-        '초대 코드 기반 멤버 합류 시 OWNER, ADMIN, EDITOR, VIEWER 4단계 권한을 검증하고 JSON 스키마 파싱을 강제합니다.'
-    }
-  ]);
+  const handleDeleteNfr = (id: string) => {
+    setNfrs((prev) => prev.filter((item) => item.id !== id));
+    showToast('비기능 요구사항이 삭제되었습니다');
+  };
+
+  const toggleNfrStatus = (id: string) => {
+    setNfrs((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, status: item.status === 'Confirmed' ? 'Review' : 'Confirmed' }
+          : item
+      )
+    );
+  };
 
   // Build default markdown from structured state
   const buildMarkdownFromState = (step: StepId) => {
@@ -590,13 +603,16 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
       return `# 02. 비즈니스 모델 (BM)\n\n## 프로젝트명: ${projectTitle}\n\n${blocksMd}`;
     }
-    return `# 05. 요구사항 및 기술 제약사항 명세서 (PRD)\n\n## 5.1 기능 요구사항 (${requirements.length}건)\n${requirements
+    return `# 05. 요구사항 명세서 (PRD)\n\n## 5.1 기능 요구사항 (${requirements.length}건)\n${requirements
       .map(
         (r) =>
           `- **[${r.reqCode}] (${r.priority} / ${r.status}) ${r.title}**\n  - 분류: ${r.category}\n  - 상세 명세: ${r.specification}\n  - 인수 조건: ${r.acceptanceCriteria}`
       )
-      .join('\n')}\n\n## 5.2 엔지니어링 제약사항 및 기술 원칙\n${prdConstraints
-      .map((c) => `- **${c.title}:** ${c.description}`)
+      .join('\n')}\n\n## 5.2 비기능 요구사항 (성능 및 품질 목표 - ${nfrs.length}건)\n${nfrs
+      .map(
+        (n) =>
+          `- **[${n.nfrCode}] (${n.priority} / ${n.status}) ${n.title}**\n  - 분류: ${n.category}\n  - 목표 지표: ${n.targetMetric}\n  - 검증 방식: ${n.verificationMethod}`
+      )
       .join('\n')}`;
   };
 
@@ -625,7 +641,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     if (!isRawDirtyStep5) {
       setRawMdStep5(buildMarkdownFromState('step5'));
     }
-  }, [requirements, prdConstraints, isRawDirtyStep5]);
+  }, [requirements, nfrs, isRawDirtyStep5]);
 
   const currentRawMarkdown =
     currentStep === 'step1'
@@ -767,10 +783,20 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
         .join('')}
     </tbody>
   </table>
-  <h2>2. 엔지니어링 제약사항 및 기술 원칙</h2>
-  <ul>
-    ${prdConstraints.map((c) => `<li><strong>${c.title}:</strong> ${c.description}</li>`).join('')}
-  </ul>
+  <h2>2. 비기능 요구사항 및 품질 목표 (${nfrs.length}건)</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>분류</th><th>중요도</th><th>목표 지표</th><th>검증 방식</th><th>상태</th></tr>
+    </thead>
+    <tbody>
+      ${nfrs
+        .map(
+          (n) =>
+            `<tr><td><strong>${n.nfrCode}</strong></td><td>${n.category}</td><td>${n.priority}</td><td><strong>${n.title}</strong><br/>${n.targetMetric}</td><td>${n.verificationMethod}</td><td>${n.status}</td></tr>`
+        )
+        .join('')}
+    </tbody>
+  </table>
 </body>
 </html>`;
   };
@@ -850,10 +876,6 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
     );
   };
 
-  const handleDeleteConstraint = (id: string) => {
-    setPrdConstraints((prev) => prev.filter((c) => c.id !== id));
-  };
-
   return (
     <div className="@container relative flex-1 flex flex-col h-full bg-surface overflow-hidden">
       {/* Floating Non-Layout-Shifting Toast */}
@@ -928,7 +950,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                 ? '01_SERVICE_OVERVIEW.md'
                 : currentStep === 'step2'
                 ? '02_BUSINESS_MODEL.md'
-                : '05_PRD_SPECIFICATION.md'}
+                : '04_PRD_SPECIFICATION.md'}
             </code>
           </div>
 
@@ -1441,284 +1463,449 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
             /* ======================================================== */
             /* STEP 5: EDITORIAL PRD SPECIFICATION (FULL EDIT)          */
             /* ======================================================== */
-            <article className="divide-y divide-line">
-              <header className="pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <article className="space-y-6">
+              <header className="pb-4 border-b border-line flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
-                  <div className="text-xs text-muted mb-2">
-                    Step 05 · 요구사항 및 기술 제약사항 (PRD)
+                  <div className="text-xs text-muted mb-1.5">
+                    Step 05 · 요구사항 명세서 (PRD)
                   </div>
                   <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
-                    기능 요구사항 및 아키텍처 제약 규칙
+                    제품 요구사항 명세서 (PRD)
                   </h1>
                 </div>
 
                 {isEditMode && (
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleOpenReqModal}
-                      className="px-3 py-1.5 rounded-lg bg-well hover:bg-control text-ink text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>요구사항 행 추가</span>
-                    </button>
+                    {prdTab === 'functional' ? (
+                      <button
+                        type="button"
+                        onClick={handleOpenReqModal}
+                        className="px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ 기능 요구사항 추가</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleOpenNfrModal}
+                        className="px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ 비기능 목표 추가</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </header>
 
-              {/* PRD Functional Matrix Table */}
-              <section className="py-8 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm sm:text-base font-semibold text-ink">
-                    1. 기능 요구사항 명세 ({requirements.length}건)
-                  </h2>
-                  <span className="text-xs text-muted">
-                    {isEditMode ? '모든 셀을 직접 클릭해 수정하거나 삭제할 수 있습니다' : '우측 상단 [전체 편집 모드]에서 모든 항목 수정 가능'}
+              {/* PRD Sub-tabs Switcher */}
+              <div className="flex items-center gap-2 border-b border-line pb-3">
+                <button
+                  type="button"
+                  onClick={() => setPrdTab('functional')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
+                    prdTab === 'functional'
+                      ? 'bg-accent text-accent-ink shadow-sm'
+                      : 'bg-well text-muted hover:text-ink border border-line'
+                  }`}
+                >
+                  <span>기능 요구사항</span>
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+                    prdTab === 'functional' ? 'bg-black/20 text-accent-ink' : 'bg-surface text-muted'
+                  }`}>
+                    {requirements.length}건
                   </span>
-                </div>
+                </button>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-y border-line text-muted font-medium">
-                        <th className="py-2.5 pr-3 w-32 whitespace-nowrap">ID · 분류</th>
-                        <th className="py-2.5 px-3 w-20 whitespace-nowrap">중요도</th>
-                        <th className="py-2.5 px-3 whitespace-nowrap">기능 제목 및 상세 명세</th>
-                        <th className="py-2.5 px-3 w-56 whitespace-nowrap">인수 조건</th>
-                        <th className="py-2.5 pl-3 w-24 text-right whitespace-nowrap">상태</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line">
-                      {requirements.map((req) => (
-                        <tr key={req.id}>
-                          <td className="py-3.5 pr-3 align-top space-y-1">
-                            {isEditMode ? (
-                              <>
-                                <input
-                                  type="text"
-                                  aria-label="요구사항 코드 편집"
-                                  value={req.reqCode}
+                <button
+                  type="button"
+                  onClick={() => setPrdTab('non_functional')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer ${
+                    prdTab === 'non_functional'
+                      ? 'bg-accent text-accent-ink shadow-sm'
+                      : 'bg-well text-muted hover:text-ink border border-line'
+                  }`}
+                >
+                  <span>비기능 요구사항 (성능/품질 목표)</span>
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] ${
+                    prdTab === 'non_functional' ? 'bg-black/20 text-accent-ink' : 'bg-surface text-muted'
+                  }`}>
+                    {nfrs.length}건
+                  </span>
+                </button>
+              </div>
+
+              {/* Functional Requirements Table */}
+              {prdTab === 'functional' && (
+                <section className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm sm:text-base font-semibold text-ink">
+                      기능 요구사항 목록 ({requirements.length}건)
+                    </h2>
+                    <span className="text-xs text-muted">
+                      {isEditMode ? '모든 셀을 직접 클릭해 수정하거나 삭제할 수 있습니다' : '우측 상단 [편집하기]에서 모든 항목 수정 가능'}
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-y border-line text-muted font-medium">
+                          <th className="py-2.5 pr-3 w-32 whitespace-nowrap">ID · 분류</th>
+                          <th className="py-2.5 px-3 w-20 whitespace-nowrap">중요도</th>
+                          <th className="py-2.5 px-3 whitespace-nowrap">기능 제목 및 상세 명세</th>
+                          <th className="py-2.5 px-3 w-56 whitespace-nowrap">인수 조건</th>
+                          <th className="py-2.5 pl-3 w-24 text-right whitespace-nowrap">상태</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-line">
+                        {requirements.map((req) => (
+                          <tr key={req.id}>
+                            <td className="py-3.5 pr-3 align-top space-y-1">
+                              {isEditMode ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    aria-label="요구사항 코드 편집"
+                                    value={req.reqCode}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setRequirements((prev) =>
+                                        prev.map((item) => (item.id === req.id ? { ...item, reqCode: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded px-2 py-1 font-mono text-xs text-ink"
+                                  />
+                                  <input
+                                    type="text"
+                                    aria-label="요구사항 분류 편집"
+                                    value={req.category}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setRequirements((prev) =>
+                                        prev.map((item) => (item.id === req.id ? { ...item, category: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-muted"
+                                  />
+                                </>
+                              ) : (
+                                <>
+                                  <span className="font-mono text-xs text-ink font-semibold block">
+                                    {req.reqCode}
+                                  </span>
+                                  <span className="text-xs text-muted block">{req.category}</span>
+                                </>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top font-mono font-semibold">
+                              {isEditMode ? (
+                                <select
+                                  aria-label="중요도 선택"
+                                  value={req.priority}
                                   onChange={(e) => {
-                                    const val = e.target.value;
+                                    const val = e.target.value as 'P0' | 'P1' | 'P2';
                                     setRequirements((prev) =>
-                                      prev.map((item) => (item.id === req.id ? { ...item, reqCode: val } : item))
+                                      prev.map((item) => (item.id === req.id ? { ...item, priority: val } : item))
                                     );
                                   }}
-                                  className="w-full bg-well border border-line rounded px-2 py-1 font-mono text-xs text-ink"
-                                />
-                                <input
-                                  type="text"
-                                  aria-label="요구사항 분류 편집"
-                                  value={req.category}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setRequirements((prev) =>
-                                      prev.map((item) => (item.id === req.id ? { ...item, category: val } : item))
-                                    );
-                                  }}
-                                  className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-muted"
-                                />
-                              </>
-                            ) : (
-                              <>
-                                <span className="font-mono text-xs text-ink font-semibold block">
-                                  {req.reqCode}
+                                  className="bg-well border border-line rounded px-1.5 py-1 text-xs text-ink"
+                                >
+                                  <option value="P0">P0</option>
+                                  <option value="P1">P1</option>
+                                  <option value="P2">P2</option>
+                                </select>
+                              ) : (
+                                <span
+                                  className={
+                                    req.priority === 'P0'
+                                      ? 'text-danger'
+                                      : req.priority === 'P1'
+                                      ? 'text-warn'
+                                      : 'text-muted'
+                                  }
+                                >
+                                  {req.priority}
                                 </span>
-                                <span className="text-xs text-muted block">{req.category}</span>
-                              </>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-3 align-top font-mono font-semibold">
-                            {isEditMode ? (
-                              <select
-                                aria-label="중요도 선택"
-                                value={req.priority}
-                                onChange={(e) => {
-                                  const val = e.target.value as 'P0' | 'P1' | 'P2';
-                                  setRequirements((prev) =>
-                                    prev.map((item) => (item.id === req.id ? { ...item, priority: val } : item))
-                                  );
-                                }}
-                                className="bg-well border border-line rounded px-1.5 py-1 text-xs text-ink"
-                              >
-                                <option value="P0">P0</option>
-                                <option value="P1">P1</option>
-                                <option value="P2">P2</option>
-                              </select>
-                            ) : (
-                              <span
-                                className={
-                                  req.priority === 'P0'
-                                    ? 'text-danger'
-                                    : req.priority === 'P1'
-                                    ? 'text-warn'
-                                    : 'text-muted'
-                                }
-                              >
-                                {req.priority}
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-3 align-top space-y-1.5">
-                            {isEditMode ? (
-                              <>
-                                <input
-                                  type="text"
-                                  aria-label={`${req.reqCode} 제목 편집`}
-                                  value={req.title}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setRequirements((prev) =>
-                                      prev.map((item) => (item.id === req.id ? { ...item, title: val } : item))
-                                    );
-                                  }}
-                                  className="w-full bg-well border border-line rounded-lg px-2.5 py-1 text-xs font-semibold text-ink"
-                                />
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top space-y-1.5">
+                              {isEditMode ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    aria-label={`${req.reqCode} 제목 편집`}
+                                    value={req.title}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setRequirements((prev) =>
+                                        prev.map((item) => (item.id === req.id ? { ...item, title: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded-lg px-2.5 py-1 text-xs font-semibold text-ink"
+                                  />
+                                  <textarea
+                                    aria-label={`${req.reqCode} 요구사항 명세 편집`}
+                                    value={req.specification}
+                                    rows={2}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setRequirements((prev) =>
+                                        prev.map((item) => (item.id === req.id ? { ...item, specification: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-accent-line rounded-lg px-2.5 py-1.5 text-xs text-ink"
+                                  />
+                                </>
+                              ) : (
+                                <>
+                                  <div className="font-semibold text-ink mb-1">{req.title}</div>
+                                  <p className="text-muted text-xs leading-relaxed max-w-[60ch]">
+                                    {req.specification}
+                                  </p>
+                                </>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top text-xs text-ink-2 font-mono">
+                              {isEditMode ? (
                                 <textarea
-                                  aria-label={`${req.reqCode} 요구사항 명세 편집`}
-                                  value={req.specification}
+                                  aria-label={`${req.reqCode} 인수 조건 편집`}
+                                  value={req.acceptanceCriteria}
                                   rows={2}
                                   onChange={(e) => {
                                     const val = e.target.value;
                                     setRequirements((prev) =>
-                                      prev.map((item) => (item.id === req.id ? { ...item, specification: val } : item))
+                                      prev.map((item) =>
+                                        item.id === req.id ? { ...item, acceptanceCriteria: val } : item
+                                      )
                                     );
                                   }}
-                                  className="w-full bg-well border border-accent-line rounded-lg px-2.5 py-1.5 text-xs text-ink"
+                                  className="w-full bg-well border border-line rounded-lg px-2 py-1 text-xs font-mono text-ink"
                                 />
-                              </>
-                            ) : (
-                              <>
-                                <div className="font-semibold text-ink mb-1">{req.title}</div>
-                                <p className="text-muted text-xs leading-relaxed max-w-[60ch]">
-                                  {req.specification}
-                                </p>
-                              </>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-3 align-top text-xs text-ink-2 font-mono">
-                            {isEditMode ? (
-                              <textarea
-                                aria-label={`${req.reqCode} 인수 조건 편집`}
-                                value={req.acceptanceCriteria}
-                                rows={2}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setRequirements((prev) =>
-                                    prev.map((item) =>
-                                      item.id === req.id ? { ...item, acceptanceCriteria: val } : item
-                                    )
-                                  );
-                                }}
-                                className="w-full bg-well border border-line rounded-lg px-2 py-1 text-xs font-mono text-ink"
-                              />
-                            ) : (
-                              req.acceptanceCriteria
-                            )}
-                          </td>
-                          <td className="py-3.5 pl-3 align-top text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => toggleRequirementStatus(req.id)}
-                                className={`px-2 py-0.5 rounded-md text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                                  req.status === 'Confirmed'
-                                    ? 'bg-ok-soft text-ok'
-                                    : 'bg-well text-muted hover:text-ink'
-                                }`}
-                              >
-                                {req.status === 'Confirmed' ? '확정됨' : '검토 중'}
-                              </button>
-                              {isEditMode && (
+                              ) : (
+                                req.acceptanceCriteria
+                              )}
+                            </td>
+                            <td className="py-3.5 pl-3 align-top text-right">
+                              <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   type="button"
-                                  aria-label="요구사항 삭제"
-                                  onClick={() => handleDeleteRequirement(req.id)}
-                                  className="p-1 text-muted hover:text-danger cursor-pointer"
+                                  onClick={() => toggleRequirementStatus(req.id)}
+                                  className={`px-2 py-0.5 rounded-md text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                                    req.status === 'Confirmed'
+                                      ? 'bg-ok-soft text-ok'
+                                      : 'bg-well text-muted hover:text-ink'
+                                  }`}
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  {req.status === 'Confirmed' ? '확정됨' : '검토 중'}
                                 </button>
-                              )}
-                            </div>
-                          </td>
+                                {isEditMode && (
+                                  <button
+                                    type="button"
+                                    aria-label="요구사항 삭제"
+                                    onClick={() => handleDeleteRequirement(req.id)}
+                                    className="p-1 text-muted hover:text-danger cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+
+              {/* Non-Functional Requirements Table */}
+              {prdTab === 'non_functional' && (
+                <section className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm sm:text-base font-semibold text-ink">
+                      비기능 요구사항 (성능, 신뢰성, 가용성, 보안 목표)
+                    </h2>
+                    <span className="text-xs text-muted">
+                      {isEditMode ? '모든 셀을 직접 클릭해 수정하거나 삭제할 수 있습니다' : '우측 상단 [편집하기]에서 모든 항목 수정 가능'}
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-y border-line text-muted font-medium">
+                          <th className="py-2.5 pr-3 w-36 whitespace-nowrap">ID · 분류</th>
+                          <th className="py-2.5 px-3 w-20 whitespace-nowrap">중요도</th>
+                          <th className="py-2.5 px-3 whitespace-nowrap">품질/성능 목표 및 상세 지표</th>
+                          <th className="py-2.5 px-3 w-64 whitespace-nowrap">검증 방식 및 테스트 도구</th>
+                          <th className="py-2.5 pl-3 w-24 text-right whitespace-nowrap">상태</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              {/* Non-Functional Constraints */}
-              <section className="pt-8 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm sm:text-base font-semibold text-ink">
-                    2. 엔지니어링 제약사항 및 기술 원칙
-                  </h2>
-                  {isEditMode && (
-                    <button
-                      type="button"
-                      onClick={handleOpenConstraintModal}
-                      className="px-2.5 py-1 rounded-md bg-well hover:bg-control text-ink text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>제약사항 추가</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 @2xl:grid-cols-3 gap-6 pt-1 text-xs">
-                  {prdConstraints.map((c, i) => (
-                    <div
-                      key={c.id}
-                      className={`space-y-1.5 ${i > 0 ? '@2xl:border-l @2xl:border-line @2xl:pl-6' : ''}`}
-                    >
-                      {isEditMode ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="text"
-                              aria-label="제약사항 제목 편집"
-                              value={c.title}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setPrdConstraints((prev) =>
-                                  prev.map((item) => (item.id === c.id ? { ...item, title: val } : item))
-                                );
-                              }}
-                              className="flex-1 bg-well border border-line rounded px-2 py-1 font-semibold text-ink"
-                            />
-                            <button
-                              type="button"
-                              aria-label="제약사항 삭제"
-                              onClick={() => handleDeleteConstraint(c.id)}
-                              className="p-1 text-muted hover:text-danger cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                          <textarea
-                            aria-label="제약사항 설명 편집"
-                            value={c.description}
-                            rows={3}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setPrdConstraints((prev) =>
-                                prev.map((item) => (item.id === c.id ? { ...item, description: val } : item))
-                              );
-                            }}
-                            className="w-full bg-well border border-line rounded p-2 text-xs text-ink leading-relaxed"
-                          />
-                        </div>
-                      ) : (
-                        <>
-                          <div className="font-semibold text-ink">{c.title}</div>
-                          <p className="text-muted leading-relaxed">{c.description}</p>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
+                      </thead>
+                      <tbody className="divide-y divide-line">
+                        {nfrs.map((nfr) => (
+                          <tr key={nfr.id}>
+                            <td className="py-3.5 pr-3 align-top space-y-1">
+                              {isEditMode ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    aria-label="비기능 코드 편집"
+                                    value={nfr.nfrCode}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setNfrs((prev) =>
+                                        prev.map((item) => (item.id === nfr.id ? { ...item, nfrCode: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded px-2 py-1 font-mono text-xs text-ink"
+                                  />
+                                  <select
+                                    aria-label="비기능 분류 선택"
+                                    value={nfr.category}
+                                    onChange={(e) => {
+                                      const val = e.target.value as any;
+                                      setNfrs((prev) =>
+                                        prev.map((item) => (item.id === nfr.id ? { ...item, category: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-muted"
+                                  >
+                                    <option value="성능 및 지연시간">성능 및 지연시간</option>
+                                    <option value="동시성 및 신뢰성">동시성 및 신뢰성</option>
+                                    <option value="가용성">가용성</option>
+                                    <option value="보안 및 개인정보">보안 및 개인정보</option>
+                                    <option value="확장성">확장성</option>
+                                  </select>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="font-mono text-xs text-ink font-semibold block">
+                                    {nfr.nfrCode}
+                                  </span>
+                                  <span className="text-xs text-muted block">{nfr.category}</span>
+                                </>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top font-mono font-semibold">
+                              {isEditMode ? (
+                                <select
+                                  aria-label="중요도 선택"
+                                  value={nfr.priority}
+                                  onChange={(e) => {
+                                    const val = e.target.value as 'P0' | 'P1' | 'P2';
+                                    setNfrs((prev) =>
+                                      prev.map((item) => (item.id === nfr.id ? { ...item, priority: val } : item))
+                                    );
+                                  }}
+                                  className="bg-well border border-line rounded px-1.5 py-1 text-xs text-ink"
+                                >
+                                  <option value="P0">P0</option>
+                                  <option value="P1">P1</option>
+                                  <option value="P2">P2</option>
+                                </select>
+                              ) : (
+                                <span
+                                  className={
+                                    nfr.priority === 'P0'
+                                      ? 'text-danger'
+                                      : nfr.priority === 'P1'
+                                      ? 'text-warn'
+                                      : 'text-muted'
+                                  }
+                                >
+                                  {nfr.priority}
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top space-y-1.5">
+                              {isEditMode ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    aria-label={`${nfr.nfrCode} 제목 편집`}
+                                    value={nfr.title}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setNfrs((prev) =>
+                                        prev.map((item) => (item.id === nfr.id ? { ...item, title: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-line rounded-lg px-2.5 py-1 text-xs font-semibold text-ink"
+                                  />
+                                  <textarea
+                                    aria-label={`${nfr.nfrCode} 목표 지표 편집`}
+                                    value={nfr.targetMetric}
+                                    rows={2}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setNfrs((prev) =>
+                                        prev.map((item) => (item.id === nfr.id ? { ...item, targetMetric: val } : item))
+                                      );
+                                    }}
+                                    className="w-full bg-well border border-accent-line rounded-lg px-2.5 py-1.5 text-xs text-ink"
+                                  />
+                                </>
+                              ) : (
+                                <>
+                                  <div className="font-semibold text-ink mb-1">{nfr.title}</div>
+                                  <p className="text-muted text-xs leading-relaxed max-w-[60ch]">
+                                    {nfr.targetMetric}
+                                  </p>
+                                </>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-3 align-top text-xs text-ink-2 font-mono">
+                              {isEditMode ? (
+                                <textarea
+                                  aria-label={`${nfr.nfrCode} 검증 방식 편집`}
+                                  value={nfr.verificationMethod}
+                                  rows={2}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setNfrs((prev) =>
+                                      prev.map((item) => (item.id === nfr.id ? { ...item, verificationMethod: val } : item))
+                                    );
+                                  }}
+                                  className="w-full bg-well border border-line rounded-lg px-2 py-1 text-xs font-mono text-ink"
+                                />
+                              ) : (
+                                nfr.verificationMethod
+                              )}
+                            </td>
+                            <td className="py-3.5 pl-3 align-top text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleNfrStatus(nfr.id)}
+                                  className={`px-2 py-0.5 rounded-md text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                                    nfr.status === 'Confirmed'
+                                      ? 'bg-ok-soft text-ok'
+                                      : 'bg-well text-muted hover:text-ink'
+                                  }`}
+                                >
+                                  {nfr.status === 'Confirmed' ? '확정됨' : '검토 중'}
+                                </button>
+                                {isEditMode && (
+                                  <button
+                                    type="button"
+                                    aria-label="비기능 요구사항 삭제"
+                                    onClick={() => handleDeleteNfr(nfr.id)}
+                                    className="p-1 text-muted hover:text-danger cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
             </article>
           )}
         </div>
@@ -2077,13 +2264,13 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
               </>
             )}
 
-            {/* 4. Constraint Modal */}
-            {addModalType === 'constraint' && (
+            {/* 4. Non-Functional Requirement Modal */}
+            {addModalType === 'non_functional' && (
               <>
                 <div className="px-5 py-4 bg-well/70 border-b border-line flex items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-sm sm:text-base font-bold text-ink">새 기술 제약사항 및 아키텍처 원칙 등록</h3>
-                    <p className="text-xs text-muted mt-0.5">시스템 설계와 구현에 강제되는 엔지니어링 제약사항을 추가합니다.</p>
+                    <h3 className="text-sm sm:text-base font-bold text-ink">새 비기능 요구사항 (품질/성능 목표) 등록</h3>
+                    <p className="text-xs text-muted mt-0.5">시스템 응답속도, 동시성, 가용성, 보안 목표 지표를 추가합니다.</p>
                   </div>
                   <button
                     type="button"
@@ -2094,31 +2281,90 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <form onSubmit={handleSubmitConstraint} className="p-5 space-y-4 text-xs">
+                <form onSubmit={handleSubmitNfr} className="p-5 space-y-4 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div>
+                      <label className="font-semibold text-ink block mb-1">식별 코드</label>
+                      <input
+                        type="text"
+                        value={modalNfrCode}
+                        onChange={(e) => setModalNfrCode(e.target.value)}
+                        placeholder="예: NFR-PERF-06"
+                        className="w-full bg-well border border-line rounded-lg px-3 py-2 text-xs text-ink font-mono focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-ink block mb-1">분류</label>
+                      <select
+                        value={modalNfrCategory}
+                        onChange={(e) =>
+                          setModalNfrCategory(
+                            e.target.value as '성능 및 지연시간' | '동시성 및 신뢰성' | '가용성' | '보안 및 개인정보' | '확장성'
+                          )
+                        }
+                        className="w-full bg-well border border-line rounded-lg px-2.5 py-2 text-xs text-ink outline-none"
+                      >
+                        <option value="성능 및 지연시간">성능 및 지연시간</option>
+                        <option value="동시성 및 신뢰성">동시성 및 신뢰성</option>
+                        <option value="가용성">가용성</option>
+                        <option value="보안 및 개인정보">보안 및 개인정보</option>
+                        <option value="확장성">확장성</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="font-semibold text-ink block mb-1">우선순위</label>
+                      <select
+                        value={modalNfrPriority}
+                        onChange={(e) => setModalNfrPriority(e.target.value as 'P0' | 'P1' | 'P2')}
+                        className="w-full bg-well border border-line rounded-lg px-2.5 py-2 text-xs text-ink outline-none"
+                      >
+                        <option value="P0">P0 (필수)</option>
+                        <option value="P1">P1 (중요)</option>
+                        <option value="P2">P2 (선택)</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-ink block">제약사항 제목 <span className="text-danger">*</span></label>
+                    <label className="font-semibold text-ink block">
+                      목표 항목 제목 <span className="text-danger">*</span>
+                    </label>
                     <input
                       type="text"
-                      aria-label="제약사항 제목"
-                      value={modalConstraintTitle}
-                      onChange={(e) => setModalConstraintTitle(e.target.value)}
-                      placeholder="예: PostgreSQL 15 단일 RDBMS 사용 원칙"
-                      className="w-full bg-well border border-line rounded-lg px-3 py-2 text-xs text-ink font-semibold focus:outline-none focus:border-ink/40"
+                      value={modalNfrTitle}
+                      onChange={(e) => setModalNfrTitle(e.target.value)}
+                      placeholder="예: 마감 할인 등록 후 실시간 SSE 푸시 수신 지연"
+                      className="w-full bg-well border border-line rounded-lg px-3 py-2 text-xs text-ink font-semibold focus:outline-none"
                       required
                       autoFocus
                     />
                   </div>
+
                   <div className="space-y-1.5">
-                    <label className="font-semibold text-ink block">상세 기술 원칙 및 선정 이유</label>
+                    <label className="font-semibold text-ink block">
+                      목표 수치 및 품질 지표 (Target Metric) <span className="text-danger">*</span>
+                    </label>
                     <textarea
-                      rows={4}
-                      aria-label="상세 기술 원칙"
-                      value={modalConstraintDesc}
-                      onChange={(e) => setModalConstraintDesc(e.target.value)}
-                      placeholder="아키텍처 제약사항의 배경과 하위 모듈이 준수해야 할 원칙을 기술하세요..."
-                      className="w-full bg-well border border-line rounded-lg p-3 text-xs text-ink leading-relaxed"
+                      rows={2}
+                      value={modalNfrTarget}
+                      onChange={(e) => setModalNfrTarget(e.target.value)}
+                      placeholder="예: 점주 마감 등록 후 3.0초 이내 반경 1.5km 고객 디바이스 수신"
+                      className="w-full bg-well border border-line rounded-lg p-2.5 text-xs text-ink leading-relaxed outline-none"
+                      required
                     />
                   </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-semibold text-ink block">검증 방식 및 테스트 도구</label>
+                    <input
+                      type="text"
+                      value={modalNfrVerify}
+                      onChange={(e) => setModalNfrVerify(e.target.value)}
+                      placeholder="예: k6 부하 테스트 스크립트 및 SSE 타임스탬프 로깅 검증"
+                      className="w-full bg-well border border-line rounded-lg px-3 py-2 text-xs text-ink font-mono outline-none"
+                    />
+                  </div>
+
                   <div className="flex items-center justify-end gap-2 pt-3 border-t border-line">
                     <button
                       type="button"
@@ -2132,7 +2378,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                       className="px-4 py-1.5 rounded-lg bg-ink hover:opacity-90 text-paper font-medium transition-opacity cursor-pointer flex items-center gap-1.5"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>제약사항 추가</span>
+                      <span>비기능 목표 추가</span>
                     </button>
                   </div>
                 </form>

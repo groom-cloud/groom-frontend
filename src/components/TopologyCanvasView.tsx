@@ -223,9 +223,9 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   onConfirmStep,
   isConfirmed = false
 }) => {
-  // Step 07 = UX Flow, Step 09 = ERD, Step 10 = System Architecture
+  // Step 08 = UX Flow, Step 10 = ERD, Step 11 = System Architecture
   const canvasMode: 'ux' | 'erd' | 'arch' =
-    currentStep === 'step7' ? 'ux' : currentStep === 'step9' ? 'erd' : 'arch';
+    currentStep === 'step8' ? 'ux' : currentStep === 'step10' ? 'erd' : 'arch';
   const isUx = canvasMode === 'ux';
   const isErd = canvasMode === 'erd';
   const isArch = canvasMode === 'arch';
@@ -1321,7 +1321,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
       .join('\n\n');
 
   const buildTerraformFromNodes = (nodes: ArchNode[], edges: ArchEdge[]) =>
-    `# Groom AWS VPC Infrastructure Specification (ap-northeast-2)\nresource "aws_vpc" "groom_main_vpc" {\n  cidr_block           = "10.20.0.0/16"\n  enable_dns_hostnames = true\n  tags = { Name = "groom-prod-vpc" }\n}\n\n# Active Nodes (${nodes.length})\n${nodes
+    `# BreadAlert AWS VPC Infrastructure Specification (ap-northeast-2)\nresource "aws_vpc" "breadalert_main_vpc" {\n  cidr_block           = "10.20.0.0/16"\n  enable_dns_hostnames = true\n  tags = { Name = "breadalert-prod-vpc" }\n}\n\n# Active Nodes (${nodes.length})\n${nodes
       .map(
         (n) =>
           `# [${n.category}] ${n.name} (${n.id})\nresource "groom_node" "${n.id}" {\n  name       = "${n.name}"\n  category   = "${n.category}"\n  tech_stack = "${n.techStack}"\n  zone       = "${n.zone}"\n  latency    = "${n.metrics.latency}"\n  throughput = "${n.metrics.throughput}"\n}`
@@ -1511,10 +1511,10 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   const handleDownloadCodeFile = () => {
     const content = isUx ? uxCodeText : isErd ? sqlCodeText : tfCodeText;
     const fileName = isUx
-      ? '03_ui_screen_flow.mmd'
+      ? '08_ui_screen_flow.mmd'
       : isErd
-      ? '04_schema_postgresql.sql'
-      : '05_main_vpc_topology.tf';
+      ? '10_schema_postgresql.sql'
+      : '11_main_vpc_topology.tf';
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
