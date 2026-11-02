@@ -184,11 +184,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       aria-modal="true"
       aria-labelledby="create-project-title"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overscroll-contain"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-surface border border-line rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-surface border border-line rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-lg"
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-line flex items-center justify-between shrink-0 bg-surface">

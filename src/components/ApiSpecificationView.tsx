@@ -148,15 +148,15 @@ ${ep.rfc7807ErrorJson}
   const getMethodBadge = (m: ApiEndpointSpec['method']) => {
     switch (m) {
       case 'GET':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">GET</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">GET</span>;
       case 'POST':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">POST</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">POST</span>;
       case 'PUT':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">PUT</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">PUT</span>;
       case 'PATCH':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">PATCH</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-purple-500/15 text-purple-400 border border-purple-500/30">PATCH</span>;
       case 'DELETE':
-        return <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">DELETE</span>;
+        return <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">DELETE</span>;
     }
   };
 
@@ -312,7 +312,7 @@ ${ep.rfc7807ErrorJson}
                       value={ep.method}
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => handleUpdateEndpointField(ep.id, 'method', e.target.value as any)}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-well border border-line text-ink outline-none"
+                      className="px-2 py-0.5 rounded text-[11px] font-sans font-bold bg-well border border-line text-ink outline-none"
                     >
                       <option value="GET">GET</option>
                       <option value="POST">POST</option>
@@ -556,7 +556,7 @@ ${ep.rfc7807ErrorJson}
                   <select
                     value={newMethod}
                     onChange={(e) => setNewMethod(e.target.value as any)}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink font-mono text-xs focus:outline-none focus:border-accent"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink font-sans font-bold text-xs focus:outline-none focus:border-accent"
                   >
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>

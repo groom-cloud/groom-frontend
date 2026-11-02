@@ -372,7 +372,7 @@ Implement feature for '${newTaskTitle.trim()}':
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-ink-2">{task.assignee.name}</span>
                           <span>·</span>
-                          <span className="font-mono">{task.storyPoints}pt</span>
+                          <span className="font-medium tabular-nums">{task.storyPoints}pt</span>
                         </div>
 
                         <span className="font-mono text-[10px] text-accent font-medium">

@@ -703,6 +703,7 @@ export default function App() {
                 onClick={() => setViewMode('landing')}
                 className="hover:opacity-85 transition-opacity cursor-pointer whitespace-nowrap flex items-center gap-2"
                 title="소개 페이지로 이동"
+                aria-label="소개 페이지로 이동"
               >
                 <img src="/logo-full.png" alt="Groom" className="h-7 w-auto object-contain" />
               </button>
@@ -714,6 +715,7 @@ export default function App() {
                 onClick={() => setIsSettingsModalOpen(true)}
                 className="font-medium text-xs sm:text-sm text-ink truncate hover:text-accent transition-colors flex items-center gap-1.5 cursor-pointer max-w-[200px] sm:max-w-[320px] group text-left"
                 title="프로젝트명 및 워크스페이스 설정 변경"
+                aria-label="프로젝트명 및 워크스페이스 설정 변경"
               >
                 <span className="truncate">{projectIdea}</span>
                 <Settings className="w-3 h-3 text-muted group-hover:text-ink shrink-0 transition-colors" />
@@ -980,6 +982,8 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => togglePhaseCollapse(phase.id)}
+                          aria-expanded={!isPhaseCollapsed}
+                          aria-label={`${phase.title} 접기/펼치기`}
                           className="w-full px-2.5 py-2 flex items-center justify-between gap-1.5 text-left hover:bg-well/50 transition-colors cursor-pointer select-none"
                         >
                           <div className="flex items-center gap-1.5 min-w-0">

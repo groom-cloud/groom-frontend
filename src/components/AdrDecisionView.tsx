@@ -358,8 +358,9 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
                 className="p-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-well/30 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="px-2 py-1 rounded bg-well border border-line font-mono text-xs font-bold text-accent shrink-0">
-                    ADR-{String(adr.adrNumber).padStart(2, '0')}
+                  <div className="px-2 py-1 rounded bg-well border border-line text-xs font-bold text-accent shrink-0">
+                    <span className="text-muted mr-0.5 font-sans">ADR-</span>
+                    <span className="font-mono tabular-nums">{String(adr.adrNumber).padStart(2, '0')}</span>
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">

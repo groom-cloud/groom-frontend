@@ -275,7 +275,7 @@ ${loadMetrics
           }`}
         >
           <Activity className="w-3.5 h-3.5" />
-          <span className="whitespace-nowrap">부하 테스트 (k6 / JMeter) 대시보드</span>
+          <span className="whitespace-nowrap">부하 테스트 (k6)</span>
         </button>
       </div>
 
@@ -538,7 +538,7 @@ ${loadMetrics
                   <Activity className="w-4 h-4 text-accent" />
                   부하 테스트 시나리오 및 SLA 지표 요약
                 </span>
-                <span className="text-[11px] font-mono text-emerald-400">Tool: k6 Cloud / JMeter</span>
+                <span className="text-[11px] font-medium text-emerald-400">Tool: k6 Cloud / JMeter</span>
               </div>
               <p className="text-xs text-ink-2 leading-relaxed">
                 마감 정각(20:00) 잉여 재고 오픈 시 발생하는 순간 트래픽(Spike Traffic)을 가정한 1,000 VU(가상 사용자) 동시 인입 테스트 결과입니다.
@@ -579,8 +579,9 @@ ${loadMetrics
 
                       <div className="p-2.5 rounded-lg bg-well border border-line">
                         <div className="text-[10px] text-muted">P95 응답시간</div>
-                        <div className="text-sm font-bold font-mono text-ink mt-0.5">
-                          {metric.p95LatencyMs}ms
+                        <div className="text-sm font-bold text-ink mt-0.5">
+                          <span className="font-mono tabular-nums">{metric.p95LatencyMs}</span>
+                          <span className="text-xs text-muted font-sans ml-0.5">ms</span>
                         </div>
                         <div className="text-[10px] text-muted mt-0.5">
                           SLA: &lt; 50ms

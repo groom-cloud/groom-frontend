@@ -137,11 +137,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 overscroll-contain"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-surface border border-line rounded-2xl flex flex-col max-h-[85vh] overflow-hidden"
+        className="w-full max-w-2xl bg-surface border border-line rounded-2xl flex flex-col max-h-[85vh] overflow-hidden shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -568,7 +568,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <span className="text-xs font-bold text-ink">{phase.title}</span>
                                 <span className="text-[10px] text-muted ml-2">{phase.titleEn}</span>
                               </div>
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-surface border border-line text-muted">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium tabular-nums bg-surface border border-line text-muted">
                                 {activeCountInPhase}/{phaseSteps.length} ON
                               </span>
                             </div>

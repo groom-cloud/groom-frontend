@@ -327,8 +327,9 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
                       placeholder="v1.5.0"
                     />
                   ) : (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Resolved in {item.resolvedInVersion}
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="text-emerald-400/80 mr-1 font-sans">Resolved in</span>
+                      <span className="font-mono tabular-nums">{item.resolvedInVersion}</span>
                     </span>
                   )}
                   <span className="text-[11px] text-muted">{item.resolvedAt}</span>

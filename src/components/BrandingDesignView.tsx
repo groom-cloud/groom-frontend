@@ -327,7 +327,7 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
                 ) : (
                   <div className="text-base font-bold text-ink">{branding.brandName || branding.serviceName}</div>
                 )}
-                <div className="text-xs text-muted font-mono mt-0.5">Vector SVG Glyph</div>
+                <div className="text-xs text-muted font-medium mt-0.5">Vector SVG Glyph</div>
               </div>
             </div>
 
@@ -536,7 +536,7 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
               <Type className="w-4 h-4 text-accent" />
               <h3 className="text-sm font-bold text-ink">타이포그래피 스케일 (Typography Hierarchy)</h3>
             </div>
-            <span className="text-xs font-mono text-muted">Pretendard Variable / JetBrains Mono</span>
+            <span className="text-xs font-medium text-muted">Pretendard Variable / JetBrains Mono</span>
           </div>
 
           <div className="space-y-3 divide-y divide-line">
