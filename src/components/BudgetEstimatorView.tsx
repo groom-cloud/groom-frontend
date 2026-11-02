@@ -4,14 +4,15 @@ import {
   Plus,
   Trash2,
   Check,
-  Copy,
   TrendingUp,
   HardDrive,
   Layers,
   Sparkles,
-  PanelRightClose
+  PanelRightClose,
+  Edit3
 } from 'lucide-react';
 import type { BudgetItem, StepId } from '../mockData';
+import { ExportDropdown } from './ExportDropdown';
 
 interface BudgetEstimatorViewProps {
   items: BudgetItem[];
@@ -28,6 +29,7 @@ export const BudgetEstimatorView: React.FC<BudgetEstimatorViewProps> = ({
   onCollapsePane,
   isConfirmed = false
 }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const [currency, setCurrency] = useState<'KRW' | 'USD'>('KRW');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isAddingItem, setIsAddingItem] = useState(false);
@@ -117,19 +119,26 @@ export const BudgetEstimatorView: React.FC<BudgetEstimatorViewProps> = ({
     showToast(`"${name}" 항목이 삭제되었습니다.`);
   };
 
-  const handleCopyBudgetReport = () => {
-    const reportText = `[Groom 프로젝트 월간 예상 인프라 & 운영 비용 산정서]
-- 월 총 예상 비용: ${formatMoney(summary.totalMonthlyKrw)} (연간 약 ₩${(summary.yearlyProjectionKrw / 10000).toFixed(0)}만 원)
+  const buildMarkdown = () => {
+    return `# 03. 비용 및 예산 산정서
+
+## 월 총 예상 비용 요약
+- 월 예상 합계: ${formatMoney(summary.totalMonthlyKrw)} (연간 약 ₩${(summary.yearlyProjectionKrw / 10000).toFixed(0)}만 원)
 - 인프라/클라우드: ${formatMoney(summary.categoryBreakdown['인프라/클라우드'] || 0)}
 - AI 및 모델 API: ${formatMoney(summary.categoryBreakdown['AI 및 모델 API'] || 0)}
 - 서드파티 및 SaaS: ${formatMoney(summary.categoryBreakdown['서드파티 및 SaaS'] || 0)}
 - 도메인 및 SSL: ${formatMoney(summary.categoryBreakdown['도메인 및 SSL'] || 0)}
 
-[세부 항목 목록]
-${items.map((i) => `• [${i.category}] ${i.name} (${i.tierSpec}): ${formatMoney(i.monthlyCostKrw || i.estimatedCostKrw || 0)} / ${i.billingCycle} - ${i.notes || i.description}`).join('\n')}
+## 세부 산정 항목 목록
+| 카테고리 | 항목명 | 인스턴스/스펙 | 과금 주기 | 예상 비용 | 산정 근거 및 비고 |
+| --- | --- | --- | --- | --- | --- |
+${items
+  .map(
+    (i) =>
+      `| ${i.category} | ${i.name || i.itemName} | ${i.tierSpec || i.provider} | ${i.billingCycle} | ${formatMoney(i.monthlyCostKrw || i.estimatedCostKrw || 0)} | ${i.notes || i.description || '-'} |`
+  )
+  .join('\n')}
 `;
-    navigator.clipboard?.writeText(reportText).catch(() => {});
-    showToast('예산 산정 요약 보고서가 클립보드에 복사되었습니다.');
   };
 
   const getCategoryBadge = (cat: BudgetItem['category']) => {
@@ -195,23 +204,23 @@ ${items.map((i) => `• [${i.category}] ${i.name} (${i.tierSpec}): ${formatMoney
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCopyBudgetReport}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-well border border-line hover:border-line-strong text-xs font-medium text-ink transition-colors cursor-pointer"
-            title="예산 보고서 복사"
-          >
-            <Copy className="w-3.5 h-3.5 text-muted" />
-            <span className="hidden sm:inline">보고서 복사</span>
-          </button>
+          <ExportDropdown
+            title="03_비용_및_예산_산정서"
+            getMarkdown={buildMarkdown}
+            onShowToast={showToast}
+          />
 
           <button
             type="button"
-            onClick={() => setIsAddingItem(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+              isEditMode
+                ? 'bg-accent text-accent-ink font-semibold'
+                : 'bg-well hover:bg-control text-ink border border-line'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>항목 추가</span>
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>{isEditMode ? '편집 완료' : '편집하기'}</span>
           </button>
 
           {onConfirmStep && (
@@ -340,7 +349,7 @@ ${items.map((i) => `• [${i.category}] ${i.name} (${i.tierSpec}): ${formatMoney
                   <th className="px-4 py-3">과금 주기</th>
                   <th className="px-4 py-3 text-right">예상 비용 ({currency})</th>
                   <th className="px-4 py-3">설명 및 산정 근거</th>
-                  <th className="px-4 py-3 text-center">관리</th>
+                  {isEditMode && <th className="px-4 py-3 text-center">삭제</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -352,38 +361,132 @@ ${items.map((i) => `• [${i.category}] ${i.name} (${i.tierSpec}): ${formatMoney
                         {getCategoryBadge(item.category)}
                       </td>
                       <td className="px-4 py-3.5 font-semibold text-ink whitespace-nowrap">
-                        {item.name || item.itemName}
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.name || item.itemName}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, name: val, itemName: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-2 py-1 text-xs text-ink font-semibold outline-none"
+                          />
+                        ) : (
+                          item.name || item.itemName
+                        )}
                       </td>
                       <td className="px-4 py-3.5 text-ink-2 whitespace-nowrap font-mono">
-                        {item.tierSpec || item.provider}
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.tierSpec || item.provider || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, tierSpec: val, provider: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-2 py-1 text-xs text-ink-2 font-mono outline-none w-32"
+                          />
+                        ) : (
+                          item.tierSpec || item.provider
+                        )}
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
-                          {item.billingCycle}
-                        </span>
+                        {isEditMode ? (
+                          <select
+                            value={item.billingCycle}
+                            onChange={(e) => {
+                              const val = e.target.value as any;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, billingCycle: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-1.5 py-1 text-[11px] text-ink outline-none"
+                          >
+                            <option value="월간">월간</option>
+                            <option value="연간">연간</option>
+                            <option value="종량제">종량제</option>
+                            <option value="일회성">일회성</option>
+                          </select>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-well text-muted border border-line">
+                            {item.billingCycle}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3.5 text-right font-mono font-bold text-ink whitespace-nowrap">
-                        {formatMoney(cost)}
+                        {isEditMode ? (
+                          <input
+                            type="number"
+                            value={cost}
+                            onChange={(e) => {
+                              const val = Number(e.target.value) || 0;
+                              setItems((prev) =>
+                                prev.map((i) =>
+                                  i.id === item.id ? { ...i, monthlyCostKrw: val, estimatedCostKrw: val } : i
+                                )
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-2 py-1 text-xs font-mono text-ink text-right w-28 outline-none"
+                          />
+                        ) : (
+                          formatMoney(cost)
+                        )}
                       </td>
-                      <td className="px-4 py-3.5 text-muted max-w-xs truncate" title={item.notes || item.description}>
-                        {item.notes || item.description}
+                      <td className="px-4 py-3.5 text-muted max-w-xs">
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.notes || item.description || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, notes: val, description: val } : i))
+                              );
+                            }}
+                            className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-muted outline-none"
+                          />
+                        ) : (
+                          <span className="truncate block" title={item.notes || item.description}>
+                            {item.notes || item.description}
+                          </span>
+                        )}
                       </td>
-                      <td className="px-4 py-3.5 text-center whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteItem(item.id, item.name || item.itemName || '항목')}
-                          className="p-1 rounded hover:bg-danger/10 text-muted hover:text-danger transition-colors cursor-pointer"
-                          title="항목 삭제"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
+                      {isEditMode && (
+                        <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteItem(item.id, item.name || item.itemName || '항목')}
+                            className="p-1 rounded hover:bg-danger/10 text-muted hover:text-danger transition-colors cursor-pointer"
+                            title="항목 삭제"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
+
+          {/* Add Item Trigger - only appears when in Edit Mode */}
+          {isEditMode && (
+            <div className="p-3 border-t border-line bg-well/30 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setIsAddingItem(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-dashed border-accent/40 hover:border-accent text-accent hover:bg-accent-soft text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ 예산 산정 항목 추가</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -7,9 +7,13 @@ import {
   Check,
   Clock,
   Copy,
-  PanelRightClose
+  PanelRightClose,
+  Edit3,
+  Trash2,
+  X
 } from 'lucide-react';
 import type { DeploymentRecord, StepId } from '../mockData';
+import { ExportDropdown } from './ExportDropdown';
 
 interface ReleaseHistoryViewProps {
   deployments: DeploymentRecord[];
@@ -26,6 +30,7 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
   onCollapsePane,
   isConfirmed = false
 }) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isAddingRelease, setIsAddingRelease] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -73,6 +78,21 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
     showToast(`"${created.version}" 배포 기록이 추가되었습니다.`);
   };
 
+  const handleDeleteRelease = (id: string, version: string) => {
+    setDeployments((prev) => prev.filter((d) => d.id !== id));
+    showToast(`"${version}" 배포 기록이 삭제되었습니다.`);
+  };
+
+  const handleUpdateReleaseField = <K extends keyof DeploymentRecord>(
+    id: string,
+    field: K,
+    value: DeploymentRecord[K]
+  ) => {
+    setDeployments((prev) =>
+      prev.map((dep) => (dep.id === id ? { ...dep, [field]: value } : dep))
+    );
+  };
+
   const latestRelease = deployments[0] || {
     id: 'default_rel',
     version: 'v1.5.0',
@@ -81,6 +101,29 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
     commitHash: 'c4bb501',
     changelog: [],
     rollbackGuide: ''
+  };
+
+  const buildMarkdown = () => {
+    return `# 15. 배포 이력 & 릴리즈 노트 (Release History & Changelog)
+
+- **현재 프로덕션 버전**: ${latestRelease.version} (Healthy 🟢)
+- **최근 배포 시각**: ${latestRelease.deployedAt}
+- **총 배포 횟수**: ${deployments.length}회
+
+## 버전별 배포 타임라인 및 변경점
+${deployments
+  .map(
+    (dep) => `### ${dep.version} (${dep.environment || dep.status})
+- **배포 일시**: ${dep.deployedAt} | 커밋: \`${dep.commitHash}\` | 배포자: ${dep.deployedBy || 'CI/CD Bot'}
+- **주요 변경 사항 (Changelog)**:
+${dep.changelog.map((c) => `  - ${c}`).join('\n')}
+- **롤백 가이드**:
+  \`\`\`bash
+  ${dep.rollbackGuide}
+  \`\`\``
+  )
+  .join('\n\n')}
+`;
   };
 
   return (
@@ -111,13 +154,23 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <ExportDropdown
+            title="15_배포_이력_및_릴리즈_노트"
+            getMarkdown={buildMarkdown}
+            onShowToast={showToast}
+          />
+
           <button
             type="button"
-            onClick={() => setIsAddingRelease(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+            onClick={() => setIsEditMode(!isEditMode)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+              isEditMode
+                ? 'bg-accent text-accent-ink font-semibold'
+                : 'bg-well hover:bg-control text-ink border border-line'
+            }`}
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>새 배포 기록</span>
+            <Edit3 className="w-3.5 h-3.5" />
+            <span>{isEditMode ? '편집 완료' : '편집하기'}</span>
           </button>
 
           {onConfirmStep && (
@@ -169,6 +222,20 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
 
       {/* Timeline List */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        {isEditMode && (
+          <div className="p-3 bg-well/40 border border-dashed border-accent/40 rounded-xl flex items-center justify-between">
+            <span className="text-xs text-muted">편집 모드: 새 배포 버전을 추가하거나 이전 기록을 삭제할 수 있습니다.</span>
+            <button
+              type="button"
+              onClick={() => setIsAddingRelease(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ 새 배포 기록 추가</span>
+            </button>
+          </div>
+        )}
+
         <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-line">
           {deployments.map((dep, idx) => {
             const isLatest = idx === 0;
@@ -178,71 +245,127 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
                 <span
                   className={`absolute -left-6 top-1.5 w-4 h-4 rounded-full border-2 bg-canvas ${
                     isLatest
-                      ? 'border-emerald-500 bg-emerald-500/20'
+                      ? 'border-emerald-400 bg-emerald-500/20'
                       : 'border-line-strong'
                   }`}
                 />
 
-                <div className="p-4 rounded-xl bg-surface border border-line hover:border-line-strong transition-colors space-y-3.5 shadow-sm">
-                  {/* Header Row */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                {/* Release Card */}
+                <div className="p-4 rounded-xl bg-surface border border-line hover:border-line-strong transition-colors space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-bold font-mono text-ink">
-                        {dep.version}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          dep.environment === 'Production'
-                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                            : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                        }`}
-                      >
-                        {dep.environment}
-                      </span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={dep.version}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'version', e.target.value)}
+                          className="font-mono text-sm font-bold text-ink bg-well border border-line rounded px-2 py-0.5 w-24 outline-none focus:border-accent"
+                          placeholder="v1.6.0"
+                        />
+                      ) : (
+                        <span className="font-mono text-sm font-bold text-ink">{dep.version}</span>
+                      )}
+
+                      {isEditMode ? (
+                        <select
+                          value={dep.environment || dep.status}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'environment', e.target.value as any)}
+                          className="px-2 py-0.5 rounded text-[10px] font-bold bg-well border border-line text-ink outline-none"
+                        >
+                          <option value="Production">Production</option>
+                          <option value="Staging">Staging</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            dep.environment === 'Production' || dep.status === 'Production'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          }`}
+                        >
+                          {dep.environment || dep.status}
+                        </span>
+                      )}
+
                       {isLatest && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                          Active Live
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-accent-soft text-accent border border-accent/20 font-medium">
+                          Latest Release
                         </span>
                       )}
                     </div>
 
                     <div className="flex items-center gap-3 text-xs text-muted">
-                      <span className="flex items-center gap-1 font-mono">
-                        <GitCommit className="w-3.5 h-3.5 text-accent" />
+                      <span className="flex items-center gap-1 font-mono text-[11px]">
+                        <GitCommit className="w-3.5 h-3.5" />
                         {dep.commitHash}
                       </span>
-                      <span>{dep.deployedAt}</span>
+                      <span className="hidden sm:inline">| {dep.deployedAt}</span>
+                      {isEditMode && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRelease(dep.id, dep.version)}
+                          className="p-1 rounded text-muted hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
+                          title="배포 기록 삭제"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {/* Changelog */}
-                  <div className="space-y-1.5">
-                    <span className="text-[11px] font-semibold text-muted block">
-                      변경 내역 (Changelog)
+                  {/* Changelog Bullets */}
+                  <div>
+                    <span className="text-[11px] font-semibold text-muted block mb-1">
+                      주요 변경 사항 (Changelog)
                     </span>
-                    <ul className="space-y-1 text-xs text-ink-2 pl-2">
-                      {dep.changelog.map((c, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-accent">•</span>
-                          <span>{c}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {isEditMode ? (
+                      <textarea
+                        value={dep.changelog.join('\n')}
+                        onChange={(e) => {
+                          const lines = e.target.value.split('\n').filter(Boolean);
+                          handleUpdateReleaseField(dep.id, 'changelog', lines);
+                        }}
+                        rows={3}
+                        className="w-full p-2.5 rounded-lg bg-well border border-line text-xs text-ink leading-relaxed outline-none focus:border-accent"
+                        placeholder="줄바꿈으로 변경 사항 입력"
+                      />
+                    ) : (
+                      <ul className="space-y-1 text-xs text-ink-2">
+                        {dep.changelog.map((c, cIdx) => (
+                          <li key={cIdx} className="flex items-start gap-1.5">
+                            <span className="text-accent mt-0.5">•</span>
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   {/* Rollback Guide */}
-                  <div className="pt-2 border-t border-line/60 flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 min-w-0 font-mono text-[11px] text-muted">
-                      <RotateCcw className="w-3.5 h-3.5 text-danger shrink-0" />
-                      <span className="truncate">롤백: {dep.rollbackGuide}</span>
+                  <div className="pt-2 border-t border-line flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-1.5 text-muted flex-1 min-w-0">
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={dep.rollbackGuide}
+                          onChange={(e) => handleUpdateReleaseField(dep.id, 'rollbackGuide', e.target.value)}
+                          className="w-full px-2 py-0.5 bg-well border border-line rounded font-mono text-[11px] text-ink outline-none focus:border-accent"
+                          placeholder="롤백 명령어"
+                        />
+                      ) : (
+                        <span className="font-mono text-[11px] text-ink-2 truncate">
+                          {dep.rollbackGuide}
+                        </span>
+                      )}
                     </div>
                     <button
                       type="button"
                       onClick={() => handleCopyRollback(dep.rollbackGuide, dep.version)}
-                      className="flex items-center gap-1 text-[11px] text-muted hover:text-ink shrink-0 cursor-pointer"
+                      className="flex items-center gap-1 text-[11px] text-accent hover:underline cursor-pointer shrink-0"
                     >
                       <Copy className="w-3 h-3" />
-                      <span>명령어 복사</span>
+                      <span>복사</span>
                     </button>
                   </div>
                 </div>
@@ -252,72 +375,78 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
         </div>
       </div>
 
-      {/* Add Deployment Modal */}
+      {/* Modal: Add Release */}
       {isAddingRelease && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-surface border border-line-strong rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-line pb-3">
-              <h3 className="text-sm font-bold text-ink">새 릴리즈 배포 기록 추가</h3>
+          <div className="bg-surface border border-line-strong rounded-2xl w-full max-w-md shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <Rocket className="w-4 h-4 text-orange-400" />
+                </div>
+                <h3 className="text-sm font-bold text-ink">새 배포 기록 등록</h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAddingRelease(false)}
-                className="p-1 text-muted hover:text-ink rounded-lg"
+                className="p-1 rounded-lg text-muted hover:text-ink hover:bg-well transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleAddRelease} className="space-y-3.5 text-xs">
+            <form onSubmit={handleAddRelease} className="p-5 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-muted font-medium mb-1">버전 태그</label>
+                  <label className="block text-[11px] font-semibold text-muted mb-1">버전 태그</label>
                   <input
                     type="text"
-                    required
-                    placeholder="예: v1.6.0"
                     value={newVersion}
                     onChange={(e) => setNewVersion(e.target.value)}
-                    className="w-full px-3 py-2 bg-well border border-line rounded-lg text-ink font-mono focus:border-accent outline-none"
+                    placeholder="예: v1.6.0"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink font-mono text-xs focus:outline-none focus:border-accent"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-muted font-medium mb-1">배포 환경</label>
+                  <label className="block text-[11px] font-semibold text-muted mb-1">배포 환경</label>
                   <select
                     value={newEnv}
                     onChange={(e) => setNewEnv(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-well border border-line rounded-lg text-ink outline-none"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink text-xs focus:outline-none focus:border-accent"
                   >
-                    <option value="Production">Production</option>
-                    <option value="Staging">Staging</option>
+                    <option value="Production">Production (운영)</option>
+                    <option value="Staging">Staging (검증)</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-muted font-medium mb-1">
-                  변경 사항 (줄바꿈으로 구분)
+                <label className="block text-[11px] font-semibold text-muted mb-1">
+                  변경 사항 (Changelog - 줄바꿈으로 구분)
                 </label>
                 <textarea
-                  rows={3}
-                  required
-                  placeholder="예: [Feat] 신규 장바구니 실시간 할인 계산기 추가&#10;[Fix] 토큰 만료 시 무한 리프레시 버그 해결"
                   value={newChangelog}
                   onChange={(e) => setNewChangelog(e.target.value)}
-                  className="w-full px-3 py-2 bg-well border border-line rounded-lg text-ink outline-none resize-none"
+                  rows={4}
+                  placeholder={`- 마감 빵 반값 예약 결제 트랜잭션 Redis 분산락 적용\n- SSE 알림 재연결 백오프 정책 추가\n- 장바구니 수량 동시성 초과 방지 패치`}
+                  className="w-full p-2.5 rounded-lg bg-well border border-line text-ink text-xs focus:outline-none focus:border-accent"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-muted font-medium mb-1">비상 롤백 명령어</label>
+                <label className="block text-[11px] font-semibold text-muted mb-1">롤백 가이드 명령어</label>
                 <input
                   type="text"
                   value={newRollback}
                   onChange={(e) => setNewRollback(e.target.value)}
-                  className="w-full px-3 py-2 bg-well border border-line rounded-lg text-ink font-mono outline-none"
+                  placeholder="git checkout v1.5.0 && docker-compose up -d"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink font-mono text-xs focus:outline-none focus:border-accent"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-line">
                 <button
                   type="button"
                   onClick={() => setIsAddingRelease(false)}
@@ -329,7 +458,7 @@ export const ReleaseHistoryView: React.FC<ReleaseHistoryViewProps> = ({
                   type="submit"
                   className="px-4 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold cursor-pointer"
                 >
-                  배포 기록 저장
+                  배포 기록 추가
                 </button>
               </div>
             </form>

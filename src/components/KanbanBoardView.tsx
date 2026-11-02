@@ -7,10 +7,6 @@ import {
   Check,
   Download,
   X,
-  Sparkles,
-  Bot,
-  Copy,
-  Terminal,
   PanelRightClose
 } from 'lucide-react';
 import type { KanbanTask, StepId } from '../mockData';
@@ -33,11 +29,8 @@ export const KanbanBoardView: React.FC<KanbanBoardViewProps> = ({
   const [filterMode, setFilterMode] = useState<'all' | 'p0' | 'mine'>('all');
   const [isAddingTask, setIsAddingTask] = useState(false);
 
-  // Selected task for detailed modal (with AI prompt generator)
+  // Selected task for detailed modal
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null);
-  const [modalTab, setModalTab] = useState<'details' | 'ai_prompt'>('details');
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
-  const [ideBridgeModal, setIdeBridgeModal] = useState<KanbanTask | null>(null);
 
   // New Task Form States
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -158,19 +151,6 @@ Implement feature for '${newTaskTitle.trim()}':
     setTasks((prev) => prev.filter((t) => t.id !== id));
     if (selectedTask?.id === id) setSelectedTask(null);
     showToast('태스크가 삭제되었습니다.');
-  };
-
-  const handleCopyPrompt = (prompt: string) => {
-    navigator.clipboard?.writeText(prompt).catch(() => {});
-    setCopiedPrompt(true);
-    showToast('AI 코딩 지시 프롬프트가 클립보드에 복사되었습니다.');
-    setTimeout(() => setCopiedPrompt(false), 2000);
-  };
-
-  const handleSendToIde = (task: KanbanTask) => {
-    const prompt = task.aiPromptSnippet || '';
-    navigator.clipboard?.writeText(prompt).catch(() => {});
-    setIdeBridgeModal(task);
   };
 
   const handleExportCsv = () => {
@@ -355,10 +335,7 @@ Implement feature for '${newTaskTitle.trim()}':
                       draggable
                       onDragStart={(e) => handleDragStart(e, task.id)}
                       onDragEnd={handleDragEnd}
-                      onClick={() => {
-                        setSelectedTask(task);
-                        setModalTab('details');
-                      }}
+                      onClick={() => setSelectedTask(task)}
                       className="group p-3.5 rounded-xl bg-well/70 border border-line hover:border-accent hover:shadow-md transition-colors cursor-pointer space-y-2.5 relative"
                     >
                       {/* Top Badges */}
@@ -398,15 +375,9 @@ Implement feature for '${newTaskTitle.trim()}':
                           <span className="font-mono">{task.storyPoints}pt</span>
                         </div>
 
-                        {task.aiPromptSnippet && (
-                          <span
-                            className="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-medium flex items-center gap-1"
-                            title="AI 코딩 지시서 생성 가능"
-                          >
-                            <Bot className="w-3 h-3" />
-                            <span>AI 지시서</span>
-                          </span>
-                        )}
+                        <span className="font-mono text-[10px] text-accent font-medium">
+                          {task.reqRef}
+                        </span>
                       </div>
 
                       {/* Direction Quick Move Buttons */}
@@ -456,7 +427,7 @@ Implement feature for '${newTaskTitle.trim()}':
       {/* Task Detail Modal with AI Coding Instruction Tab */}
       {selectedTask && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-surface border border-line-strong rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+          <div className="bg-surface border border-line-strong rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-lg overflow-hidden">
             {/* Modal Header */}
             <div className="p-5 border-b border-line flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2.5">
@@ -474,133 +445,148 @@ Implement feature for '${newTaskTitle.trim()}':
               </button>
             </div>
 
-            {/* Modal Tabs */}
-            <div className="px-5 py-2.5 bg-well/60 border-b border-line flex items-center gap-2 text-xs shrink-0">
-              <button
-                type="button"
-                onClick={() => setModalTab('details')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-                  modalTab === 'details'
-                    ? 'bg-ink text-paper font-semibold shadow-xs'
-                    : 'bg-surface text-muted hover:text-ink border border-line'
-                }`}
-              >
-                태스크 정보 (Overview)
-              </button>
-              <button
-                type="button"
-                onClick={() => setModalTab('ai_prompt')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer ${
-                  modalTab === 'ai_prompt'
-                    ? 'bg-accent text-accent-ink font-semibold shadow-xs'
-                    : 'bg-surface text-accent hover:bg-accent-soft border border-line'
-                }`}
-              >
-                <Bot className="w-3.5 h-3.5" />
-                <span className="whitespace-nowrap">AI 코딩 지시서 (IDE Prompt)</span>
-              </button>
-            </div>
-
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
-              {modalTab === 'details' ? (
-                /* TAB 1: Task Details */
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="p-3 rounded-xl bg-well border border-line">
-                      <span className="text-[10px] text-muted block">상태</span>
-                      <span className="font-semibold text-ink mt-0.5 block">
-                        {selectedTask.status === 'todo' ? '대기 중' : selectedTask.status === 'in_progress' ? '진행 중' : '완료됨'}
-                      </span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-well border border-line">
-                      <span className="text-[10px] text-muted block">담당자</span>
-                      <span className="font-semibold text-ink mt-0.5 block">{selectedTask.assignee.name} ({selectedTask.assignee.role})</span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-well border border-line">
-                      <span className="text-[10px] text-muted block">연결 요구사항</span>
-                      <span className="font-mono font-semibold text-accent mt-0.5 block">{selectedTask.reqRef}</span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-well border border-line">
-                      <span className="text-[10px] text-muted block">추정 공수 / 마감일</span>
-                      <span className="font-semibold text-ink mt-0.5 block">{selectedTask.storyPoints} SP · {selectedTask.deadline}</span>
-                    </div>
-                  </div>
+              <div>
+                <label className="text-muted font-medium block mb-1">태스크 제목</label>
+                <input
+                  type="text"
+                  value={selectedTask.title}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    setSelectedTask((prev) => (prev ? { ...prev, title } : null));
+                    setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, title } : t)));
+                  }}
+                  className="w-full px-3 py-2 bg-well border border-line rounded-lg text-ink font-semibold focus:border-accent outline-none"
+                />
+              </div>
 
-                  <div>
-                    <label className="text-muted font-medium block mb-1">상세 설명</label>
-                    <p className="p-3.5 rounded-xl bg-well border border-line text-ink-2 leading-relaxed whitespace-pre-wrap">
-                      {selectedTask.description}
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-accent-soft/30 border border-accent/20 flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-ink flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-accent" />
-                        <span>이 태스크의 AI 코딩 지시서가 준비되어 있습니다</span>
-                      </div>
-                      <p className="text-[11px] text-muted mt-0.5">
-                        05.PRD + 09.ERD + 11.컨벤션 + 12.API 명세가 결합된 프롬프트입니다.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setModalTab('ai_prompt')}
-                      className="px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover font-semibold shrink-0 cursor-pointer"
-                    >
-                      지시서 보기
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* TAB 2: AI Coding Instruction (IDE Prompt) */
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div>
-                      <h4 className="text-xs font-bold text-ink">
-                        Cursor / GitHub Copilot / IntelliJ AI 지시서
-                      </h4>
-                      <p className="text-[11px] text-muted">
-                        앞선 4개 모듈의 엔지니어링 맥락이 통합 주입된 전용 개발 프롬프트입니다.
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleCopyPrompt(selectedTask.aiPromptSnippet || '')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-well border border-line hover:border-line-strong text-ink font-medium cursor-pointer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{copiedPrompt ? '복사 완료' : '프롬프트 복사'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSendToIde(selectedTask)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover font-semibold cursor-pointer"
-                      >
-                        <Terminal className="w-3.5 h-3.5" />
-                        <span>VS Code / IntelliJ 전송</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Code Block for Prompt */}
-                  <textarea
-                    rows={12}
-                    value={selectedTask.aiPromptSnippet || ''}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-xl bg-well border border-line">
+                  <label className="text-[10px] text-muted block mb-1">진행 상태</label>
+                  <select
+                    value={selectedTask.status}
                     onChange={(e) => {
-                      const val = e.target.value;
-                      setSelectedTask((prev) => (prev ? { ...prev, aiPromptSnippet: val } : null));
-                      setTasks((prev) =>
-                        prev.map((t) => (t.id === selectedTask.id ? { ...t, aiPromptSnippet: val } : t))
-                      );
+                      const status = e.target.value as 'todo' | 'in_progress' | 'done';
+                      setSelectedTask((prev) => (prev ? { ...prev, status } : null));
+                      setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, status } : t)));
                     }}
-                    className="w-full p-4 rounded-xl bg-well font-mono text-xs text-ink-2 leading-relaxed border border-line focus:border-accent outline-none resize-y"
+                    className="w-full bg-surface border border-line rounded-md px-2 py-1 text-xs text-ink font-semibold outline-none"
+                  >
+                    <option value="todo">대기 중 (To-Do)</option>
+                    <option value="in_progress">진행 중 (In Progress)</option>
+                    <option value="done">완료됨 (Done)</option>
+                  </select>
+                </div>
+
+                <div className="p-3 rounded-xl bg-well border border-line">
+                  <label className="text-[10px] text-muted block mb-1">우선순위</label>
+                  <select
+                    value={selectedTask.priority}
+                    onChange={(e) => {
+                      const priority = e.target.value as 'P0' | 'P1' | 'P2';
+                      setSelectedTask((prev) => (prev ? { ...prev, priority } : null));
+                      setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, priority } : t)));
+                    }}
+                    className="w-full bg-surface border border-line rounded-md px-2 py-1 text-xs text-ink font-semibold outline-none"
+                  >
+                    <option value="P0">P0 (최우선)</option>
+                    <option value="P1">P1 (중요)</option>
+                    <option value="P2">P2 (선택)</option>
+                  </select>
+                </div>
+
+                <div className="p-3 rounded-xl bg-well border border-line">
+                  <label className="text-[10px] text-muted block mb-1">연결 요구사항 ID</label>
+                  <input
+                    type="text"
+                    value={selectedTask.reqRef}
+                    onChange={(e) => {
+                      const reqRef = e.target.value;
+                      setSelectedTask((prev) => (prev ? { ...prev, reqRef } : null));
+                      setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, reqRef } : t)));
+                    }}
+                    className="w-full bg-surface border border-line rounded-md px-2 py-1 font-mono text-xs text-accent font-semibold outline-none"
                   />
                 </div>
-              )}
+
+                <div className="p-3 rounded-xl bg-well border border-line">
+                  <label className="text-[10px] text-muted block mb-1">추정 공수 (Story Points)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={13}
+                    value={selectedTask.storyPoints}
+                    onChange={(e) => {
+                      const storyPoints = Number(e.target.value) || 1;
+                      setSelectedTask((prev) => (prev ? { ...prev, storyPoints } : null));
+                      setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, storyPoints } : t)));
+                    }}
+                    className="w-full bg-surface border border-line rounded-md px-2 py-1 font-mono text-xs text-ink font-semibold outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted font-medium block mb-1">담당자</label>
+                  <input
+                    type="text"
+                    value={selectedTask.assignee.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setSelectedTask((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              assignee: { ...prev.assignee, name, initials: name.slice(0, 2).toUpperCase() }
+                            }
+                          : null
+                      );
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t.id === selectedTask.id
+                            ? { ...t, assignee: { ...t.assignee, name, initials: name.slice(0, 2).toUpperCase() } }
+                            : t
+                        )
+                      );
+                    }}
+                    className="w-full px-3 py-1.5 bg-well border border-line rounded-lg text-ink outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-muted font-medium block mb-1">역할 (Role)</label>
+                  <input
+                    type="text"
+                    value={selectedTask.assignee.role}
+                    onChange={(e) => {
+                      const role = e.target.value;
+                      setSelectedTask((prev) =>
+                        prev ? { ...prev, assignee: { ...prev.assignee, role } } : null
+                      );
+                      setTasks((prev) =>
+                        prev.map((t) => (t.id === selectedTask.id ? { ...t, assignee: { ...t.assignee, role } } : t))
+                      );
+                    }}
+                    className="w-full px-3 py-1.5 bg-well border border-line rounded-lg text-ink outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-muted font-medium block mb-1">상세 작업 내용 및 인수 조건</label>
+                <textarea
+                  rows={4}
+                  value={selectedTask.description}
+                  onChange={(e) => {
+                    const description = e.target.value;
+                    setSelectedTask((prev) => (prev ? { ...prev, description } : null));
+                    setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? { ...t, description } : t)));
+                  }}
+                  className="w-full p-3.5 rounded-xl bg-well border border-line text-ink-2 leading-relaxed focus:border-accent outline-none resize-y"
+                />
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -624,45 +610,10 @@ Implement feature for '${newTaskTitle.trim()}':
         </div>
       )}
 
-      {/* IDE Bridge Confirmation Modal */}
-      {ideBridgeModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-surface border border-line-strong rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <Check className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-ink">IDE 클립보드 전송 완료</h3>
-                <span className="text-[11px] text-muted">VS Code / Cursor / IntelliJ 브릿지</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-ink-2 leading-relaxed">
-              <strong>[{ideBridgeModal.ticketKey}]</strong> 태스크의 AI 코딩 지시서가 클립보드에 복사되었습니다. 에디터의 AI 채팅창(Command+L / Ctrl+L)에 붙여넣으면 바로 개발을 시작할 수 있습니다.
-            </p>
-
-            <div className="p-2.5 rounded-lg bg-well font-mono text-[11px] text-muted border border-line">
-              URI: vscode://groom.cloud/task/{ideBridgeModal.ticketKey}
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setIdeBridgeModal(null)}
-                className="px-4 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold cursor-pointer"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Add Task Modal */}
       {isAddingTask && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-surface border border-line-strong rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line-strong rounded-2xl max-w-md w-full p-5 space-y-4 shadow-lg">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <h3 className="text-sm font-bold text-ink">새 WBS 개발 태스크 등록</h3>
               <button
