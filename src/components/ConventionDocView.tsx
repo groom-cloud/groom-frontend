@@ -212,7 +212,7 @@ export const ConventionDocView: React.FC<ConventionDocViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 10. 개발 컨벤션 정의서 (Dev Conventions)
+    return `# 12. 개발 컨벤션 정의서 (Dev Conventions)
 
 ## 1. Git 브랜치 전략 (${conventions.gitStrategy.model})
 | 브랜치명 | 역할 및 목적 | 네이밍 규칙 |
@@ -261,7 +261,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">10. Conventions</span>
+              <span className="text-xs text-muted">12. Conventions</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 Git & Code Standards
               </span>
@@ -272,7 +272,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="10_개발_컨벤션_정의서"
+            title="12_개발_컨벤션_정의서"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />
@@ -293,7 +293,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
           {onConfirmStep && (
             <button
               type="button"
-              onClick={() => onConfirmStep('step11')}
+              onClick={() => onConfirmStep('step12')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 isConfirmed
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'

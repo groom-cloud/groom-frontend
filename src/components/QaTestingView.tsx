@@ -136,7 +136,7 @@ export const QaTestingView: React.FC<QaTestingViewProps> = ({
   });
 
   const buildMarkdown = () => {
-    return `# 13. 테스트 케이스 & QA 검증 (QA & Test Cases)
+    return `# 15. 테스트 케이스 & QA 검증 (QA & Test Cases)
 
 - **전체 통과율**: ${passRate}% (${passedCount}/${testCases.length})
 
@@ -194,7 +194,7 @@ ${loadMetrics
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">13. QA & Testing</span>
+              <span className="text-xs text-muted">15. QA & Testing</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 통과율 {passRate}% ({passedCount}/{testCases.length})
               </span>
@@ -205,7 +205,7 @@ ${loadMetrics
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="13_테스트_케이스_및_QA_검증"
+            title="15_테스트_케이스_및_QA_검증"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />
@@ -226,7 +226,7 @@ ${loadMetrics
           {onConfirmStep && (
             <button
               type="button"
-              onClick={() => onConfirmStep('step14')}
+              onClick={() => onConfirmStep('step15')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 isConfirmed
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'

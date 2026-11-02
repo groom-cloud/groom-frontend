@@ -383,7 +383,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 </div>
                 <div className="text-right shrink-0">
                   <span className="inline-block px-2.5 py-1 rounded-full bg-well text-xs font-semibold text-ink">
-                    <span className="text-accent">{enabledCount}</span> / 8 단계 활성
+                    <span className="text-accent">{enabledCount}</span> / 17 단계 활성
                   </span>
                 </div>
               </div>
@@ -394,26 +394,26 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   {
                     id: 'fullstack' as PipelineTrack,
                     title: '풀스택 전문가',
-                    badge: '15개 전체 · 추천',
-                    desc: '기획부터 배포·트러블슈팅까지 15개 완결형 모듈'
+                    badge: '17개 전체 · 추천',
+                    desc: '기획부터 배포·트러블슈팅까지 17개 완결형 모듈'
                   },
                   {
                     id: 'startup' as PipelineTrack,
                     title: '창업가 / 비개발자',
-                    badge: '8개 집중',
-                    desc: '기획, BM, 예산, PRD, 브랜딩, 화면흐름, 칸반, QA'
+                    badge: '10개 집중',
+                    desc: '기획, BM, 예산, 백로그, PRD, 정책, 브랜딩, 화면흐름, 칸반, QA'
                   },
                   {
                     id: 'backend' as PipelineTrack,
                     title: '백엔드 포트폴리오',
-                    badge: '11개 엔지니어링',
-                    desc: 'PRD, ADR, ERD, 아키텍처, 컨벤션, API, WBS, Ops'
+                    badge: '12개 엔지니어링',
+                    desc: '개요, PRD, 정책, ADR, ERD, 아키텍처, 컨벤션, API, WBS, Ops'
                   },
                   {
                     id: 'custom' as PipelineTrack,
                     title: '커스텀 트랙',
                     badge: '자유 구성',
-                    desc: '요구에 맞춰 15개 모듈을 직접 토글 조합'
+                    desc: '요구에 맞춰 17개 모듈을 직접 토글 조합'
                   }
                 ].map((track) => {
                   const isSelected = selectedTrack === track.id;
@@ -441,10 +441,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 })}
               </div>
 
-              {/* 5-Phase / 15-Step Matrix Grid */}
+              {/* 5-Phase / 17-Step Matrix Grid */}
               <div className="pt-2 space-y-3">
                 <span className="text-xs font-bold text-ink block">
-                  5대 Phase / 15개 모듈 활성화 여부 선택
+                  5대 Phase / 17개 모듈 활성화 여부 선택
                 </span>
                 <div className="space-y-2.5">
                   {PIPELINE_PHASES.map((phase) => {
@@ -568,11 +568,11 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     <span className="text-[11px] text-muted block">파이프라인 트랙</span>
                     <span className="font-semibold text-ink">
                       {selectedTrack === 'fullstack'
-                        ? '풀스택 전문가 (15개 전체)'
+                        ? '풀스택 전문가 (17개 전체)'
                         : selectedTrack === 'startup'
-                        ? '창업가 / 비개발자 (8개)'
+                        ? '창업가 / 비개발자 (10개)'
                         : selectedTrack === 'backend'
-                        ? '백엔드 포트폴리오 (11개)'
+                        ? '백엔드 포트폴리오 (12개)'
                         : '커스텀 트랙'}
                       {' · '}
                       <span className="text-accent">{enabledCount}개 모듈 활성</span>

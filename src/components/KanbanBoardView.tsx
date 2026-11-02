@@ -216,7 +216,7 @@ Implement feature for '${newTaskTitle.trim()}':
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">12. WBS & Kanban</span>
+              <span className="text-xs text-muted">14. WBS & Kanban</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 총 {tasks.length}개 태스크
               </span>
@@ -278,7 +278,7 @@ Implement feature for '${newTaskTitle.trim()}':
           {onConfirmStep && (
             <button
               type="button"
-              onClick={() => onConfirmStep('step13')}
+              onClick={() => onConfirmStep('step14')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 isConfirmed
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
