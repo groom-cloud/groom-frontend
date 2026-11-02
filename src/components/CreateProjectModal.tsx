@@ -394,8 +394,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   {
                     id: 'fullstack' as PipelineTrack,
                     title: '풀스택 전문가',
-                    badge: '16개 전체 · 추천',
-                    desc: '기획부터 배포·트러블슈팅까지 16개 완결형 모듈'
+                    badge: '15개 전체 · 추천',
+                    desc: '기획부터 배포·트러블슈팅까지 15개 완결형 모듈'
                   },
                   {
                     id: 'startup' as PipelineTrack,
@@ -413,7 +413,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     id: 'custom' as PipelineTrack,
                     title: '커스텀 트랙',
                     badge: '자유 구성',
-                    desc: '요구에 맞춰 16개 모듈을 직접 토글 조합'
+                    desc: '요구에 맞춰 15개 모듈을 직접 토글 조합'
                   }
                 ].map((track) => {
                   const isSelected = selectedTrack === track.id;
@@ -441,10 +441,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 })}
               </div>
 
-              {/* 5-Phase / 16-Step Matrix Grid */}
+              {/* 5-Phase / 15-Step Matrix Grid */}
               <div className="pt-2 space-y-3">
                 <span className="text-xs font-bold text-ink block">
-                  5대 Phase / 16개 모듈 활성화 여부 선택
+                  5대 Phase / 15개 모듈 활성화 여부 선택
                 </span>
                 <div className="space-y-2.5">
                   {PIPELINE_PHASES.map((phase) => {
@@ -479,7 +479,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                                   </span>
                                   <div className="min-w-0">
                                     <span className="text-xs font-semibold block truncate">
-                                      {step.title.replace(/^Step \d+\.\s*/, '')}
+                                      {step.title.replace(/^(\d+[\.\s\-]+|Step \d+[\.\s\-]*)/, '')}
                                     </span>
                                   </div>
                                 </div>
@@ -568,7 +568,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     <span className="text-[11px] text-muted block">파이프라인 트랙</span>
                     <span className="font-semibold text-ink">
                       {selectedTrack === 'fullstack'
-                        ? '풀스택 전문가 (16개 전체)'
+                        ? '풀스택 전문가 (15개 전체)'
                         : selectedTrack === 'startup'
                         ? '창업가 / 비개발자 (8개)'
                         : selectedTrack === 'backend'

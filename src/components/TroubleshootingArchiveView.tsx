@@ -143,7 +143,7 @@ export const TroubleshootingArchiveView: React.FC<TroubleshootingArchiveViewProp
   };
 
   const buildMarkdown = () => {
-    return `# 16. 트러블슈팅 아카이빙 (Troubleshooting & Post-Mortem)
+    return `# 15. 트러블슈팅 아카이빙 (Troubleshooting & Post-Mortem)
 
 총 ${items.length}건의 장애 대응 및 성능 병목 개선 기록
 
@@ -186,7 +186,7 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">16. Troubleshooting</span>
+              <span className="text-xs text-muted">15. Troubleshooting</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 총 {items.length}건 포스트모템
               </span>
@@ -197,7 +197,7 @@ ${item.improvementSummary || item.resolutionProcess || item.solutionMechanisms?.
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="16_트러블슈팅_아카이빙"
+            title="15_트러블슈팅_아카이빙"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />

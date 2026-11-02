@@ -482,7 +482,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       2. 라이프사이클 트랙 & 단계별 활성화 구성
                     </h3>
                     <span className="text-accent font-medium text-xs">
-                      {enabledCount} / 8 단계 활성
+                      {enabledCount} / {pipelineSteps.length} 단계 활성
                     </span>
                   </div>
                   <p className="text-xs text-muted mb-3">
@@ -493,9 +493,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {[
                       {
                         id: 'fullstack' as PipelineTrack,
-                        title: '풀스택 전문가 트랙 (16개 전체 활성 - 기본값)',
-                        desc: '01 기획부터 16 트러블슈팅까지 5대 Phase 전체 산출물 활성화',
-                        count: '16개 모듈 전체'
+                        title: '풀스택 전문가 트랙 (15개 전체 활성 - 기본값)',
+                        desc: '01 기획부터 15 트러블슈팅까지 5대 Phase 전체 산출물 활성화',
+                        count: '15개 모듈 전체'
                       },
                       {
                         id: 'startup' as PipelineTrack,
@@ -512,7 +512,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       {
                         id: 'custom' as PipelineTrack,
                         title: '커스텀 트랙 (Custom Pipeline)',
-                        desc: '아래 5대 Phase의 16개 독립 모듈을 사용자 요구에 맞게 직접 ON/OFF',
+                        desc: '아래 5대 Phase의 15개 독립 모듈을 사용자 요구에 맞게 직접 ON/OFF',
                         count: '자유 설정'
                       }
                     ].map((track) => {
@@ -552,7 +552,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     })}
                   </div>
 
-                  {/* 5-Phase / 16-Step Modular Switches */}
+                  {/* 5-Phase / 15-Step Modular Switches */}
                   {pipelineSteps.length > 0 && (
                     <div className="space-y-3 mb-3">
                       {PIPELINE_PHASES.map((phase) => {
@@ -595,7 +595,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                           isOn ? 'text-ink' : 'line-through text-muted'
                                         }`}
                                       >
-                                        {step.title.replace(/^Step \d+\.\s*/, '')}
+                                        {step.title.replace(/^(\d+[\.\s\-]+|Step \d+[\.\s\-]*)/, '')}
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">

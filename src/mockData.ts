@@ -1,12 +1,11 @@
 // =====================================================================
-// GROOM WORKSPACE - 5 PHASES / 16 INDEPENDENT MODULES DATA SYSTEM
+// GROOM WORKSPACE - 5 PHASES / 15 INDEPENDENT MODULES DATA SYSTEM
 // =====================================================================
 
 export type StepId =
   | 'step1'
   | 'step2'
   | 'step3'
-  | 'step4'
   | 'step5'
   | 'step6'
   | 'step7'
@@ -36,7 +35,6 @@ export const ALL_STEP_IDS: StepId[] = [
   'step1',
   'step2',
   'step3',
-  'step4',
   'step5',
   'step6',
   'step7',
@@ -66,8 +64,8 @@ export const PIPELINE_PHASES: PhaseInfo[] = [
     number: 1,
     title: 'Phase 1. 기획 및 비즈니스',
     titleEn: 'Planning & Business',
-    subtitle: '서비스 정의, 수익 모델, 예산 산정 및 아이디어 백로그',
-    stepIds: ['step1', 'step2', 'step3', 'step4']
+    subtitle: '서비스 정의, 수익 모델 및 인프라/운영 예산 산정',
+    stepIds: ['step1', 'step2', 'step3']
   },
   {
     id: 'design_spec',
@@ -115,7 +113,6 @@ export const TRACK_PRESET_STEPS: Record<
     step1: true,
     step2: true,
     step3: true,
-    step4: false,
     step5: true,
     step6: true,
     step7: true,
@@ -134,7 +131,6 @@ export const TRACK_PRESET_STEPS: Record<
     step1: true,
     step2: false,
     step3: false,
-    step4: false,
     step5: true,
     step6: false,
     step7: false,
@@ -148,12 +144,11 @@ export const TRACK_PRESET_STEPS: Record<
     step15: true,
     step16: true
   },
-  // 3. 풀스택 전문가 트랙 (16개 전체 활성 - 기본값)
+  // 3. 풀스택 전문가 트랙 (15개 전체 활성 - 기본값)
   fullstack: {
     step1: true,
     step2: true,
     step3: true,
-    step4: true,
     step5: true,
     step6: true,
     step7: true,
@@ -190,7 +185,7 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step1',
     number: 1,
     phaseId: 'planning',
-    title: '01. 서비스 개요 및 기획서',
+    title: '서비스 개요 및 기획서',
     shortTitle: '서비스 개요',
     subtitle: '핵심 문제 정의, 타겟 고객, 문제 해결 방안',
     deliverable: '01_SERVICE_OVERVIEW.md',
@@ -204,7 +199,7 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step2',
     number: 2,
     phaseId: 'planning',
-    title: '02. 비즈니스 모델 (BM)',
+    title: '비즈니스 모델 (BM)',
     shortTitle: '비즈니스 모델 (BM)',
     subtitle: '수익 구조, 가격 정책, 양면 시장 수수료 설계',
     deliverable: '02_BUSINESS_MODEL.md',
@@ -218,7 +213,7 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     id: 'step3',
     number: 3,
     phaseId: 'planning',
-    title: '03. 비용 및 예산 산정서',
+    title: '비용 및 예산 산정서',
     shortTitle: '비용 및 예산',
     subtitle: '클라우드 인프라, AI API, SaaS 구독료 월간 계산',
     deliverable: '03_BUDGET_ESTIMATION.xlsx',
@@ -228,29 +223,15 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
     status: 'IN_PROGRESS',
     lastUpdated: '10분 전 갱신'
   },
-  {
-    id: 'step4',
-    number: 4,
-    phaseId: 'planning',
-    title: '04. 아이디어 백로그',
-    shortTitle: '아이디어 백로그',
-    subtitle: '기능 아이디어 큐, 우선순위 태그 및 칸반 이관',
-    deliverable: '04_IDEA_BACKLOG.csv',
-    personaName: 'Ideation Coach',
-    personaRole: '제품 인큐베이터',
-    modelTier: 'GPT-4o-mini',
-    status: 'IN_PROGRESS',
-    lastUpdated: '방금 동기화됨'
-  },
   // Phase 2
   {
     id: 'step5',
-    number: 5,
+    number: 4,
     phaseId: 'design_spec',
-    title: '05. 요구사항 및 제약사항 (PRD)',
+    title: '요구사항 및 제약사항 (PRD)',
     shortTitle: '요구사항 (PRD)',
     subtitle: '기능/비기능 요구사항, 제약조건 및 인수 기준',
-    deliverable: '05_PRD_SPECIFICATION.md',
+    deliverable: '04_PRD_SPECIFICATION.md',
     personaName: 'Lead PM Copilot',
     personaRole: '수석 테크니컬 PM',
     modelTier: 'Claude 3.5 Sonnet',
@@ -259,12 +240,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step6',
-    number: 6,
+    number: 5,
     phaseId: 'design_spec',
-    title: '06. 브랜딩 & 디자인 시스템',
+    title: '브랜딩 & 디자인 시스템',
     shortTitle: '브랜딩 & 디자인',
     subtitle: '로고 심볼, 슬로건, 컬러 스와치, 타이포그래피',
-    deliverable: '06_DESIGN_SYSTEM.tokens',
+    deliverable: '05_DESIGN_SYSTEM.tokens',
     personaName: 'Design System Lead',
     personaRole: '비주얼 디자인 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -273,12 +254,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step7',
-    number: 7,
+    number: 6,
     phaseId: 'design_spec',
-    title: '07. 화면 흐름도 & 프론트 라우팅',
+    title: '화면 흐름도 & 프론트 라우팅',
     shortTitle: '화면 흐름 & 라우팅',
     subtitle: '캔버스 플로우, IA 라우팅 테이블, 노드 인스펙터',
-    deliverable: '07_UI_SCREEN_FLOW.canvas',
+    deliverable: '06_UI_SCREEN_FLOW.canvas',
     personaName: 'Principal UX Architect',
     personaRole: '수석 인터랙션 디자이너',
     modelTier: 'Claude 3.5 Sonnet',
@@ -288,12 +269,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   // Phase 3
   {
     id: 'step8',
-    number: 8,
+    number: 7,
     phaseId: 'architecture',
-    title: '08. 기술 스택 선정 정의서 (ADR)',
+    title: '기술 스택 선정 정의서 (ADR)',
     shortTitle: '기술 선정 (ADR)',
     subtitle: '아키텍처 의사결정 기록, 대안 기술 비교 및 채택 근거',
-    deliverable: '08_ADR_DECISIONS.md',
+    deliverable: '07_ADR_DECISIONS.md',
     personaName: 'Enterprise Architect',
     personaRole: '수석 기술 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -302,12 +283,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step9',
-    number: 9,
+    number: 8,
     phaseId: 'architecture',
-    title: '09. 데이터베이스 설계 (ERD)',
+    title: '데이터베이스 설계 (ERD)',
     shortTitle: '데이터베이스 (ERD)',
     subtitle: '테이블 관계선, PK/FK 제약조건, PostgreSQL DDL',
-    deliverable: '09_SCHEMA_POSTGRESQL.sql',
+    deliverable: '08_SCHEMA_POSTGRESQL.sql',
     personaName: 'Principal DB Architect',
     personaRole: '데이터베이스 아키텍트',
     modelTier: 'Claude 3.5 Sonnet',
@@ -316,12 +297,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step10',
-    number: 10,
+    number: 9,
     phaseId: 'architecture',
-    title: '10. 시스템 아키텍처 구성도',
+    title: '시스템 아키텍처 구성도',
     shortTitle: '시스템 아키텍처',
     subtitle: 'VPC 서브넷, Spring, DB, Cache, SSE 토폴로지',
-    deliverable: '10_SYSTEM_TOPOLOGY.tf',
+    deliverable: '09_SYSTEM_TOPOLOGY.tf',
     personaName: 'Cloud Infra Architect',
     personaRole: '클라우드 인프라 아키텍트',
     modelTier: 'GPT-4o',
@@ -331,12 +312,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   // Phase 4
   {
     id: 'step11',
-    number: 11,
+    number: 10,
     phaseId: 'development',
-    title: '11. 개발 컨벤션 정의서',
+    title: '개발 컨벤션 정의서',
     shortTitle: '개발 컨벤션',
     subtitle: 'Git 브랜치 전략, 커밋 메시지 규칙, 디렉토리 구조',
-    deliverable: '11_DEV_CONVENTIONS.md',
+    deliverable: '10_DEV_CONVENTIONS.md',
     personaName: 'Engineering Standards Lead',
     personaRole: '개발 문화 & 컨벤션 리드',
     modelTier: 'GPT-4o-mini',
@@ -345,12 +326,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step12',
-    number: 12,
+    number: 11,
     phaseId: 'development',
-    title: '12. 백엔드 API 명세서',
+    title: '백엔드 API 명세서',
     shortTitle: '백엔드 API 명세',
     subtitle: 'REST 엔드포인트, JSON 스키마, RFC 7807 에러 규격',
-    deliverable: '12_OPENAPI_SPEC.json',
+    deliverable: '11_OPENAPI_SPEC.json',
     personaName: 'Staff API & DX Lead',
     personaRole: '수석 백엔드 API 리드',
     modelTier: 'Claude 3.5 Sonnet',
@@ -359,12 +340,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step13',
-    number: 13,
+    number: 12,
     phaseId: 'development',
-    title: '13. WBS 및 일정 칸반 보드',
+    title: 'WBS 및 일정 칸반 보드',
     shortTitle: 'WBS & 칸반 보드',
     subtitle: '스프린트 백로그, 작업 티켓, AI 코딩 지시서 생성',
-    deliverable: '13_WBS_SPRINT_BOARD.kanban',
+    deliverable: '12_WBS_SPRINT_BOARD.kanban',
     personaName: 'Agile Delivery Lead',
     personaRole: '스크럼 마스터 & 딜리버리 리드',
     modelTier: 'GPT-4o-mini',
@@ -374,12 +355,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   // Phase 5
   {
     id: 'step14',
-    number: 14,
+    number: 13,
     phaseId: 'ops_maint',
-    title: '14. 테스트 케이스 & QA',
+    title: '테스트 케이스 & QA',
     shortTitle: '테스트 & QA',
     subtitle: '기능 체크리스트, 예외 동작 검증, k6 부하 테스트 지표',
-    deliverable: '14_QA_TEST_CASES.spec',
+    deliverable: '13_QA_TEST_CASES.spec',
     personaName: 'QA Automation Lead',
     personaRole: '품질 보증 & 부하 테스트 엔지니어',
     modelTier: 'Claude 3.5 Sonnet',
@@ -388,12 +369,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step15',
-    number: 15,
+    number: 14,
     phaseId: 'ops_maint',
-    title: '15. 배포 이력 & 릴리즈 노트',
+    title: '배포 이력 & 릴리즈 노트',
     shortTitle: '배포 & 릴리즈',
     subtitle: '운영 버전 상태, 변경 사항 타임라인, 롤백 런북',
-    deliverable: '15_RELEASE_HISTORY.log',
+    deliverable: '14_RELEASE_HISTORY.log',
     personaName: 'SRE & Release Copilot',
     personaRole: '릴리즈 매니저',
     modelTier: 'GPT-4o',
@@ -402,12 +383,12 @@ export const INITIAL_PIPELINE_STEPS: PipelineStepInfo[] = [
   },
   {
     id: 'step16',
-    number: 16,
+    number: 15,
     phaseId: 'ops_maint',
-    title: '16. 트러블슈팅 아카이빙',
+    title: '트러블슈팅 아카이빙',
     shortTitle: '트러블슈팅 일지',
     subtitle: '병목 원인 분석, 해결 과정, Before/After 정량 지표',
-    deliverable: '16_TROUBLESHOOTING.archive',
+    deliverable: '15_TROUBLESHOOTING.archive',
     personaName: 'Performance Tuning SRE',
     personaRole: '시스템 성능 최적화 리드',
     modelTier: 'GPT-4o',

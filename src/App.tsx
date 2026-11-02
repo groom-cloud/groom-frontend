@@ -35,7 +35,6 @@ import {
   INITIAL_KANBAN_TASKS,
   INITIAL_API_ENDPOINTS,
   INITIAL_BUDGET_ITEMS,
-  INITIAL_IDEA_BACKLOG,
   INITIAL_BRANDING_INFO,
   INITIAL_ADR_DECISIONS,
   INITIAL_DEV_CONVENTIONS,
@@ -50,16 +49,13 @@ import {
   type PipelineTrack,
   type ViewMode,
   type ChatMessage,
-  type BacklogIdeaItem,
-  type ServiceDomain,
-  type KanbanTask
+  type ServiceDomain
 } from './mockData';
 import { LandingView } from './components/LandingView';
 import { DocumentArtifactView } from './components/DocumentArtifactView';
 import { TopologyCanvasView } from './components/TopologyCanvasView';
 import { KanbanBoardView } from './components/KanbanBoardView';
 import { BudgetEstimatorView } from './components/BudgetEstimatorView';
-import { IdeaBacklogView } from './components/IdeaBacklogView';
 import { BrandingDesignView } from './components/BrandingDesignView';
 import { AdrDecisionView } from './components/AdrDecisionView';
 import { ConventionDocView } from './components/ConventionDocView';
@@ -181,7 +177,6 @@ export default function App() {
   const [pipelineSteps, setPipelineSteps] = useState(INITIAL_PIPELINE_STEPS);
   const [requirements, setRequirements] = useState(INITIAL_PRD_REQUIREMENTS);
   const [budgetItems, setBudgetItems] = useState(INITIAL_BUDGET_ITEMS);
-  const [ideaBacklog, setIdeaBacklog] = useState(INITIAL_IDEA_BACKLOG);
   const [branding, setBranding] = useState(INITIAL_BRANDING_INFO);
   const [adrDecisions, setAdrDecisions] = useState(INITIAL_ADR_DECISIONS);
   const [devConventions, setDevConventions] = useState(INITIAL_DEV_CONVENTIONS);
@@ -214,36 +209,6 @@ export default function App() {
 
   const togglePhaseCollapse = (phaseId: PhaseId) => {
     setCollapsedPhases((prev) => ({ ...prev, [phaseId]: !prev[phaseId] }));
-  };
-
-  const handleSendIdeaToKanban = (idea: BacklogIdeaItem) => {
-    const newTask: KanbanTask = {
-      id: `task_${Date.now()}`,
-      ticketKey: `GRM-${Math.floor(200 + Math.random() * 800)}`,
-      title: idea.title,
-      description: idea.description,
-      assignee: {
-        name: '한정호',
-        initials: 'JH',
-        color: 'bg-accent',
-        role: 'Fullstack'
-      },
-      category: 'Frontend',
-      status: 'todo',
-      priority: idea.priority,
-      reqRef: 'REQ-BACKLOG',
-      storyPoints: idea.effort && idea.effort.includes('High') ? 8 : 5,
-      deadline: 'D-5',
-      aiPromptSnippet: `// 🤖 Cursor / Copilot AI 개발 지시서 (${idea.title})
-// [맥락: 04 아이디어 백로그에서 전환됨]
-Implement backlog feature '${idea.title}':
-- Category: ${idea.category}
-- Impact: ${idea.impact || 'High'}
-- Scope & Details: ${idea.description}`
-    };
-
-    setKanbanTasks((prev) => [newTask, ...prev]);
-    showAppToast(`"${idea.title}" 아이디어가 [13. WBS 칸반] To-Do 열에 등록되었습니다.`);
   };
 
   // AI Copilot Input & Filter State
@@ -631,7 +596,6 @@ Implement backlog feature '${idea.title}':
     step1: ['초기 시장 진입 전략 보강', '핵심 성공 지표(KPI) 재검토'],
     step2: ['중개 수수료 5% 유닛 이코노믹스 검증', '점주 구독 모델 수익성 시뮬레이션'],
     step3: ['AWS 인프라 월간 예상 비용 산정', 'OpenAI API 토큰 비용 최적화 방안'],
-    step4: ['WBS 칸반으로 넘길 우선순위 선정', 'MVP 제외 아이디어 아카이빙'],
     step5: ['반경 1.5km 조회 기능 요구사항 추가', '게스트 세션 클레임 요구사항 검토'],
     step6: ['컬러 팔레트 명도 대비(WCAG) 검증', '브랜드 SVG 심볼 코드 복사'],
     step7: ['화면 흐름도 IA 라우팅 테이블 동기화', '게스트/회원 권한 분기 검토'],
@@ -958,7 +922,7 @@ Implement backlog feature '${idea.title}':
                 </div>
 
                 {/* 5-Phase Grouped Accordion Pipeline Navigation */}
-                <nav aria-label="5대 Phase 16개 독립 모듈" className="p-2 space-y-2">
+                <nav aria-label="5대 Phase 15개 독립 모듈" className="p-2 space-y-2">
                   {PIPELINE_PHASES.map((phase) => {
                     const isPhaseCollapsed = collapsedPhases[phase.id];
                     const phaseSteps = phase.stepIds
@@ -1002,7 +966,7 @@ Implement backlog feature '${idea.title}':
                               const isEnabled = enabledSteps[step.id];
                               const isSelected = isEnabled && currentStep === step.id;
                               const stepNumStr = String(step.number).padStart(2, '0');
-                              const cleanLabel = step.title.replace(/^Step \d+\.\s*/, '');
+                              const cleanLabel = step.title.replace(/^(\d+[\.\s\-]+|Step \d+[\.\s\-]*)/, '');
 
                               return (
                                 <button
@@ -1500,18 +1464,6 @@ Implement backlog feature '${idea.title}':
                 />
               )}
 
-              {/* Step 04: 아이디어 백로그 */}
-              {currentStep === 'step4' && (
-                <IdeaBacklogView
-                  ideas={ideaBacklog}
-                  setIdeas={setIdeaBacklog}
-                  onSendToWbs={handleSendIdeaToKanban}
-                  onNavigateStep={handleForceNavigateStep}
-                  onConfirmStep={handleConfirmStep}
-                  onCollapsePane={toggleArtifactPane}
-                  isConfirmed={activeStepInfo.status === 'COMPLETED'}
-                />
-              )}
 
               {/* Step 05: 요구사항 및 제약사항 (PRD) */}
               {currentStep === 'step5' && (

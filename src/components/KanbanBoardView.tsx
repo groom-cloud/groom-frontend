@@ -216,7 +216,7 @@ Implement feature for '${newTaskTitle.trim()}':
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">13. WBS & Kanban</span>
+              <span className="text-xs text-muted">12. WBS & Kanban</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 총 {tasks.length}개 태스크
               </span>

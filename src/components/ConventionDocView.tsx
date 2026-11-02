@@ -212,7 +212,7 @@ export const ConventionDocView: React.FC<ConventionDocViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 11. 개발 컨벤션 정의서 (Dev Conventions)
+    return `# 10. 개발 컨벤션 정의서 (Dev Conventions)
 
 ## 1. Git 브랜치 전략 (${conventions.gitStrategy.model})
 | 브랜치명 | 역할 및 목적 | 네이밍 규칙 |
@@ -261,7 +261,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">11. Conventions</span>
+              <span className="text-xs text-muted">10. Conventions</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 Git & Code Standards
               </span>
@@ -272,7 +272,7 @@ ${conventions.codeRules.map((r, i) => `${i + 1}. ${r}`).join('\n')}
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="11_개발_컨벤션_정의서"
+            title="10_개발_컨벤션_정의서"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />

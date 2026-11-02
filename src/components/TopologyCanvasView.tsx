@@ -1511,10 +1511,10 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   const handleDownloadCodeFile = () => {
     const content = isUx ? uxCodeText : isErd ? sqlCodeText : tfCodeText;
     const fileName = isUx
-      ? '03_ui_screen_flow.mmd'
+      ? '06_ui_screen_flow.mmd'
       : isErd
-      ? '04_schema_postgresql.sql'
-      : '05_main_vpc_topology.tf';
+      ? '08_schema_postgresql.sql'
+      : '09_main_vpc_topology.tf';
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

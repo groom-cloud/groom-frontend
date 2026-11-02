@@ -106,7 +106,7 @@ export const ApiSpecificationView: React.FC<ApiSpecificationViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 12. 백엔드 API 명세서 (REST API Spec)
+    return `# 11. 백엔드 API 명세서 (REST API Spec)
 
 표준 규격: OpenAPI 3.1 & RFC 7807 Problem Details
 
@@ -191,7 +191,7 @@ ${ep.rfc7807ErrorJson}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">12. REST API Spec</span>
+              <span className="text-xs text-muted">11. REST API Spec</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 OpenAPI 3.1 / RFC 7807
               </span>
@@ -202,7 +202,7 @@ ${ep.rfc7807ErrorJson}
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="12_백엔드_API_명세서"
+            title="11_백엔드_API_명세서"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />

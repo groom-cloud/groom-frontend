@@ -590,7 +590,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
 
       return `# 02. 비즈니스 모델 (BM)\n\n## 프로젝트명: ${projectTitle}\n\n${blocksMd}`;
     }
-    return `# 05. 요구사항 및 기술 제약사항 명세서 (PRD)\n\n## 5.1 기능 요구사항 (${requirements.length}건)\n${requirements
+    return `# 04. 요구사항 및 기술 제약사항 명세서 (PRD)\n\n## 4.1 기능 요구사항 (${requirements.length}건)\n${requirements
       .map(
         (r) =>
           `- **[${r.reqCode}] (${r.priority} / ${r.status}) ${r.title}**\n  - 분류: ${r.category}\n  - 상세 명세: ${r.specification}\n  - 인수 조건: ${r.acceptanceCriteria}`
@@ -928,7 +928,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                 ? '01_SERVICE_OVERVIEW.md'
                 : currentStep === 'step2'
                 ? '02_BUSINESS_MODEL.md'
-                : '05_PRD_SPECIFICATION.md'}
+                : '04_PRD_SPECIFICATION.md'}
             </code>
           </div>
 

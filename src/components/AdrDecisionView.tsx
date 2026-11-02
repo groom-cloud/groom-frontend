@@ -167,7 +167,7 @@ export const AdrDecisionView: React.FC<AdrDecisionViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 08. 기술 스택 선정 정의서 (ADR)
+    return `# 07. 기술 스택 선정 정의서 (ADR)
 
 총 ${decisions.length}건의 아키텍처 의사결정 기록
 
@@ -244,7 +244,7 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">08. Tech ADR</span>
+              <span className="text-xs text-muted">07. Tech ADR</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 총 {decisions.length}건 의사결정
               </span>
@@ -255,7 +255,7 @@ ${adr.alternatives.map((alt) => `  * ${alt.tech}: 미선정 사유 - ${alt.decis
 
         <div className="flex items-center gap-2 shrink-0">
           <ExportDropdown
-            title="08_기술_스택_선정_정의서_ADR"
+            title="07_기술_스택_선정_정의서_ADR"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />

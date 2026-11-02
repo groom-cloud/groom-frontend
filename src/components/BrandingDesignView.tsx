@@ -164,7 +164,7 @@ export const BrandingDesignView: React.FC<BrandingDesignViewProps> = ({
   };
 
   const buildMarkdown = () => {
-    return `# 06. 브랜딩 & 디자인 시스템 (Branding & Design System)
+    return `# 05. 브랜딩 & 디자인 시스템 (Branding & Design System)
 
 - **서비스명**: ${branding.brandName || branding.serviceName}
 - **슬로건**: "${branding.slogan}"
@@ -209,7 +209,7 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted">06. Branding & Design</span>
+              <span className="text-xs text-muted">05. Branding & Design</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-well text-muted border border-line">
                 Design System v1.0
               </span>
@@ -244,7 +244,7 @@ ${(branding.colorSwatches || []).map((c) => `| ${c.name} | ${c.role} | \`${c.hex
           </div>
 
           <ExportDropdown
-            title="06_브랜딩_및_디자인_시스템"
+            title="05_브랜딩_및_디자인_시스템"
             getMarkdown={buildMarkdown}
             onShowToast={showToast}
           />
