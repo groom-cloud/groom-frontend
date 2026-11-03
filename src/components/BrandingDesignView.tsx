@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Palette,
   Copy,
@@ -14,7 +14,9 @@ import {
   Plus,
   Trash2,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload,
+  RotateCcw
 } from 'lucide-react';
 import type { BrandingInfo, StepId } from '../mockData';
 import { ExportDropdown } from './ExportDropdown';
@@ -233,9 +235,11 @@ export const BrandingDesignView: React.FC<BrandingDesignViewProps> = ({
       : DEFAULT_TYPO_SCALE;
   });
 
-  // Logo Customizer Modal State
+  // Logo Customizer State & File Refs
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   const [customLogoInput, setCustomLogoInput] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const modalFileInputRef = useRef<HTMLInputElement>(null);
 
   // Modals state
   const [isAddingPrinciple, setIsAddingPrinciple] = useState(false);
@@ -288,6 +292,96 @@ export const BrandingDesignView: React.FC<BrandingDesignViewProps> = ({
     setIsLogoModalOpen(false);
     setCustomLogoInput('');
     showToast('커스텀 로고가 적용되었습니다.');
+  };
+
+  const handleProcessLogoFile = (file: File) => {
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('이미지 파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+
+    if (isSvg) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        if (text && (text.includes('<svg') || text.trim().startsWith('<svg'))) {
+          if (setBranding) {
+            setBranding((prev) => ({ ...prev, logoSymbolSvg: text.trim() }));
+          }
+          showToast(`SVG 로고 파일이 적용되었습니다: ${file.name}`);
+        } else {
+          const dataUrlReader = new FileReader();
+          dataUrlReader.onload = (dEvt) => {
+            const dataUrl = dEvt.target?.result as string;
+            if (setBranding) {
+              setBranding((prev) => ({ ...prev, logoSymbolSvg: dataUrl }));
+            }
+            showToast(`로고 이미지가 적용되었습니다: ${file.name}`);
+          };
+          dataUrlReader.readAsDataURL(file);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (setBranding) {
+          setBranding((prev) => ({ ...prev, logoSymbolSvg: dataUrl }));
+        }
+        showToast(`로고 이미지가 적용되었습니다: ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleProcessLogoFile(file);
+    }
+    if (e.target) {
+      e.target.value = '';
+    }
+  };
+
+  const handleResetToDefaultLogo = () => {
+    if (setBranding) {
+      setBranding((prev) => ({ ...prev, logoSymbolSvg: LOGO_PRESETS[0].svg }));
+    }
+    showToast('기본 베이커리 로고로 복원되었습니다.');
+  };
+
+  const renderLogoContent = (logoSource?: string, altText: string = 'Brand Logo') => {
+    if (!logoSource) {
+      return (
+        <div className="w-16 h-16 rounded-xl bg-well flex items-center justify-center text-muted font-bold text-xl">
+          {altText ? altText.charAt(0) : 'L'}
+        </div>
+      );
+    }
+
+    const trimmed = logoSource.trim();
+    if (trimmed.startsWith('<svg') || trimmed.includes('<svg')) {
+      return (
+        <div
+          className="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:max-w-[72px] [&>svg]:max-h-[72px] [&>svg]:object-contain"
+          dangerouslySetInnerHTML={{ __html: trimmed }}
+        />
+      );
+    }
+
+    return (
+      <img
+        src={trimmed}
+        alt={altText}
+        className="max-w-[72px] max-h-[72px] w-auto h-auto object-contain rounded"
+      />
+    );
   };
 
   // Typography scale handlers
@@ -533,34 +627,106 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
               <h3 className="text-sm font-bold text-ink">로고 심볼 및 브랜드 아이덴티티</h3>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsLogoModalOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-              >
-                <ImageIcon className="w-3.5 h-3.5" />
-                <span>로고 변경</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleCopySvg}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-well border border-line text-xs font-medium text-muted hover:text-ink transition-colors cursor-pointer"
-              >
-                <Code2 className="w-3.5 h-3.5" />
-                <span>SVG 복사</span>
-              </button>
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>로고 파일 선택</span>
+                </button>
+              )}
+              {Boolean(branding.logoSymbolSvg?.includes('<svg')) && (
+                <button
+                  type="button"
+                  onClick={handleCopySvg}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-well border border-line text-xs font-medium text-muted hover:text-ink transition-colors cursor-pointer"
+                >
+                  <Code2 className="w-3.5 h-3.5" />
+                  <span>SVG 복사</span>
+                </button>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-center">
             {/* Logo Preview */}
-            <div className="flex flex-col items-center justify-center p-6 bg-canvas border border-line-strong rounded-xl text-center space-y-3">
-              <div
-                onClick={() => setIsLogoModalOpen(true)}
-                title="클릭하여 로고 심볼 변경"
-                className="w-20 h-20 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
-                dangerouslySetInnerHTML={{ __html: branding.logoSymbolSvg || '' }}
+            <div
+              className={`flex flex-col items-center justify-center p-6 bg-canvas border rounded-xl text-center space-y-3 transition-colors ${
+                isEditMode ? 'border-dashed border-accent/60 bg-accent/5' : 'border-line-strong'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp,image/gif"
+                onChange={handleLogoFileSelect}
+                className="hidden"
               />
+
+              {isEditMode ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleProcessLogoFile(file);
+                  }}
+                  className="group relative w-24 h-24 flex flex-col items-center justify-center rounded-xl border border-dashed border-accent/70 hover:border-accent bg-well/60 hover:bg-well cursor-pointer transition-colors p-2"
+                  title="클릭하거나 이미지 파일을 드래그하여 로고 변경"
+                >
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    {renderLogoContent(branding.logoSymbolSvg, branding.brandName || branding.serviceName)}
+                  </div>
+                  <div className="absolute inset-0 bg-canvas/80 backdrop-blur-xs rounded-xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-accent">
+                    <Upload className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-bold">파일 변경</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-20 h-20 flex items-center justify-center">
+                  {renderLogoContent(branding.logoSymbolSvg, branding.brandName || branding.serviceName)}
+                </div>
+              )}
+
+              {isEditMode && (
+                <div className="flex flex-col items-center gap-1.5 w-full">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>파일 선택 (PNG, JPG, SVG)</span>
+                  </button>
+
+                  <div className="flex items-center gap-2 text-[10px] text-muted">
+                    <button
+                      type="button"
+                      onClick={handleResetToDefaultLogo}
+                      className="hover:text-ink underline cursor-pointer flex items-center gap-0.5"
+                    >
+                      <RotateCcw className="w-2.5 h-2.5" />
+                      기본 로고 복원
+                    </button>
+                    <span>|</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsLogoModalOpen(true)}
+                      className="hover:text-ink underline cursor-pointer"
+                    >
+                      프리셋/SVG 코드
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="w-full">
                 {isEditMode ? (
                   <input
@@ -568,11 +734,18 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
                     value={branding.brandName || branding.serviceName}
                     onChange={(e) => handleUpdateBrandName(e.target.value)}
                     className="w-full text-center text-base font-bold text-ink bg-well border border-line rounded px-2 py-1 focus:outline-none focus:border-accent"
+                    placeholder="브랜드명 입력"
                   />
                 ) : (
                   <div className="text-base font-bold text-ink">{branding.brandName || branding.serviceName}</div>
                 )}
-                <div className="text-xs text-muted font-medium mt-0.5">Vector SVG Glyph</div>
+                <div className="text-xs text-muted font-medium mt-0.5">
+                  {branding.logoSymbolSvg?.startsWith('data:image/')
+                    ? 'Uploaded Image Asset'
+                    : branding.logoSymbolSvg?.includes('<svg')
+                    ? 'Vector SVG Glyph'
+                    : 'Brand Asset'}
+                </div>
               </div>
             </div>
 
@@ -979,10 +1152,19 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-xs"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-xs overflow-hidden p-0.5"
                     style={{ backgroundColor: activeThemePreset.accent }}
                   >
-                    빵
+                    {branding.logoSymbolSvg?.startsWith('data:image/') ? (
+                      <img src={branding.logoSymbolSvg} alt="Logo" className="w-5 h-5 object-contain" />
+                    ) : branding.logoSymbolSvg?.includes('<svg') ? (
+                      <div
+                        className="w-5 h-5 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5"
+                        dangerouslySetInnerHTML={{ __html: branding.logoSymbolSvg }}
+                      />
+                    ) : (
+                      '빵'
+                    )}
                   </div>
                   <div>
                     <span className="font-bold text-sm block leading-none">
@@ -1045,8 +1227,7 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
 
               <div className="text-center">
                 <span className="text-[11px] opacity-60">
-                  현재 활성 테마: <strong>{activeThemePreset.name}</strong> ·{' '}
-                  {previewTheme === 'dark' ? '다크 모드' : '라이트 모드'}
+                  현재 활성 테마: <strong>{activeThemePreset.name}</strong> ({previewTheme === 'dark' ? '다크 모드' : '라이트 모드'})
                 </span>
               </div>
             </div>
@@ -1064,8 +1245,8 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
                   <ImageIcon className="w-4 h-4 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-ink">로고 심볼 프리셋 및 커스텀 변경</h3>
-                  <p className="text-[11px] text-muted">서비스 성격에 맞는 로고 글리프를 선택하거나 커스텀 SVG를 입력하세요.</p>
+                  <h3 className="text-sm font-bold text-ink">로고 심볼 변경 및 파일 업로드</h3>
+                  <p className="text-[11px] text-muted">이미지 파일을 직접 업로드하거나 추천 프리셋, 커스텀 SVG를 적용하세요.</p>
                 </div>
               </div>
               <button
@@ -1078,6 +1259,33 @@ ${typoScale.map((t) => `- **${t.level}** (${t.size} / ${t.weight}): ${t.sampleTe
             </div>
 
             <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+              <input
+                ref={modalFileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp,image/gif"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleProcessLogoFile(file);
+                    setIsLogoModalOpen(false);
+                  }
+                  if (e.target) e.target.value = '';
+                }}
+                className="hidden"
+              />
+
+              <div className="p-4 rounded-xl border border-dashed border-accent/60 bg-accent/5 text-center space-y-2">
+                <span className="text-xs font-bold text-ink block">로고 이미지 파일 직접 업로드</span>
+                <p className="text-[11px] text-muted">컴퓨터에 저장된 로고 파일(PNG, JPG, SVG, WebP)을 선택하여 바로 적용합니다.</p>
+                <button
+                  type="button"
+                  onClick={() => modalFileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>내 컴퓨터에서 파일 선택</span>
+                </button>
+              </div>
               <div>
                 <span className="text-xs font-bold text-ink block mb-2">추천 벡터 로고 프리셋</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
