@@ -358,7 +358,21 @@ ${items
                   return (
                     <tr key={item.id} className="hover:bg-well/50 transition-colors">
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        {getCategoryBadge(item.category)}
+                        {isEditMode ? (
+                          <input
+                            type="text"
+                            value={item.category}
+                            onChange={(e) => {
+                              const val = e.target.value as any;
+                              setItems((prev) =>
+                                prev.map((i) => (i.id === item.id ? { ...i, category: val } : i))
+                              );
+                            }}
+                            className="bg-well border border-line rounded px-1.5 py-1 text-xs text-ink outline-none w-28 font-medium"
+                          />
+                        ) : (
+                          getCategoryBadge(item.category)
+                        )}
                       </td>
                       <td className="px-4 py-3.5 font-semibold text-ink whitespace-nowrap">
                         {isEditMode ? (

@@ -39,10 +39,69 @@ export const ApiSpecificationView: React.FC<ApiSpecificationViewProps> = ({
   const [newMethod, setNewMethod] = useState<'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'>('GET');
   const [newPath, setNewPath] = useState('');
   const [newSummary, setNewSummary] = useState('');
-  const [newDomain, setNewDomain] = useState<ApiEndpointSpec['domainGroup']>('인증 및 세션');
+  const [newDomain, setNewDomain] = useState<string>('탐색 및 위치');
   const [newAuth, setNewAuth] = useState<ApiEndpointSpec['authScope']>('Public');
   const [newReqJson, setNewReqJson] = useState('{\n  "query": "string"\n}');
   const [newResJson, setNewResJson] = useState('{\n  "code": "SUCCESS",\n  "data": {}\n}');
+
+  // Domain Category Management State
+  const [domainList, setDomainList] = useState<string[]>(() => {
+    const list = Array.from(new Set(endpoints.map((e) => e.domainGroup).filter(Boolean)));
+    return list.length > 0
+      ? list
+      : ['탐색 및 위치', '점주 마감 등록', '픽업 예약/결제', '실시간 알림', '픽업 및 매장 인증'];
+  });
+  const [isAddingDomain, setIsAddingDomain] = useState(false);
+  const [newDomainInput, setNewDomainInput] = useState('');
+  const [editingDomain, setEditingDomain] = useState<{ orig: string; val: string } | null>(null);
+
+  const handleAddDomain = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newDomainInput.trim();
+    if (!trimmed) return;
+    if (domainList.includes(trimmed)) {
+      showToast('이미 존재하는 도메인 카테고리입니다.');
+      return;
+    }
+    setDomainList((prev) => [...prev, trimmed]);
+    setSelectedDomain(trimmed);
+    setIsAddingDomain(false);
+    setNewDomainInput('');
+    showToast(`"${trimmed}" 도메인 카테고리가 추가되었습니다.`);
+  };
+
+  const handleSaveRenameDomain = (origName: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === origName) {
+      setEditingDomain(null);
+      return;
+    }
+    setDomainList((prev) => prev.map((d) => (d === origName ? trimmed : d)));
+    if (setEndpoints) {
+      setEndpoints((prev) =>
+        prev.map((ep) => (ep.domainGroup === origName ? { ...ep, domainGroup: trimmed } : ep))
+      );
+    }
+    if (selectedDomain === origName) setSelectedDomain(trimmed);
+    setEditingDomain(null);
+    showToast(`"${origName}" 카테고리가 "${trimmed}"(으)로 변경되었습니다.`);
+  };
+
+  const handleDeleteDomain = (domName: string) => {
+    const count = endpoints.filter((e) => e.domainGroup === domName).length;
+    if (count > 0) {
+      const confirmed = window.confirm(
+        `"${domName}" 카테고리에 속한 ${count}개의 API 명세도 함께 삭제됩니다. 계속하시겠습니까?`
+      );
+      if (!confirmed) return;
+    }
+    setDomainList((prev) => prev.filter((d) => d !== domName));
+    if (setEndpoints) {
+      setEndpoints((prev) => prev.filter((ep) => ep.domainGroup !== domName));
+    }
+    if (selectedDomain === domName) setSelectedDomain('all');
+    showToast(`"${domName}" 도메인 카테고리가 삭제되었습니다.`);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -138,7 +197,7 @@ ${ep.rfc7807ErrorJson}
 `;
   };
 
-  const domains = Array.from(new Set(endpoints.map((e) => e.domainGroup)));
+
 
   const filteredEndpoints = endpoints.filter((ep) => {
     if (selectedDomain === 'all') return true;
@@ -249,32 +308,117 @@ ${ep.rfc7807ErrorJson}
       </div>
 
       {/* Domain Category Filter Tabs */}
-      <div className="px-5 py-2.5 bg-well/50 border-b border-line flex items-center gap-1.5 overflow-x-auto text-xs shrink-0">
-        <button
-          type="button"
-          onClick={() => setSelectedDomain('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-            selectedDomain === 'all'
-              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold'
-              : 'text-muted hover:text-ink hover:bg-well'
-          }`}
-        >
-          전체 보기 ({endpoints.length})
-        </button>
-        {domains.map((dom) => (
+      <div className="px-5 py-2 bg-well/50 border-b border-line flex items-center justify-between gap-2 overflow-x-auto text-xs shrink-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
-            key={dom}
             type="button"
-            onClick={() => setSelectedDomain(dom)}
+            onClick={() => setSelectedDomain('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
-              selectedDomain === dom
+              selectedDomain === 'all'
                 ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold'
                 : 'text-muted hover:text-ink hover:bg-well'
             }`}
           >
-            {dom}
+            전체 보기 ({endpoints.length})
           </button>
-        ))}
+          {domainList.map((dom) => {
+            const isSelected = selectedDomain === dom;
+            const count = endpoints.filter((e) => e.domainGroup === dom).length;
+            const isEditing = editingDomain?.orig === dom;
+
+            if (isEditing) {
+              return (
+                <div key={dom} className="flex items-center gap-1 bg-surface border border-accent rounded-lg px-2 py-0.5">
+                  <input
+                    type="text"
+                    value={editingDomain.val}
+                    autoFocus
+                    onChange={(e) => setEditingDomain({ orig: dom, val: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveRenameDomain(dom, editingDomain.val);
+                      if (e.key === 'Escape') setEditingDomain(null);
+                    }}
+                    className="text-xs font-bold text-ink bg-transparent outline-none w-28"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSaveRenameDomain(dom, editingDomain.val)}
+                    className="p-0.5 text-accent hover:text-accent-hover"
+                    title="저장"
+                  >
+                    <Check className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingDomain(null)}
+                    className="p-0.5 text-muted hover:text-ink"
+                    title="취소"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={dom}
+                className={`flex items-center rounded-lg border transition-colors group ${
+                  isSelected
+                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 font-semibold'
+                    : 'bg-surface/50 border-line text-muted hover:text-ink hover:bg-well'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedDomain(dom)}
+                  className="px-2.5 py-1.5 text-xs whitespace-nowrap cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>{dom}</span>
+                  <span className="text-[10px] opacity-75 font-mono">({count})</span>
+                </button>
+
+                {isEditMode && (
+                  <div className="flex items-center pr-1.5 gap-0.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      title="카테고리명 수정"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingDomain({ orig: dom, val: dom });
+                      }}
+                      className="p-1 hover:text-accent rounded cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      title="카테고리 삭제"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteDomain(dom);
+                      }}
+                      className="p-1 hover:text-danger rounded cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {isEditMode && (
+          <button
+            type="button"
+            onClick={() => setIsAddingDomain(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold whitespace-nowrap cursor-pointer shrink-0 shadow-xs"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ 카테고리 추가</span>
+          </button>
+        )}
       </div>
 
       {/* API Endpoints List (Swagger-Style Accordion) */}
@@ -381,10 +525,11 @@ ${ep.rfc7807ErrorJson}
                       onChange={(e) => handleUpdateEndpointField(ep.id, 'domainGroup', e.target.value as any)}
                       className="px-1.5 py-0.5 rounded text-[10px] bg-well text-accent border border-accent/20 outline-none"
                     >
-                      <option value="인증 및 세션">인증 및 세션</option>
-                      <option value="점주 마감 등록">점주 마감 등록</option>
-                      <option value="픽업 예약/결제">픽업 예약/결제</option>
-                      <option value="실시간 알림">실시간 알림</option>
+                      {domainList.map((dom) => (
+                        <option key={dom} value={dom}>
+                          {dom}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <span className="px-2 py-0.5 rounded text-[10px] bg-accent-soft text-accent border border-accent/20">
@@ -598,10 +743,11 @@ ${ep.rfc7807ErrorJson}
                     onChange={(e) => setNewDomain(e.target.value as any)}
                     className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink text-xs focus:outline-none focus:border-accent"
                   >
-                    <option value="인증 및 세션">인증 및 세션</option>
-                    <option value="점주 마감 등록">점주 마감 등록</option>
-                    <option value="픽업 예약/결제">픽업 예약/결제</option>
-                    <option value="실시간 알림">실시간 알림</option>
+                    {domainList.map((dom) => (
+                      <option key={dom} value={dom}>
+                        {dom}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -652,6 +798,64 @@ ${ep.rfc7807ErrorJson}
                   className="px-4 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
                 >
                   엔드포인트 등록
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal: Add Domain Category */}
+      {isAddingDomain && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line-strong rounded-2xl w-full max-w-sm shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-accent-soft border border-accent-line flex items-center justify-center">
+                  <Code2 className="w-4 h-4 text-accent" />
+                </div>
+                <h3 className="text-sm font-bold text-ink">새 도메인 카테고리 추가</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddingDomain(false)}
+                className="p-1 rounded-lg text-muted hover:text-ink hover:bg-well transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddDomain} className="p-5 space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] font-semibold text-muted mb-1">
+                  도메인 카테고리명
+                </label>
+                <input
+                  type="text"
+                  value={newDomainInput}
+                  autoFocus
+                  onChange={(e) => setNewDomainInput(e.target.value)}
+                  placeholder="예: 정산 및 매출 통계"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-well border border-line text-ink text-xs focus:outline-none focus:border-accent"
+                  required
+                />
+                <p className="text-[10px] text-muted mt-1.5">
+                  추가된 도메인은 상단 필터 탭 및 API 명세 작성 시 즉시 선택할 수 있습니다.
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-line">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingDomain(false)}
+                  className="px-3 py-1.5 rounded-lg bg-well text-muted hover:text-ink text-xs font-medium transition-colors cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg bg-accent text-accent-ink hover:bg-accent-hover text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  카테고리 생성
                 </button>
               </div>
             </form>

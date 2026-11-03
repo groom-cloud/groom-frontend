@@ -62,7 +62,7 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
   nonFunctionalReqs,
   setNonFunctionalReqs,
   onConfirmStep,
-  onRequestAiRefine,
+  onRequestAiRefine: _onRequestAiRefine,
   onCollapsePane,
   isConfirmed = false
 }) => {
@@ -1107,15 +1107,6 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                       ? 'Step 01 · 서비스 개요 및 기획서'
                       : 'Step 02 · 비즈니스 모델 (BM)'}
                   </span>
-                  {!isEditMode && (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditMode(true)}
-                      className="text-xs text-accent hover:underline font-medium cursor-pointer"
-                    >
-                      문서 항목 직접 수정하기
-                    </button>
-                  )}
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
                   {projectTitle}
@@ -1378,13 +1369,6 @@ export const DocumentArtifactView: React.FC<DocumentArtifactViewProps> = ({
                           <h2 className="text-sm sm:text-base font-semibold text-ink">
                             {block.title}
                           </h2>
-                          <button
-                            type="button"
-                            onClick={() => onRequestAiRefine(block.title)}
-                            className="text-xs text-accent hover:underline font-medium cursor-pointer whitespace-nowrap"
-                          >
-                            AI 문단 보강
-                          </button>
                         </div>
 
                         {block.format === 'text' && (

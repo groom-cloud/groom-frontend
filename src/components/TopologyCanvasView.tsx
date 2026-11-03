@@ -22,6 +22,7 @@ import {
   SquareDashed,
   Workflow,
   Monitor,
+  Settings,
   PanelRightClose
 } from 'lucide-react';
 import type {
@@ -458,7 +459,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
   const handleMouseDownZoneResize = (e: React.MouseEvent, zone: CanvasZone) => {
     e.stopPropagation();
     e.preventDefault();
-    setSelectedZoneId(zone.id);
+    didDragRef.current = true;
     interactionRef.current = {
       kind: 'zone-resize',
       id: zone.id,
@@ -536,7 +537,7 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
     e.stopPropagation();
     if (e.touches.length !== 1) return;
     const t = e.touches[0];
-    setSelectedZoneId(zone.id);
+    didDragRef.current = true;
     interactionRef.current = {
       kind: 'zone-resize',
       id: zone.id,
@@ -1945,13 +1946,15 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                       key={zone.id}
                       onMouseDown={(e) => handleMouseDownZone(e, zone)}
                       onTouchStart={(e) => handleTouchStartZone(e, zone)}
-                      onClick={(e) => {
+                      onDoubleClick={(e) => {
                         e.stopPropagation();
-                        if (didDragRef.current) return;
-                        setSelectedZoneId((prev) => (prev === zone.id ? null : zone.id));
+                        setSelectedZoneId(zone.id);
                         setSelectedUxId(null);
                         setSelectedErdId(null);
                         setSelectedArchId(null);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
                       }}
                       style={{
                         left: zone.x,
@@ -1968,6 +1971,21 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
                         <span className="font-semibold text-ink truncate">{zone.title}</span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className="text-muted truncate max-w-[150px]">{zone.subtitle}</span>
+                          <button
+                            type="button"
+                            title="영역 속성 편집"
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedZoneId((prev) => (prev === zone.id ? null : zone.id));
+                              setSelectedUxId(null);
+                              setSelectedErdId(null);
+                              setSelectedArchId(null);
+                            }}
+                            className="p-1 rounded hover:bg-surface text-muted hover:text-ink cursor-pointer"
+                          >
+                            <Settings className="w-3 h-3" />
+                          </button>
                           {isZoneSelected && (
                             <button
                               type="button"
@@ -1987,8 +2005,19 @@ export const TopologyCanvasView: React.FC<TopologyCanvasViewProps> = ({
 
                       <div
                         title="드래그하여 영역 크기 조절"
-                        onMouseDown={(e) => handleMouseDownZoneResize(e, zone)}
-                        onTouchStart={(e) => handleTouchStartZoneResize(e, zone)}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleMouseDownZoneResize(e, zone);
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          handleTouchStartZoneResize(e, zone);
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
                         className="absolute right-0 bottom-0 w-5 h-5 cursor-nwse-resize flex items-end justify-end p-1 text-muted hover:text-accent"
                       >
                         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
