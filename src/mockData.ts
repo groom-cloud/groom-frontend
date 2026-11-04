@@ -1226,7 +1226,8 @@ export interface ApiEndpointSpec {
     | '픽업 예약/결제'
     | '실시간 알림'
     | '탐색 및 위치'
-    | '픽업 및 매장 인증';
+    | '픽업 및 매장 인증'
+    | string;
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
   path: string;
   summary: string;

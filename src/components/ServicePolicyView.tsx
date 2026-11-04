@@ -341,11 +341,45 @@ ${policies
                   <span className="font-mono text-xs font-bold px-2 py-0.5 bg-well text-accent rounded border border-line">
                     {policy.policyCode}
                   </span>
-                  <span className="flex items-center gap-1 text-[11px] font-semibold text-muted bg-well px-2 py-0.5 rounded border border-line">
-                    {getCategoryIcon(policy.category)}
-                    {policy.category}
-                  </span>
-                  {getImpactBadge(policy.impactLevel)}
+                  {isEditMode ? (
+                    <select
+                      value={policy.category}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setPolicies((prev) =>
+                          prev.map((p) => (p.id === policy.id ? { ...p, category: val } : p))
+                        );
+                      }}
+                      className="text-[11px] font-semibold text-ink bg-well px-2 py-0.5 rounded border border-line outline-none"
+                    >
+                      <option value="비즈니스 운영 정책">비즈니스 운영 정책</option>
+                      <option value="법적 및 보안 제약">법적 및 보안 제약</option>
+                      <option value="외부 연동 제약">외부 연동 제약</option>
+                    </select>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[11px] font-semibold text-muted bg-well px-2 py-0.5 rounded border border-line">
+                      {getCategoryIcon(policy.category)}
+                      {policy.category}
+                    </span>
+                  )}
+                  {isEditMode ? (
+                    <select
+                      value={policy.impactLevel}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setPolicies((prev) =>
+                          prev.map((p) => (p.id === policy.id ? { ...p, impactLevel: val } : p))
+                        );
+                      }}
+                      className="text-[10px] font-bold text-ink bg-well px-2 py-0.5 rounded border border-line outline-none"
+                    >
+                      <option value="CRITICAL">CRITICAL (필수)</option>
+                      <option value="HIGH">HIGH (중요)</option>
+                      <option value="MEDIUM">MEDIUM (권장)</option>
+                    </select>
+                  ) : (
+                    getImpactBadge(policy.impactLevel)
+                  )}
                 </div>
 
                 {isEditMode && (

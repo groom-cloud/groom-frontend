@@ -30,6 +30,7 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
   isConfirmed = false
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isAddingIdea, setIsAddingIdea] = useState(false);
@@ -88,7 +89,10 @@ export const IdeaBacklogView: React.FC<IdeaBacklogViewProps> = ({
     showToast(`"${idea.title}" 아이디어가 [14. WBS 칸반] 대기 열로 전송되었습니다!`);
   };
 
+  const categories = Array.from(new Set(ideas.map((i) => i.category).filter(Boolean)));
+
   const filteredIdeas = ideas.filter((idea) => {
+    if (filterCategory !== 'all' && idea.category !== filterCategory) return false;
     if (filterPriority !== 'all' && idea.priority !== filterPriority) return false;
     const isConverted = idea.status === 'wbs_converted' || idea.status === 'transferred_to_wbs';
     if (filterStatus === 'idea' && isConverted) return false;
@@ -200,26 +204,57 @@ ${ideas
 
       {/* Filter Toolbar */}
       <div className="px-5 py-2.5 bg-well/50 border-b border-line flex items-center justify-between gap-3 flex-wrap text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-muted flex items-center gap-1 font-medium">
-            <Filter className="w-3.5 h-3.5" />
-            우선순위:
-          </span>
-          <div className="flex items-center gap-1">
-            {['all', 'P0', 'P1', 'P2'].map((p) => (
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto">
+            <span className="text-muted font-medium whitespace-nowrap">분류:</span>
+            <button
+              type="button"
+              onClick={() => setFilterCategory('all')}
+              className={`px-2 py-0.5 rounded text-[11px] whitespace-nowrap transition-colors cursor-pointer ${
+                filterCategory === 'all'
+                  ? 'bg-ink text-paper font-semibold'
+                  : 'bg-surface text-muted hover:text-ink border border-line'
+              }`}
+            >
+              전체 ({ideas.length})
+            </button>
+            {categories.map((cat) => (
               <button
-                key={p}
+                key={cat}
                 type="button"
-                onClick={() => setFilterPriority(p)}
-                className={`px-2 py-0.5 rounded text-[11px] transition-colors cursor-pointer ${
-                  filterPriority === p
+                onClick={() => setFilterCategory(cat)}
+                className={`px-2 py-0.5 rounded text-[11px] whitespace-nowrap transition-colors cursor-pointer ${
+                  filterCategory === cat
                     ? 'bg-ink text-paper font-semibold'
                     : 'bg-surface text-muted hover:text-ink border border-line'
                 }`}
               >
-                {p === 'all' ? '전체' : p}
+                {cat}
               </button>
             ))}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-muted flex items-center gap-1 font-medium whitespace-nowrap">
+              <Filter className="w-3.5 h-3.5" />
+              우선순위:
+            </span>
+            <div className="flex items-center gap-1">
+              {['all', 'P0', 'P1', 'P2'].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setFilterPriority(p)}
+                  className={`px-2 py-0.5 rounded text-[11px] transition-colors cursor-pointer ${
+                    filterPriority === p
+                      ? 'bg-ink text-paper font-semibold'
+                      : 'bg-surface text-muted hover:text-ink border border-line'
+                  }`}
+                >
+                  {p === 'all' ? '전체' : p}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -280,9 +315,22 @@ ${ideas
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {getPriorityBadge(idea.priority)}
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-well text-ink-2 border border-line font-medium">
-                        {idea.category}
-                      </span>
+                      {isEditMode ? (
+                        <input
+                          type="text"
+                          value={idea.category}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, category: val } : i)));
+                          }}
+                          className="px-2 py-0.5 rounded text-[10px] bg-well text-ink border border-line font-medium w-28 outline-none focus:border-accent"
+                          placeholder="카테고리"
+                        />
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-well text-ink-2 border border-line font-medium">
+                          {idea.category}
+                        </span>
+                      )}
                       {isConverted && (
                         <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1">
                           <Check className="w-3 h-3" />
@@ -336,11 +384,76 @@ ${ideas
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 text-[11px] text-muted pt-1">
-                    <span>영향도: <strong className="text-ink-2">{idea.impact}</strong></span>
-                    <span>공수: <strong className="text-ink-2">{idea.effort}</strong></span>
-                    <span>등록일: {idea.suggestedAt}</span>
-                  </div>
+                  {isEditMode ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-line text-xs">
+                      <div>
+                        <label className="text-[10px] text-muted block mb-0.5 font-medium">영향도 (Impact)</label>
+                        <select
+                          value={idea.impact || 'High'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, impact: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-ink outline-none"
+                        >
+                          <option value="High">High (높음)</option>
+                          <option value="Medium">Medium (보통)</option>
+                          <option value="Low">Low (낮음)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] text-muted block mb-0.5 font-medium">공수 (Effort)</label>
+                        <select
+                          value={idea.effort || 'Medium'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, effort: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-ink outline-none"
+                        >
+                          <option value="Low">Low (1-2일)</option>
+                          <option value="Medium">Medium (3-5일)</option>
+                          <option value="High">High (1-2주)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] text-muted block mb-0.5 font-medium">등록일</label>
+                        <input
+                          type="date"
+                          value={idea.suggestedAt}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, suggestedAt: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-ink outline-none tabular-nums"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] text-muted block mb-0.5 font-medium">우선순위</label>
+                        <select
+                          value={idea.priority}
+                          onChange={(e) => {
+                            const val = e.target.value as any;
+                            setIdeas((prev) => prev.map((i) => (i.id === idea.id ? { ...i, priority: val } : i)));
+                          }}
+                          className="w-full bg-well border border-line rounded px-2 py-1 text-xs text-ink outline-none"
+                        >
+                          <option value="P0">P0 (최우선)</option>
+                          <option value="P1">P1 (중요)</option>
+                          <option value="P2">P2 (선택)</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 text-[11px] text-muted pt-1">
+                      <span>영향도: <strong className="text-ink-2 font-medium">{idea.impact}</strong></span>
+                      <span>공수: <strong className="text-ink-2 font-medium">{idea.effort}</strong></span>
+                      <span>등록일: <span className="tabular-nums">{idea.suggestedAt}</span></span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Transfer Action Button */}
